@@ -1,7 +1,7 @@
 #include <poke_manager.h>
 
 PokeManager::PokeManager()
-: state_{RESET}, poke_count_{0}
+: state_{RESET}, poke_count_{0}, poke_detected_{false}
 {
     // Nothing else to do!
 }
@@ -12,16 +12,11 @@ PokeManager::~PokeManager()
     // TODO: implement this!
 }
 
-bool PokeManager::poke_detected()
-{
-    return false;
-}
-
 void PokeManager::update()
 {
     // Update inputs.
     // TODO: poke detection here.
-    printf("Updating\r\n");
+    // printf("Updating\r\n");
 
     state_t next_state{state_}; // initialize next-state to current state.
 
@@ -36,7 +31,7 @@ void PokeManager::update()
                 next_state = ODOR_DISPENSING_TO_EXHAUST;
             break;
         case ODOR_DISPENSING_TO_EXHAUST:
-            if (poke_detected())
+            if (poke_detected_)
                 next_state = ODOR_DELIVERY_TO_FINAL_VALVE;
             break;
         case ODOR_DELIVERY_TO_FINAL_VALVE:
@@ -63,6 +58,7 @@ void PokeManager::update()
     if (state_ != next_state)
     {
         state_entry_time_us_ = time_us_32();
+        printf("State transition %d -> %d\r\n", state_, next_state);
     }
 
     if (next_state == RESET)
@@ -73,6 +69,7 @@ void PokeManager::update()
     if (next_state == ODOR_DELIVERY_TO_FINAL_VALVE)
     {
         ++poke_count_;
+        poke_detected_ = false;
     }
 
 
