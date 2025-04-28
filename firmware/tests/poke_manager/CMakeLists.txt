@@ -34,6 +34,9 @@ project(poke-manager)
 
 pico_sdk_init()
 
+add_subdirectory(../../lib/rp2040.pwm build/rp2040_pwm) # build in this folder
+add_subdirectory(../../lib/etl build/etl)
+
 add_executable(${PROJECT_NAME}
     main.cpp
 )
@@ -42,12 +45,17 @@ add_library(poke_manager
     ../../src/poke_manager.cpp
 )
 
+add_library(valve_driver
+    ../../src/valve_driver.cpp
+)
 include_directories(../../inc)
 
-target_link_libraries(poke_manager 
-                        pico_stdlib)
+target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
+
+target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
+
 target_link_libraries(${PROJECT_NAME}
-                      poke_manager pico_stdlib)
+                      poke_manager pico_stdlib valve_driver etl::etl)
 
 pico_add_extra_outputs(${PROJECT_NAME})
 

@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #define NUM_VALVES (16)
+#define NUM_ODOR_VALVES (3)
 
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)
