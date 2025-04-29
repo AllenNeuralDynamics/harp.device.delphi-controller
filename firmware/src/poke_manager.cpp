@@ -15,13 +15,19 @@ void PokeManager::deenergize_all_valves()
 {
     final_valve_.deenergize();
     vac_valve_.deenergize();
+    for (int i = 0; i < NUM_ODOR_VALVES; i++){
+        odor_valves_[i].deenergize();
+    }
 }
 
 void PokeManager::update()
 {
-    // Update inputs.
-    // Poke detection here.
-
+    //initialize RESET state
+    if (state_ == RESET) //need to query state_ for initital 
+    {
+        // state_entry_time_us_ = time_us_32();
+        deenergize_all_valves();
+    }
 
     state_t next_state{state_}; // initialize next-state to current state.
 
@@ -34,7 +40,6 @@ void PokeManager::update()
         case ODOR_SETUP:
             if (state_duration_us() >= VACUUM_CLOSE_TIME_US)
                 next_state = ODOR_DISPENSING_TO_EXHAUST;
-                poke(); // constant simulated pokes
             break;
         case ODOR_DISPENSING_TO_EXHAUST:
             if (poke_detected_)
@@ -63,19 +68,14 @@ void PokeManager::update()
     // Update how long we've been in the new state.
     if (state_ != next_state)
     {
-        state_entry_time_us_ = time_us_32();
         printf("State transition %d -> %d\r\n", state_, next_state);
+        printf("State transition time %i\r\n", state_duration_us());
+        state_entry_time_us_ = time_us_32();
     
         // Next state logic should only be assessed if there is a state transition
-        if (next_state == RESET) //need to query state_ for initital 
-        {
-            deenergize_all_valves();
-            state_entry_time_us_ = time_us_32(); // Force this to happen at reset.
-        }
-
         if (next_state == ODOR_SETUP)
         {
-            // // Energize one of the odor valves
+            // Energize one of the odor valves
             deenergize_all_valves();
             odor_valves_[valve_index_].energize();
         }
@@ -89,7 +89,7 @@ void PokeManager::update()
         {
             final_valve_.energize();
             ++poke_count_;
-            // printf("Number of pokes = %i\r\n", poke_count_);
+            printf("Number of pokes = %i\r\n", poke_count_);
             poke_detected_ = false;
         }
 
@@ -98,14 +98,12 @@ void PokeManager::update()
             final_valve_.deenergize();
         }
 
-
         if (next_state == VAC_START)
         {
             // Deenergize odor valve
             odor_valves_[valve_index_].deenergize();
             vac_valve_.energize();
         }
-
 
         if (next_state == ODOR_PURGE)
         {
@@ -114,6 +112,8 @@ void PokeManager::update()
             ++valve_index_;
             if (valve_index_ == NUM_ODOR_VALVES) // test logic for iterating through valves
                 valve_index_ = 0;
+
+            printf("Odor Valve: %i\r\n", valve_index_); //valve odor index
         }
     }
     // Update state:

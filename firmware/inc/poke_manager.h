@@ -55,6 +55,7 @@ private:
     // Declare data members
     state_t state_;
     uint32_t state_entry_time_us_;
+    
     int valve_index_;
     size_t poke_count_;
     bool poke_detected_;
@@ -64,7 +65,6 @@ private:
 
     // Declare Constants
     static inline constexpr uint32_t VACUUM_CLOSE_TIME_US = 2e4;// 20ms
-    static inline constexpr uint32_t MIN_POKE_TIME_US = 1e6;
     static inline constexpr uint32_t ODOR_DELIVERY_TIME_US = 1e6; // 1 second
     static inline constexpr uint32_t ODOR_TRANSITION_TIME_US = 0; // No vaccum setup needed
     static inline constexpr uint32_t VAC_SETUP_TIME_US = 0;
