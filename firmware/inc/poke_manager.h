@@ -64,11 +64,11 @@ private:
     etl::vector<ValveDriver, NUM_ODOR_VALVES>& odor_valves_;
 
     // Declare Constants
-    static inline constexpr uint32_t VACUUM_CLOSE_TIME_US = 2e4;// 20ms
-    static inline constexpr uint32_t ODOR_DELIVERY_TIME_US = 1e6; // 1 second
-    static inline constexpr uint32_t ODOR_TRANSITION_TIME_US = 0; // No vaccum setup needed
-    static inline constexpr uint32_t VAC_SETUP_TIME_US = 0;
-    static inline constexpr uint32_t FINAL_VALVE_ENERGIZED_TIME_US = 0;
+    static inline constexpr uint32_t VACUUM_CLOSE_TIME_US = 20e3;
+    static inline constexpr uint32_t ODOR_DELIVERY_TIME_US = 10e3; 
+    static inline constexpr uint32_t ODOR_TRANSITION_TIME_US = 30e3; 
+    static inline constexpr uint32_t VAC_SETUP_TIME_US = 20e3;
+    static inline constexpr uint32_t FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
 
 };
 

@@ -21,7 +21,7 @@ const uint POKE_PIN = 0; //GPIO pin for pokes
 bool beam_broken = false; //keep track of beam state
 bool poke_initiated_once = false; //Only trigger the FSM on 1 poke
 uint32_t poke_start_time_us; //poke start time
-static inline constexpr uint32_t MIN_POKE_TIME_US = 1e6; //poke duration - 1s 
+static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3; //poke duration - 1s, could return this value in the source file
 
 // Core0 main.
 int main()
