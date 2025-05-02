@@ -36,12 +36,6 @@ public:
 
     void update();
 
-    void reset(); // reset the fsm
-
-    void pause(); // pause fsm
-
-    void restart(); // restart fsm
-
 /**
  * \brief true if a poke was detected. Inline replaces function with code
  */
@@ -49,12 +43,6 @@ public:
     {poke_detected_ = true;}
 
     void deenergize_all_valves();
-
-    inline size_t get_poke_count() const
-    {return poke_count_;}
-
-    inline int get_current_odor() const
-    {return odor_valve_index_;}
 
 private:
 
@@ -68,10 +56,9 @@ private:
     state_t state_;
     uint32_t state_entry_time_us_;
     
-    int odor_valve_index_;
+    int valve_index_;
     size_t poke_count_;
     bool poke_detected_;
-    bool disable_fsm_;
     ValveDriver& vac_valve_;
     ValveDriver& final_valve_;
     etl::vector<ValveDriver, NUM_ODOR_VALVES>& odor_valves_;

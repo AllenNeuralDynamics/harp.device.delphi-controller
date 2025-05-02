@@ -4,7 +4,7 @@
 #include <core_registers.h>
 #include <reg_types.h>
 #include <config.h>
-#include <valve_controller_app.h>
+#include <delphi_controller_app.h>
 #ifdef DEBUG
     #include <pico/stdlib.h> // for uart printing
     #include <cstdio> // for printf
@@ -17,7 +17,7 @@ HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
                                HARP_VERSION_MAJOR, HARP_VERSION_MINOR,
                                FW_VERSION_MAJOR, FW_VERSION_MINOR,
                                UNUSED_SERIAL_NUMBER,
-                               "valve-controller",
+                               "delphi-controller",
                                (uint8_t*)GIT_HASH,
                                &app_regs, app_reg_specs,
                                reg_handler_fns, APP_REG_COUNT, update_app_state,

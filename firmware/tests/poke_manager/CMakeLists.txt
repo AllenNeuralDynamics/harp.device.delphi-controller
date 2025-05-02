@@ -41,8 +41,8 @@ add_executable(${PROJECT_NAME}
     main.cpp
 )
 
-add_library(poke_manager
-    ../../src/poke_manager.cpp
+add_library(poke_manager_test
+    ../../src/poke_manager_test.cpp
 )
 
 add_library(valve_driver
@@ -52,17 +52,17 @@ include_directories(../../inc)
 
 target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
 
-target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
+target_link_libraries(poke_manager_test pico_stdlib valve_driver etl::etl)
 
 target_link_libraries(${PROJECT_NAME}
-                      poke_manager pico_stdlib valve_driver etl::etl)
+                      poke_manager_test pico_stdlib valve_driver etl::etl)
 
 pico_add_extra_outputs(${PROJECT_NAME})
 
 message(WARNING "Debug printf() messages from harp core to UART with baud \
         rate 921600.")
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
-pico_enable_stdio_usb(poke_manager 1)
+pico_enable_stdio_usb(poke_manager_test 1)
 # pico_enable_stdio_uart(${PROJECT_NAME} 1) # UART stdio for printf.
 # pico_enable_stdio_uart(poke_manager 1) # UART stdio for printf.
 # Additional libraries need to have stdio init also.

@@ -1,7 +1,7 @@
 #include <cstring>
 #include <config.h>
 #include <etl/vector.h>
-#include <poke_manager.h>
+#include <poke_manager_test.h>
 #include <valve_driver.h>
 #include <pico/stdlib.h> // for uart printing
 #include <cstdio> // for printf
