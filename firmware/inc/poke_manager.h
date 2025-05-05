@@ -42,6 +42,22 @@ public:
 
     void restart(); // restart fsm
 
+    void update_next_odor(int next_odor);
+
+    void set_vacuum_close_time_us(uint32_t vacuum_close_time_us);
+
+    void set_odor_delivery_time_us(uint32_t odor_delivery_time_us);
+
+    void set_odor_transition_time_us(uint32_t odor_transition_time_us);
+
+    void set_vac_setup_time_us(uint32_t vac_setup_time_us);
+
+    void set_final_valve_energized_time_us(uint32_t final_valve_energized_time_us);
+
+    void set_min_poke_time_us(uint32_t min_poke_time_us);
+
+    void set_poke_pin(uint8_t pin);
+
 /**
  * \brief true if a poke was detected. Inline replaces function with code
  */
@@ -50,11 +66,34 @@ public:
 
     void deenergize_all_valves();
 
+    void check_poke_status();
+
     inline size_t get_poke_count() const
     {return poke_count_;}
 
     inline int get_current_odor() const
     {return odor_valve_index_;}
+
+    inline int get_next_odor() const
+    {return next_odor_index_;}
+
+    inline uint32_t get_vacuum_close_time() const
+    {return vacuum_close_time_us_;}
+
+    inline uint32_t get_odor_delivery_time() const
+    {return odor_delivery_time_us_;}
+
+    inline uint32_t get_odor_transition_time() const
+    {return odor_transition_time_;}
+
+    inline uint32_t get_vac_setup_time() const
+    {return vac_setup_time_us_;}
+
+    inline uint32_t get_final_valve_energized_time() const
+    {return final_valve_energized_time_us_;}
+
+    inline uint32_t get_min_poke_time() const
+    {return min_poke_time_us_;}
 
 private:
 
@@ -67,22 +106,35 @@ private:
     // Declare data members
     state_t state_;
     uint32_t state_entry_time_us_;
+    uint32_t poke_start_time_us_;
     
+    uint8_t poke_pin_;
     int odor_valve_index_;
+    int next_odor_index_;
     size_t poke_count_;
     bool poke_detected_;
     bool disable_fsm_;
+    bool beam_broken_; //keep track of beam state
+    bool poke_initiated_once_; //Only trigger the FSM on 1 poke
     ValveDriver& vac_valve_;
     ValveDriver& final_valve_;
     etl::vector<ValveDriver, NUM_ODOR_VALVES>& odor_valves_;
 
-    // Declare Constants
-    static inline constexpr uint32_t VACUUM_CLOSE_TIME_US = 20e3;
-    static inline constexpr uint32_t ODOR_DELIVERY_TIME_US = 10e3; 
-    static inline constexpr uint32_t ODOR_TRANSITION_TIME_US = 30e3; 
-    static inline constexpr uint32_t VAC_SETUP_TIME_US = 20e3;
-    static inline constexpr uint32_t FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
+    uint32_t vacuum_close_time_us_;
+    uint32_t odor_delivery_time_us_;
+    uint32_t odor_transition_time_;
+    uint32_t vac_setup_time_us_;
+    uint32_t final_valve_energized_time_us_;
+    uint32_t min_poke_time_us_;
 
+    // Declare Constants
+    static inline constexpr uint32_t DEFAULT_VACUUM_CLOSE_TIME_US = 20e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_DELIVERY_TIME_US = 10e3; 
+    static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3; 
+    static inline constexpr uint32_t DEFAULT_VAC_SETUP_TIME_US = 20e3;
+    static inline constexpr uint32_t DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
+    static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
+    static inline constexpr uint8_t DEFAUT_POKE_PIN = GPIO_PIN_BASE;
 };
 
 #endif // POKE_MANAGER_H

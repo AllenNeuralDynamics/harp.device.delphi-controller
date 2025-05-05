@@ -1,7 +1,6 @@
 #include <delphi_controller_app.h>
 
 app_regs_t app_regs;
-
 uint8_t old_aux_gpio_inputs;
 
 
@@ -86,6 +85,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.CurrentOdor, sizeof(app_regs.CurrentOdor), U8},
     {(uint8_t*)&app_regs.NextOdor, sizeof(app_regs.NextOdor), U8},
     {(uint8_t*)&app_regs.DelphiTaskConfig, sizeof(DelphiTaskConfig), U8},
+    {(uint8_t*)&app_regs.PokePin, sizeof(app_regs.PokePin), U8},
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -127,9 +127,71 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {HarpCore::read_reg_generic, write_restart_fsm}, // write only
     {HarpCore::read_reg_generic, write_reset_poke_manager_fsm}, // write only
     {read_current_odor, HarpCore::write_to_read_only_reg_error}, // read only
-    {read_next_odor, write_next_odor}, //read and write
+    {read_next_odor, write_next_odor}, //read and write --ADD TIMING HANDLER FUNCTIONS AFTER THIS
+    {read_delphi_task_config, write_delphi_task_config}, //read and write --Delphi Task
+    {HarpCore::read_reg_generic, write_poke_pin}, // write only
 };
 
+void read_delphi_task_config(uint8_t reg_address)
+{
+    DelphiTaskConfig& delphi_cfg = app_regs.DelphiTaskConfig
+
+    // Update Harp App registers with Poke Manager class contents.
+    delphi_cfg.vacuum_close_time_us = poke_manager.get_vacuum_close_time();
+    delphi_cfg.odor_delivery_time_us = poke_manager.get_odor_delivery_time();
+    delphi_cfg.odor_transition_time_us = poke_manager.get_odor_transition_time();
+    delphi_cfg.vac_setup_time_us = poke_manager.get_vac_setup_time();
+    delphi_cfg.final_valve_energized_time_us = poke_manager.get_final_valve_energized_time();
+    delphi_cfg.min_poke_time_us = poke_manager.get_min_poke_time();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_poke_pin(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+
+    // Apply the configuration.
+    poke_manager.set_poke_pin((uint8_t) msg.payload);
+
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void write_delphi_task_config(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    DelphiTaskConfig& delphi_cfg = app_regs.DelphiTaskConfig
+
+    // Apply the configuration.
+    poke_manager.set_vacuum_close_time_us(delphi_cfg.vacuum_close_time_us);
+    poke_manager.set_odor_delivery_time_us(delphi_cfg.odor_delivery_time_us);
+    poke_manager.set_odor_transition_time_us(delphi_cfg.odor_transition_time_us);
+    poke_manager.set_vac_setup_time_us(delphi_cfg.vac_setup_time_us);
+    poke_manager.set_final_valve_energized_time_us(delphi_cfg.final_valve_energized_time_us);
+    poke_manager.set_min_poke_time_us(delphi_cfg.min_poke_time_us);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void write_next_odor(msg_t& msg)
+{
+    // Registered value is updated 
+    HarpCore::copy_msg_payload_to_register(msg); //updates the register
+    poke_manager.update_next_odor((int) msg.payload); //write next odor
+
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);   
+}
+
+void read_next_odor(uint8_t reg_address)
+{
+    // Get recent poke count value
+    app_regs.NextOdor = poke_manager.get_next_odor();
+
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);   
+}
 
 void read_current_odor(uint8_t reg_address)
 {
@@ -337,7 +399,7 @@ void write_aux_gpio_clear(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void update_app_state() // Called when app.run() is called
+void update_app_state() // Called when app.run() is called -- add poke detection here
 {
     // Update poke manager FSM
     poke_manager.update();
@@ -366,6 +428,7 @@ void reset_app()
 {
     // Reset poke manager
     poke_manager.reset();
+    app_regs.PokeDometer = 0;
     
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;

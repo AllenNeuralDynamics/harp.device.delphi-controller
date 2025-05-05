@@ -14,7 +14,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 34;
+inline constexpr size_t APP_REG_COUNT = 35;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -46,7 +46,7 @@ struct DelphiTaskConfig
 {
     uint32_t vacuum_close_time_us;
     uint32_t odor_delivery_time_us;
-    uint32_t odor_transition_time;
+    uint32_t odor_transition_time_us;
     uint32_t vac_setup_time_us;
     uint32_t final_valve_energized_time_us;
     uint32_t min_poke_time_us;
@@ -91,6 +91,7 @@ struct app_regs_t
     volatile uint8_t CurrentOdor; //Read only -- Current odor by index [0-(NUM_ODOR_VALVES-1)] that is being delivered 
     volatile uint8_t NextOdor; //Read and Write -- write the next odor index [0-(NUM_ODOR_VALVES-1)] that is queued
     DelphiTaskConfig DelphiTaskConfig; // write and read
+    uint8_t PokePin; // write only 
 };
 #pragma pack(pop)
 
@@ -115,6 +116,9 @@ void read_valves_clear(uint8_t reg_address);
 void read_any_valve_config(uint8_t reg_address);
 void read_aux_gpio_state(uint8_t reg_address);
 void read_pokedometer(uint8_t reg_address);
+void read_current_odor(uint8_t reg_address);
+void read_next_odor(uint8_t reg_address);
+void read_delphi_task_config(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -124,5 +128,11 @@ void write_aux_gpio_dir(msg_t& msg);
 void write_aux_gpio_state(msg_t& msg);
 void write_aux_gpio_set(msg_t& msg);
 void write_aux_gpio_clear(msg_t& msg);
+void write_pause_fsm(msg_t& msg);
+void write_restart_fsm(msg_t& msg);
+void write_reset_poke_manager_fsm(msg_t& msg);
+void write_next_odor(msg_t& msg);
+void write_delphi_task_config(msg_t& msg);
+void write_poke_pin(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H
