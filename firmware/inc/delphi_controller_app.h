@@ -84,12 +84,12 @@ struct app_regs_t
     uint8_t AuxGPIOFallingInputs; // Raw state of which inputs fell (could be multiple)
     
     // Poke Manager app "registers" here.
-    volatile uint32_t PokeDometer; //Read only -- number of pokes the mouse has done since boot
-    volatile uint8_t PauseFSM; // Write only -- 1 = FSM disabled , 0 = FSM enabled (default)
-    volatile uint8_t RestartFSM; // Write only -- 1 = FSM enabled (default), 0 = FSM disabled
-    volatile uint8_t ResetFSM; // Write only -- force FSM into reset state when passed a value of 1, default = 0
-    volatile uint8_t CurrentOdor; //Read only -- Current odor by index [0-(NUM_ODOR_VALVES-1)] that is being delivered 
-    volatile uint8_t NextOdor; //Read and Write -- write the next odor index [0-(NUM_ODOR_VALVES-1)] that is queued
+    uint32_t PokeDometer; //Read only -- number of pokes the mouse has done since boot
+    uint8_t PauseFSM; // Write only -- 1 = FSM disabled , 0 = FSM enabled (default)
+    uint8_t RestartFSM; // Write only -- 1 = FSM enabled (default), 0 = FSM disabled
+    uint8_t ResetFSM; // Write only -- force FSM into reset state when passed a value of 1, default = 0
+    uint8_t CurrentOdor; //Read only -- Current odor by index [0-(NUM_ODOR_VALVES-1)] that is being delivered 
+    uint8_t NextOdor; //Read and Write -- write the next odor index [0-(NUM_ODOR_VALVES-1)] that is queued
     DelphiTaskConfig DelphiTaskConfig; // write and read
     uint8_t PokePin; // write only 
 };

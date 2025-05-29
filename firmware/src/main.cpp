@@ -27,12 +27,13 @@ HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
                                reset_app);
 
 // Inititalize final and vac valve pins -- Does this go here?
-ValveDriver final_valve(VALVE_PIN_BASE);
-ValveDriver vac_valve(VALVE_PIN_BASE + 1);
-etl::vector<ValveDriver, NUM_ODOR_VALVES> odor_valves;
+ValveDriver& final_valve = valve_drivers[0]; // add to config
+ValveDriver& vac_valve = valve_drivers[1];
+ValveDriver& odor_valves[] = &valve_drivers[2]; // refer to rest of vale drivers as valves for odoor delivery
+                                                // i.e: odor_valves[app_regs.NextOdor].energize(); // check out harp core
 
 // Pass valves into the poke manager constructor
-PokeManager poke_manager(final_valve, vac_valve, odor_valves);
+PokeManager poke_manager(final_valve, vac_valve, odor_valves, NUM_ODOR_VALVES);
 
 // Core0 main.
 int main()
@@ -41,9 +42,6 @@ int main()
     HarpSynchronizer::init(uart1, HARP_SYNC_RX_PIN);
     app.set_synchronizer(&HarpSynchronizer::instance());
 
-    // Odor valves vector -- set valves
-    for (int i = VALVE_PIN_BASE + 2; i < VALVE_PIN_BASE + 2 + NUM_ODOR_VALVES; i++){
-        odor_valves.emplace_back(i);
 }
 #ifdef DEBUG
     stdio_uart_init_full(uart0, 921600, UART_TX_PIN, -1); // use uart1 tx only.

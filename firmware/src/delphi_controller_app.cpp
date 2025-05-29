@@ -16,8 +16,6 @@ void (&write_aux_gpio_fall_event)(msg_t& msg) = HarpCore::write_reg_generic;
 
 void (&read_aux_gpio_rise_input)(uint8_t reg_address) = HarpCore::read_reg_generic;
 void (&read_aux_gpio_fall_input)(uint8_t reg_address) = HarpCore::read_reg_generic;
-void (&write_aux_gpio_rise_input)(msg_t& msg) = HarpCore::write_reg_generic;
-void (&write_aux_gpio_fall_input)(msg_t& msg) = HarpCore::write_reg_generic;
 
 
 /// Create Hit-and-Hold Valve Drivers.
@@ -118,8 +116,8 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
 
     {read_aux_gpio_rise_event, write_aux_gpio_rise_event},
     {read_aux_gpio_fall_event, write_aux_gpio_fall_event},
-    {read_aux_gpio_rise_input, write_aux_gpio_rise_input}, //this handler function was missing
-    {read_aux_gpio_fall_input, write_aux_gpio_fall_input}, //this handler function was missing
+    {read_aux_gpio_rise_input, HarpCore::write_to_read_only_reg_error}, 
+    {read_aux_gpio_fall_input, HarpCore::write_to_read_only_reg_error}, 
 
     // Poke manager handler functions
     {read_pokedometer, HarpCore::write_to_read_only_reg_error}, // read only
@@ -205,7 +203,7 @@ void read_current_odor(uint8_t reg_address)
 void write_restart_fsm(msg_t& msg)
 {
     // Registered value is updated 
-    // HarpCore::copy_msg_payload_to_register(msg); //upfates the register
+    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
     if ((unit8_t) msg.payload == 1) //just extracting the payload of the register and not actually updating it // explict casting
         poke_manager.restart();
 
@@ -216,19 +214,21 @@ void write_restart_fsm(msg_t& msg)
 void write_pause_fsm(msg_t& msg)
 {
     // Registered value is updated 
-    // HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if ((unit8_t) msg.payload == 1) //just extracting the payload of the register and not actually updating it // explict casting
+    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
+    if (apps_regs.PauseFSM == 1) //FIX THIS EVERYWHERE
         poke_manager.pause();
 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);   
+    
+        apps_regs.PauseFSM == 0;
 }
 
 
 void write_reset_poke_manager_fsm(msg_t& msg)
 {
     // Registered value is updated 
-    // HarpCore::copy_msg_payload_to_register(msg); //upfates the register
+    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
     if ((unit8_t) msg.payload == 1) //just extracting the payload of the register and not actually updating it // explict casting
         poke_manager.reset();
 
