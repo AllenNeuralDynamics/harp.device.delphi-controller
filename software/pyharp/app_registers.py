@@ -32,3 +32,19 @@ class AppRegs(IntEnum):
     AuxGPIOInputFallEvent = 56
     AuxGPIOInputRisingInputs = 57
     AuxGPIOFallingInputs = 58
+
+
+class DelphiAppRegs(AppRegs):
+    PokePinMask = 59
+    PokeEvent = 60
+    PokeDometers = 61
+    FSMState = 62
+    ForceFSM = 63
+    CurrentOdorIndex = 64
+    NextOdorIndex = 65
+    VacuumCloseTimeUS = 66
+    OdorDeliveryTimeUS = 67
+    OdorTransitionTimeUS = 68
+    VacuumSetupTimeUS = 69
+    FinalValveEnergizedTimeUS = 70
+    MinimumPokeTimeUS = 71
