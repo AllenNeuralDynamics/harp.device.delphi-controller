@@ -43,21 +43,29 @@ public:
 
     void restart(); // restart fsm
 
-    void update_next_odor(uint32_t next_odor);
+    inline void update_next_odor(uint32_t next_odor)
+    {next_odor_index_ = next_odor;}
 
-    void set_vacuum_close_time_us(uint32_t vacuum_close_time_us);
+    inline void set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
+    {vacuum_close_time_us_ = vacuum_close_time_us;}
 
-    void set_odor_delivery_time_us(uint32_t odor_delivery_time_us);
+    inline void set_odor_delivery_time_us(uint32_t odor_delivery_time_us)
+    {odor_delivery_time_us_ = odor_delivery_time_us;}
 
-    void set_odor_transition_time_us(uint32_t odor_transition_time_us);
+    void set_odor_transition_time_us(uint32_t odor_transition_time_us)
+    {odor_transition_time_us_ = odor_transition_time_us;}
 
-    void set_vac_setup_time_us(uint32_t vac_setup_time_us);
+    inline void set_vac_setup_time_us(uint32_t vac_setup_time_us)
+    {vac_setup_time_us_ = vac_setup_time_us;}
 
-    void set_final_valve_energized_time_us(uint32_t final_valve_energized_time_us);
+    inline void set_final_valve_energized_time_us(uint32_t final_valve_energized_time_us)
+    {final_valve_energized_time_us_ = final_valve_energized_time_us;}
 
-    void set_min_poke_time_us(uint32_t min_poke_time_us);
+    inline void set_min_poke_time_us(uint32_t min_poke_time_us)
+    {min_poke_time_us_ = min_poke_time_us;}
 
-    void set_poke_pin(uint8_t pin);
+    inline void set_poke_pin(uint8_t pin)
+    {poke_pin_ = pin;}
 
 /**
  * \brief true if a poke was detected. Inline replaces function with code
@@ -85,7 +93,7 @@ public:
     {return odor_delivery_time_us_;}
 
     inline uint32_t get_odor_transition_time() const
-    {return odor_transition_time_;}
+    {return odor_transition_time_us_;}
 
     inline uint32_t get_vac_setup_time() const
     {return vac_setup_time_us_;}
@@ -126,7 +134,7 @@ private:
 
     uint32_t vacuum_close_time_us_;
     uint32_t odor_delivery_time_us_;
-    uint32_t odor_transition_time_;
+    uint32_t odor_transition_time_us_;
     uint32_t vac_setup_time_us_;
     uint32_t final_valve_energized_time_us_;
     uint32_t min_poke_time_us_;

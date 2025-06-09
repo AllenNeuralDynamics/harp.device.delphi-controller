@@ -12,7 +12,6 @@
     #include <pico/stdlib.h> // for uart printing
     #include <cstdio> // for printf
 #endif
-
 // Create Harp App.
 HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
                                HW_VERSION_MAJOR, HW_VERSION_MINOR,
@@ -26,11 +25,11 @@ HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
                                reg_handler_fns, APP_REG_COUNT, update_app_state,
                                reset_app);
 
-// Inititalize final and vac valve pins -- Does this go here?
-ValveDriver& final_valve = valve_drivers[0]; // add to config
-ValveDriver& vac_valve = valve_drivers[1];
-ValveDriver (&odor_valves)[] = (&valve_drivers)[2]; // refer to rest of valve drivers as valves for odoor delivery
-                                                // i.e: odor_valves[app_regs.NextOdor].energize(); // check out harp core
+    ValveDriver& final_valve = valve_drivers[0]; // add to config
+    ValveDriver& vac_valve = valve_drivers[1];
+    // Consider the rest of the valves as odor delivery valves.
+    ValveDriver* odor_valves_start = valve_drivers + 2;
+    ValveDriver (&odor_valves)[] = *reinterpret_cast<ValveDriver(*)[]>(odor_valves_start);
 
 // Pass valves into the poke manager constructor
 PokeManager poke_manager(final_valve, vac_valve, odor_valves, NUM_ODOR_VALVES);
@@ -38,6 +37,7 @@ PokeManager poke_manager(final_valve, vac_valve, odor_valves, NUM_ODOR_VALVES);
 // Core0 main.
 int main()
 {
+
     // Init Synchronizer.
     HarpSynchronizer::init(uart1, HARP_SYNC_RX_PIN);
     app.set_synchronizer(&HarpSynchronizer::instance());

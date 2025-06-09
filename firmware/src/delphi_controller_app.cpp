@@ -423,7 +423,7 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_FALLING_INPUTS_ADDRESS);
 
     // Update poke manager FSM
-    poke_manager.update();
+    //poke_manager.update();
 }
 
 void reset_app()

@@ -28,50 +28,8 @@ void PokeManager::deenergize_all_valves()
 {
     final_valve_.deenergize();
     vac_valve_.deenergize();
-    for (int i = 0; i < NUM_ODOR_VALVES; i++){
+    for (int i = 0; i < num_odor_valves_; ++i)
         odor_valves_[i].deenergize();
-    }
-}
-
-// Functions to configure Delphi Task/update it
-void PokeManager::update_next_odor(uint32_t next_odor)
-{
-    next_odor_index_ = next_odor;
-}
-
-void PokeManager::set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
-{
-    vacuum_close_time_us_ = vacuum_close_time_us;
-}
-
-void PokeManager::set_odor_delivery_time_us(uint32_t odor_delivery_time_us)
-{
-    odor_delivery_time_us_ = odor_delivery_time_us;
-}
-
-void PokeManager::set_odor_transition_time_us(uint32_t odor_transition_time_us)
-{
-    odor_transition_time_ = odor_transition_time_us;
-}
-
-void PokeManager::set_vac_setup_time_us(uint32_t vac_setup_time_us)
-{
-    vac_setup_time_us_ = vac_setup_time_us;
-}
-
-void PokeManager::set_final_valve_energized_time_us(uint32_t final_valve_energized_time_us)
-{
-    final_valve_energized_time_us_ = final_valve_energized_time_us;
-}
-
-void PokeManager::set_min_poke_time_us(uint32_t min_poke_time_us)
-{
-    min_poke_time_us_ = min_poke_time_us;
-}
-
-void PokeManager::set_poke_pin(uint8_t pin)
-{
-    poke_pin_ = pin;
 }
 
 //Poke detection function
@@ -178,7 +136,7 @@ void PokeManager::update()
                 next_state = ODOR_PRECLEAN;
             break;
         case ODOR_PRECLEAN:
-            if (state_duration_us() >= odor_transition_time_)
+            if (state_duration_us() >= odor_transition_time_us_)
                 next_state = VAC_START;
             break;
         case VAC_START:
