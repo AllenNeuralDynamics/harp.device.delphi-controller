@@ -1,7 +1,13 @@
 #include <poke_manager.h>
 
-PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve, ValveDriver& odor_valves[])
-: state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN}, odor_valve_index_{0}, next_odor_index_{0}, disable_fsm_{false}, poke_detected_{false}, final_valve_{final_valve}, vac_valve_{vac_valve}, odor_valves_{odor_valves}, beam_broken_{false}, poke_initiated_once_{false} 
+PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve,
+                         ValveDriver (&odor_valves)[], size_t num_odor_valves)
+: final_valve_{final_valve}, vac_valve_{vac_valve}, odor_valves_{odor_valves},
+num_odor_valves_{num_odor_valves},
+state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
+odor_valve_index_{0}, next_odor_index_{0}, disable_fsm_{false},
+poke_detected_{false},
+beam_broken_{false}, poke_initiated_once_{false}
 {
     // Nothing else to do!
 }
@@ -28,6 +34,11 @@ void PokeManager::deenergize_all_valves()
 }
 
 // Functions to configure Delphi Task/update it
+void PokeManager::update_next_odor(uint32_t next_odor)
+{
+    next_odor_index_ = next_odor;
+}
+
 void PokeManager::set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
 {
     vacuum_close_time_us_ = vacuum_close_time_us;
@@ -43,7 +54,7 @@ void PokeManager::set_odor_transition_time_us(uint32_t odor_transition_time_us)
     odor_transition_time_ = odor_transition_time_us;
 }
 
-void PokeManager::set_vac_setup_time_uss(uint32_t vac_setup_time_us)
+void PokeManager::set_vac_setup_time_us(uint32_t vac_setup_time_us)
 {
     vac_setup_time_us_ = vac_setup_time_us;
 }
@@ -85,7 +96,7 @@ void PokeManager::check_poke_status()
     // Check duration since beam break/poke
     if (gpio_get(poke_pin_) == 0 && beam_broken_ == true)
     {
-        gpio_put(LED_PIN, 1); // Turn on LED whenever the beam is broken
+        //gpio_put(LED_PIN, 1); // Turn on LED whenever the beam is broken
         if ((time_us_32() - poke_start_time_us_) >= min_poke_time_us_ && poke_initiated_once_ == false){
             
             //Poke was detected!
@@ -111,7 +122,7 @@ void PokeManager::reset()
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
-    set_vac_setup_time_uss(DEFAULT_VAC_SETUP_TIME_US);
+    set_vac_setup_time_us(DEFAULT_VAC_SETUP_TIME_US);
     set_final_valve_energized_time_us(DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US);
 }
 
@@ -128,11 +139,6 @@ void PokeManager::restart() // Needed for odor changes/refills -- change to disa
     state_ = RESET;
     beam_broken_ = false;
     poke_initiated_once_ = false;
-}
-
-void PokeManager::update_next_odor(int next_odor) // Update the index of the next odor
-{
-    next_odor_index_ = next_odor;
 }
 
 void PokeManager::update()

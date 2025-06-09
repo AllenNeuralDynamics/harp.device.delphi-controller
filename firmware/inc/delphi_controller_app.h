@@ -27,6 +27,7 @@ extern RegFnPair reg_handler_fns[APP_REG_COUNT];
 extern HarpCApp& app;
 
 extern ValveDriver valve_drivers[NUM_VALVES];
+extern PokeManager poke_manager;
 
 extern uint8_t old_aux_gpio_inputs;
 
@@ -42,7 +43,7 @@ struct ValveConfig
 
 // Delphi task timing params
 #pragma pack(push, 1)
-struct DelphiTaskConfig
+struct delphi_task_config_t
 {
     uint32_t vacuum_close_time_us;
     uint32_t odor_delivery_time_us;
@@ -90,7 +91,7 @@ struct app_regs_t
     uint8_t ResetFSM; // Write only -- force FSM into reset state when passed a value of 1, default = 0
     uint8_t CurrentOdor; //Read only -- Current odor by index [0-(NUM_ODOR_VALVES-1)] that is being delivered 
     uint8_t NextOdor; //Read and Write -- write the next odor index [0-(NUM_ODOR_VALVES-1)] that is queued
-    DelphiTaskConfig DelphiTaskConfig; // write and read
+    delphi_task_config_t DelphiTaskConfig; // write and read
     uint8_t PokePin; // write only 
 };
 #pragma pack(pop)

@@ -12,7 +12,7 @@ add_definitions(-DUSBD_PRODUCT="delphi-controller")
 include(${PICO_SDK_PATH}/pico_sdk_init.cmake)
 
 # Use modern conventions like std::invoke
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 23)
 
 project(delphi-controller)
 
@@ -23,8 +23,8 @@ add_subdirectory(lib/etl build/etl) # etl library path
 
 
 add_executable(${PROJECT_NAME}
-    main.cpp
-    delphi_controller_app.cpp
+    src/main.cpp
+    src/delphi_controller_app.cpp
 )
 
 add_library(valve_driver
@@ -39,8 +39,9 @@ include_directories(inc)
 
 target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
 target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
-target_link_libraries(${PROJECT_NAME} harp_core harp_c_app rp2040_pwm
-                      valve_driver harp_sync pico_stdlib etl::etl)
+target_link_libraries(${PROJECT_NAME}
+    harp_core harp_c_app rp2040_pwm poke_manager valve_driver harp_sync
+    pico_stdlib etl::etl)
 
 pico_add_extra_outputs(${PROJECT_NAME})
 

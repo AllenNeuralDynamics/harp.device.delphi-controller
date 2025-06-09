@@ -82,7 +82,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.ResetFSM, sizeof(app_regs.ResetFSM), U8},
     {(uint8_t*)&app_regs.CurrentOdor, sizeof(app_regs.CurrentOdor), U8},
     {(uint8_t*)&app_regs.NextOdor, sizeof(app_regs.NextOdor), U8},
-    {(uint8_t*)&app_regs.DelphiTaskConfig, sizeof(DelphiTaskConfig), U8},
+    {(uint8_t*)&app_regs.DelphiTaskConfig, sizeof(delphi_task_config_t), U8},
     {(uint8_t*)&app_regs.PokePin, sizeof(app_regs.PokePin), U8},
 };
 
@@ -132,9 +132,10 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
 
 void read_delphi_task_config(uint8_t reg_address)
 {
-    DelphiTaskConfig& delphi_cfg = app_regs.DelphiTaskConfig
+    delphi_task_config_t& delphi_cfg = app_regs.DelphiTaskConfig;
 
     // Update Harp App registers with Poke Manager class contents.
+    // FIXME: since they are the same data type, we can just use assignment.
     delphi_cfg.vacuum_close_time_us = poke_manager.get_vacuum_close_time();
     delphi_cfg.odor_delivery_time_us = poke_manager.get_odor_delivery_time();
     delphi_cfg.odor_transition_time_us = poke_manager.get_odor_transition_time();
@@ -150,7 +151,7 @@ void write_poke_pin(msg_t& msg)
     HarpCore::copy_msg_payload_to_register(msg);
 
     // Apply the configuration.
-    poke_manager.set_poke_pin((uint8_t) msg.payload);
+    poke_manager.set_poke_pin(app_regs.PokePin);
 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
@@ -159,7 +160,7 @@ void write_poke_pin(msg_t& msg)
 void write_delphi_task_config(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    DelphiTaskConfig& delphi_cfg = app_regs.DelphiTaskConfig
+    delphi_task_config_t& delphi_cfg = app_regs.DelphiTaskConfig;
 
     // Apply the configuration.
     poke_manager.set_vacuum_close_time_us(delphi_cfg.vacuum_close_time_us);
@@ -176,7 +177,7 @@ void write_next_odor(msg_t& msg)
 {
     // Registered value is updated 
     HarpCore::copy_msg_payload_to_register(msg); //updates the register
-    poke_manager.update_next_odor((int) msg.payload); //write next odor
+    poke_manager.update_next_odor(app_regs.NextOdor); //write next odor
 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);   
@@ -203,8 +204,8 @@ void read_current_odor(uint8_t reg_address)
 void write_restart_fsm(msg_t& msg)
 {
     // Registered value is updated 
-    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if ((unit8_t) msg.payload == 1) //just extracting the payload of the register and not actually updating it // explict casting
+    HarpCore::copy_msg_payload_to_register(msg); //updates the register
+    if (app_regs.RestartFSM)
         poke_manager.restart();
 
     if (!HarpCore::is_muted())
@@ -215,13 +216,14 @@ void write_pause_fsm(msg_t& msg)
 {
     // Registered value is updated 
     HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if (apps_regs.PauseFSM == 1) //FIX THIS EVERYWHERE
+    if (app_regs.PauseFSM)
         poke_manager.pause();
 
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);   
-    
-        apps_regs.PauseFSM == 0;
+    {
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+        app_regs.PauseFSM == 0;
+    }
 }
 
 
@@ -229,7 +231,7 @@ void write_reset_poke_manager_fsm(msg_t& msg)
 {
     // Registered value is updated 
     HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if ((unit8_t) msg.payload == 1) //just extracting the payload of the register and not actually updating it // explict casting
+    if (app_regs.ResetFSM)
         poke_manager.reset();
 
     if (!HarpCore::is_muted())

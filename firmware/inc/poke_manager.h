@@ -27,9 +27,10 @@ public:
 
     // Declare constructor
     PokeManager(
-    ValveDriver& final_valve, //Pass by reference (work of this org. object)
-    ValveDriver& vac_valve,
-    etl::vector<ValveDriver, NUM_ODOR_VALVES>& odor_valves
+        ValveDriver& final_valve, //Pass by reference (work of this org. object)
+        ValveDriver& vac_valve,
+        ValveDriver (&odor_valves)[],
+        size_t num_odor_valves
     );
 
     ~PokeManager(); // desctructor
@@ -42,7 +43,7 @@ public:
 
     void restart(); // restart fsm
 
-    void update_next_odor(int next_odor);
+    void update_next_odor(uint32_t next_odor);
 
     void set_vacuum_close_time_us(uint32_t vacuum_close_time_us);
 
@@ -107,10 +108,11 @@ private:
     state_t state_;
     uint32_t state_entry_time_us_;
     uint32_t poke_start_time_us_;
-    
+
     uint8_t poke_pin_;
     int odor_valve_index_;
     int next_odor_index_;
+
     size_t poke_count_;
     bool poke_detected_;
     bool disable_fsm_;
@@ -118,7 +120,9 @@ private:
     bool poke_initiated_once_; //Only trigger the FSM on 1 poke
     ValveDriver& vac_valve_;
     ValveDriver& final_valve_;
-    etl::vector<ValveDriver, NUM_ODOR_VALVES>& odor_valves_;
+
+    ValveDriver (&odor_valves_)[];
+    size_t num_odor_valves_;
 
     uint32_t vacuum_close_time_us_;
     uint32_t odor_delivery_time_us_;
