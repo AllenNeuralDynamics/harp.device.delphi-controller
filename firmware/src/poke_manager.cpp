@@ -238,9 +238,6 @@ void PokeManager::update()
             // Energize the final valve
             final_valve_.energize();
             odor_valve_index_ = next_odor_index_; //DO SOMETHING HERE TO READ FROM THE REGISTER TO GET NEXT ODOR
-            // ++odor_valve_index_;
-            // if (odor_valve_index_ == NUM_ODOR_VALVES) // test logic for iterating through valves
-            //     odor_valve_index_ = 0;
 
             printf("Odor Valve: %i\r\n", odor_valve_index_); //valve odor index
         }

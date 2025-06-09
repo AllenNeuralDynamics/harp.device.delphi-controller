@@ -403,9 +403,6 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void update_app_state() // Called when app.run() is called -- add poke detection here
 {
-    // Update poke manager FSM
-    poke_manager.update();
-    
     // Update valve controller state machines.
     for (auto& valve_driver: valve_drivers)
         valve_driver.update();
@@ -424,6 +421,9 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_RISING_INPUTS_ADDRESS);
     if (app_regs.AuxGPIOInputFallEvent & app_regs.AuxGPIOFallingInputs)
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_FALLING_INPUTS_ADDRESS);
+
+    // Update poke manager FSM
+    poke_manager.update();
 }
 
 void reset_app()
