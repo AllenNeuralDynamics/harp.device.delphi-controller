@@ -3,8 +3,8 @@
 # yaml-language-server: $schema=https://harp-tech.org/draft-02/schema/device.json
 device: DelphiController
 whoAmI: 1407
-firmwareVersion: "0.0.0"
-hardwareTargets: "1.0.0"
+firmwareVersion: "0.0"
+hardwareTargets: "1.0"
 registers:
     ValveState:
         address: 32
