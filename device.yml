@@ -138,72 +138,73 @@ registers:
         maskType: AuxGPIOMask
         access: Write
         description: ""
-    PokePinMask:
+    PokePin:
         address: 59
         type: U8
         access: Write
-        maskType: PokePortMask
         description: "which poke ports are active."
-    PokeEvent:
+    PokePinInverted:
         address: 60
         type: U8
-        access: Event
-        maskType: PokePortMask
-        description: "One or more pokes occurred at the specified index."
-    PokeDometers:
+        access: Write
+        description: "Which poke ports are inverted (i.e: transition from HIGH to LOW when a poke occurs)."
+    PokeState:
         address: 61
-        type: U32
-        length: 8
-        access: Read
-        maskType: PokePortMask
-        description: "number of mouse pokes per port since boot or reset."
-    FSMState:
+        type: U8
+        access: Event
+        description: "The raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state."
+    PokeDometer:
         address: 62
         type: U32
+        access: Read
+        description: "number of mouse pokes per port since boot or reset."
+    FSMState:
+        address: 63
+        type: U8
         access: Write
         description: "Enable (1) (aka reset) or Disable (0) the poke handling state machine. Note that CurrentOdorIndex must be specified first. Disabling and then enabling a previously-enabled FSM will reset it to its starting state."
     ForceFSM:
-        address: 63
+        address: 64
         type: U8
         access: Write
         description: "Force the poke handling state machine to iterate as if handling a mouse poke. PokeDometers are not incremented."
     CurrentOdorIndex:
-        address: 64
+        address: 65
         type: S8
         access: Write
         description: "The current odor being dispensed to the odor port. Must be specified before enabling the state machine."
     NextOdorIndex:
-        address: 65
+        address: 66
         type: S8
         access: Write
         description: "The next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle."
     VacuumCloseTimeUS:
-        address: 66
+        address: 67
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the vacuum valve to close."
     OdorDeliveryTimeUS:
-        address: 67
+        address: 68
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the odor delivery state."
     OdorTransitionTimeUS:
-        address: 68
+        address: 69
         type: U32
         access: Write
         description: "Time alotted (in microseconds) before the vacuum turns on to remove the current odor."
     VacuumSetupTimeUS:
-        address: 69
+        address: 70
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the vacuum to open."
     FinalValveEnergizedTimeUS:
-        address: 70
+        address: 71
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the final valve to open and remain on."
     MinimumPokeTimeUS:
-        address: 71
+        address: 72
         type: U32
         access: Write
         description: "Minimum time (in microseconds) necessary for a mouse poke port beam to be broken before being interpretted as a poke."
@@ -239,14 +240,3 @@ groupMasks:
             AuxGPIO5: 0x5
             AuxGPIO6: 0x6
             AuxGPIO7: 0x7
-    PokePortMask:
-        description: "Poke Port index."
-        values:
-            PokePort0: 0x0
-            PokePort1: 0x1
-            PokePort2: 0x2
-            PokePort3: 0x3
-            PokePort4: 0x4
-            PokePort5: 0x5
-            PokePort6: 0x6
-            PokePort7: 0x7

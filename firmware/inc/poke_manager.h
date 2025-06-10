@@ -2,6 +2,7 @@
 #define POKE_MANAGER_H
 
 #include <hardware/timer.h>
+#include <hardware/gpio.h>
 #include <pico/stdlib.h> // for uart printing
 #include <cstdio> // for printf
 #include <valve_driver.h>
@@ -39,11 +40,21 @@ public:
 
     void reset(); // reset the fsm
 
-    void pause(); // pause fsm
+    inline void enable()
+    {set_enabled_state(true);}
 
-    void restart(); // restart fsm
+    inline void disable()
+    {set_enabled_state(false);}
 
-    inline void update_next_odor(uint32_t next_odor)
+/*
+ * \brief enable (true) or disable (false) the odor delivery state machine.
+ */
+    void set_enabled_state(bool enabled);
+
+    inline void set_current_odor(uint32_t odor_index)
+    {odor_valve_index_ = odor_index;}
+
+    inline void set_next_odor(uint32_t next_odor)
     {next_odor_index_ = next_odor;}
 
     inline void set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
@@ -55,7 +66,7 @@ public:
     void set_odor_transition_time_us(uint32_t odor_transition_time_us)
     {odor_transition_time_us_ = odor_transition_time_us;}
 
-    inline void set_vac_setup_time_us(uint32_t vac_setup_time_us)
+    inline void set_vacuum_setup_time_us(uint32_t vac_setup_time_us)
     {vac_setup_time_us_ = vac_setup_time_us;}
 
     inline void set_final_valve_energized_time_us(uint32_t final_valve_energized_time_us)
@@ -65,46 +76,82 @@ public:
     {min_poke_time_us_ = min_poke_time_us;}
 
     inline void set_poke_pin(uint8_t pin)
-    {poke_pin_ = pin;}
+    {
+        poke_pin_ = pin;
+        set_poke_pin_override_state(override_state_);
+    }
+
+    inline void force_poke()
+    {poke();}
 
 /**
- * \brief true if a poke was detected. Inline replaces function with code
- */
-    inline void poke()
-    {poke_detected_ = true;}
+ * \brief set the poke pin input override state to (1) invert or (0) uninvert
+ *  the input.
+*/
+    inline void set_poke_pin_override_state(gpio_override override_state)
+    {
+        gpio_set_inover(poke_pin_, override_state);
+        override_state_ = override_state; // Cache the override state.
+    }
 
     void deenergize_all_valves();
 
-    void check_poke_status();
+
+/**
+ * \brief true if the poke pin is inverted.
+*/
+    inline uint8_t poke_pin_is_inverted() const
+    {
+        gpio_override override_state =
+            gpio_override(
+                (io_bank0_hw->io[poke_pin_].ctrl & IO_BANK0_GPIO0_CTRL_INOVER_BITS)
+                >> IO_BANK0_GPIO0_CTRL_INOVER_LSB);
+        return override_state == GPIO_OVERRIDE_INVERT;
+    }
+
+    inline uint8_t get_poke_pin() const
+    {return poke_pin_;}
 
     inline size_t get_poke_count() const
     {return poke_count_;}
 
-    inline int get_current_odor() const
+    inline uint32_t get_current_odor() const
     {return odor_valve_index_;}
 
-    inline int get_next_odor() const
+    inline uint32_t get_next_odor() const
     {return next_odor_index_;}
 
-    inline uint32_t get_vacuum_close_time() const
+    inline uint32_t get_vacuum_close_time_us() const
     {return vacuum_close_time_us_;}
 
-    inline uint32_t get_odor_delivery_time() const
+    inline uint32_t get_odor_delivery_time_us() const
     {return odor_delivery_time_us_;}
 
-    inline uint32_t get_odor_transition_time() const
+    inline uint32_t get_odor_transition_time_us() const
     {return odor_transition_time_us_;}
 
-    inline uint32_t get_vac_setup_time() const
+    inline uint32_t get_vacuum_setup_time_us() const
     {return vac_setup_time_us_;}
 
-    inline uint32_t get_final_valve_energized_time() const
+    inline uint32_t get_final_valve_energized_time_us() const
     {return final_valve_energized_time_us_;}
 
-    inline uint32_t get_min_poke_time() const
+    inline uint32_t get_min_poke_time_us() const
     {return min_poke_time_us_;}
 
 private:
+
+/**
+ * \brief update whether or not the input has seen a poke. Called in a loop.
+ */
+    void update_poke_status();
+
+/**
+ * \brief count a poke.
+ */
+    inline void poke()
+    {poke_detected_ = true;}
+
 
 /**
  * \brief time we've been in the current state.
@@ -118,6 +165,8 @@ private:
     uint32_t poke_start_time_us_;
 
     uint8_t poke_pin_;
+    gpio_override override_state_; /// Whether or not the poke pin is inverted.
+
     int odor_valve_index_;
     int next_odor_index_;
 

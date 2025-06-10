@@ -33,11 +33,11 @@ void PokeManager::deenergize_all_valves()
 }
 
 //Poke detection function
-void PokeManager::check_poke_status()
+void PokeManager::update_poke_status()
 {
     // Check to see if poke has been detected
     // Beam is no longer broken
-    if (gpio_get(poke_pin_) == 1) // specify poke pin
+    if (!gpio_get(poke_pin_))
     {
         beam_broken_ == false;
         poke_start_time_us_ = time_us_32();
@@ -45,24 +45,23 @@ void PokeManager::check_poke_status()
     }
 
     // Poke detected -- start poke timer
-    if (gpio_get(poke_pin_) == 0 && beam_broken_ == false)
+    if (gpio_get(poke_pin_) && !beam_broken_)
     {
         poke_start_time_us_ = time_us_32();
         beam_broken_ = true;
     }
-        
+
     // Check duration since beam break/poke
-    if (gpio_get(poke_pin_) == 0 && beam_broken_ == true)
+    if (gpio_get(poke_pin_) && beam_broken_)
     {
         //gpio_put(LED_PIN, 1); // Turn on LED whenever the beam is broken
-        if ((time_us_32() - poke_start_time_us_) >= min_poke_time_us_ && poke_initiated_once_ == false){
-            
+        if ((time_us_32() - poke_start_time_us_) >= min_poke_time_us_ && poke_initiated_once_ == false)
+        {
             //Poke was detected!
             poke();
-
-            //Account for the successful poke so that another doesn't occur on the same poke 
+            //Account for the successful poke so that another doesn't occur on the same poke
             poke_initiated_once_ = true;
-        }   
+        }
     }
 }
 
@@ -80,23 +79,26 @@ void PokeManager::reset()
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
-    set_vac_setup_time_us(DEFAULT_VAC_SETUP_TIME_US);
+    set_vacuum_setup_time_us(DEFAULT_VAC_SETUP_TIME_US);
     set_final_valve_energized_time_us(DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US);
 }
 
-void PokeManager::pause() // Needed for odor changes/refills -- Change to enable
+void PokeManager::set_enabled_state(bool enabled)
 {
-    disable_fsm_ = true;
-    deenergize_all_valves(); // deenergize all valves
-}
-
-void PokeManager::restart() // Needed for odor changes/refills -- change to disable
-{
-    disable_fsm_ = false;
-    poke_detected_ = false;
-    state_ = RESET;
-    beam_broken_ = false;
-    poke_initiated_once_ = false;
+    // FIXME: validate that this is what we actually want to do.
+    if (enabled)
+    {
+        deenergize_all_valves(); // deenergize all valves
+        disable_fsm_ = false;
+        poke_detected_ = false;
+        state_ = RESET;
+        beam_broken_ = false;
+        poke_initiated_once_ = false;
+    }
+    else
+    {
+        disable_fsm_ = true;
+    }
 }
 
 void PokeManager::update()
@@ -113,7 +115,7 @@ void PokeManager::update()
     }
 
     // check for poke
-    check_poke_status();
+    update_poke_status();
 
     state_t next_state{state_}; // initialize next-state to current state.
 

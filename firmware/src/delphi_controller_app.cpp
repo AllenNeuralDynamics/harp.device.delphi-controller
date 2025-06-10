@@ -18,6 +18,8 @@ void (&read_aux_gpio_rise_input)(uint8_t reg_address) = HarpCore::read_reg_gener
 void (&read_aux_gpio_fall_input)(uint8_t reg_address) = HarpCore::read_reg_generic;
 
 
+void (&read_force_fsm)(uint8_t reg_address) = HarpCore::read_reg_generic;
+
 /// Create Hit-and-Hold Valve Drivers.
 /// The underlying PWM peripheral, aka: a PWM Slice, controls two adjacent PWM
 /// pins and must be configured with the same settings. This is OK since we are
@@ -74,16 +76,21 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.AuxGPIOInputFallEvent, sizeof(app_regs.AuxGPIOInputFallEvent), U8},
     {(uint8_t*)&app_regs.AuxGPIORisingInputs, sizeof(app_regs.AuxGPIORisingInputs), U8},
     {(uint8_t*)&app_regs.AuxGPIOFallingInputs, sizeof(app_regs.AuxGPIOFallingInputs), U8},
-    
+
     // More specs here for poke manager registers.
-    {(uint8_t*)&app_regs.PokeDometer, sizeof(app_regs.PokeDometer), U32},
-    {(uint8_t*)&app_regs.PauseFSM, sizeof(app_regs.PauseFSM), U8},
-    {(uint8_t*)&app_regs.RestartFSM, sizeof(app_regs.RestartFSM), U8},
-    {(uint8_t*)&app_regs.ResetFSM, sizeof(app_regs.ResetFSM), U8},
-    {(uint8_t*)&app_regs.CurrentOdor, sizeof(app_regs.CurrentOdor), U8},
-    {(uint8_t*)&app_regs.NextOdor, sizeof(app_regs.NextOdor), U8},
-    {(uint8_t*)&app_regs.DelphiTaskConfig, sizeof(delphi_task_config_t), U8},
     {(uint8_t*)&app_regs.PokePin, sizeof(app_regs.PokePin), U8},
+    {(uint8_t*)&app_regs.PokePinInverted, sizeof(app_regs.PokePinInverted), U8},
+    {(uint8_t*)&app_regs.PokeState, sizeof(app_regs.PokeState), U8},
+    {(uint8_t*)&app_regs.PokeDometer, sizeof(app_regs.PokeDometer), U32},
+    {(uint8_t*)&app_regs.FSMEnabledState, sizeof(app_regs.FSMEnabledState), U8},
+    {(uint8_t*)&app_regs.ForceFSM, sizeof(app_regs.ForceFSM), U8},
+    {(uint8_t*)&app_regs.CurrentOdorIndex, sizeof(app_regs.CurrentOdorIndex), S8},
+    {(uint8_t*)&app_regs.NextOdorIndex, sizeof(app_regs.NextOdorIndex), S8},
+    {(uint8_t*)&app_regs.VacuumCloseTimeUS, sizeof(app_regs.VacuumCloseTimeUS), U32},
+    {(uint8_t*)&app_regs.OdorDeliveryTimeUS, sizeof(app_regs.OdorDeliveryTimeUS), U32},
+    {(uint8_t*)&app_regs.VacuumSetupTimeUS, sizeof(app_regs.VacuumSetupTimeUS), U32},
+    {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
+    {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -116,32 +123,30 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
 
     {read_aux_gpio_rise_event, write_aux_gpio_rise_event},
     {read_aux_gpio_fall_event, write_aux_gpio_fall_event},
-    {read_aux_gpio_rise_input, HarpCore::write_to_read_only_reg_error}, 
-    {read_aux_gpio_fall_input, HarpCore::write_to_read_only_reg_error}, 
+    {read_aux_gpio_rise_input, HarpCore::write_to_read_only_reg_error},
+    {read_aux_gpio_fall_input, HarpCore::write_to_read_only_reg_error},
 
     // Poke manager handler functions
-    {read_pokedometer, HarpCore::write_to_read_only_reg_error}, // read only
-    {HarpCore::read_reg_generic, write_pause_fsm}, // write only
-    {HarpCore::read_reg_generic, write_restart_fsm}, // write only
-    {HarpCore::read_reg_generic, write_reset_poke_manager_fsm}, // write only
-    {read_current_odor, HarpCore::write_to_read_only_reg_error}, // read only
-    {read_next_odor, write_next_odor}, //read and write --ADD TIMING HANDLER FUNCTIONS AFTER THIS
-    {read_delphi_task_config, write_delphi_task_config}, //read and write --Delphi Task
-    {HarpCore::read_reg_generic, write_poke_pin}, // write only
+    {read_poke_pin, write_poke_pin},
+    {read_poke_pin_inverted, write_poke_pin_inverted},
+    {read_poke_state, HarpCore::write_to_read_only_reg_error},
+    {read_pokedometer, HarpCore::write_to_read_only_reg_error},
+    {read_fsm_enabled_state, write_fsm_enabled_state},
+    {read_force_fsm, write_force_fsm},
+    {read_current_odor, write_current_odor},
+    {read_next_odor, write_next_odor},
+    {read_vacuum_close_time_us, write_vacuum_close_time_us},
+    {read_odor_delivery_time_us, write_odor_delivery_time_us},
+    {read_odor_transition_time_us, write_odor_transition_time_us},
+    {read_vacuum_setup_time_us, write_vacuum_setup_time_us},
+    {read_final_valve_energized_time_us, write_final_valve_energized_time_us},
+    {read_minimum_poke_time_us, write_minimum_poke_time_us}
 };
 
-void read_delphi_task_config(uint8_t reg_address)
-{
-    delphi_task_config_t& delphi_cfg = app_regs.DelphiTaskConfig;
 
-    // Update Harp App registers with Poke Manager class contents.
-    // FIXME: since they are the same data type, we can just use assignment.
-    delphi_cfg.vacuum_close_time_us = poke_manager.get_vacuum_close_time();
-    delphi_cfg.odor_delivery_time_us = poke_manager.get_odor_delivery_time();
-    delphi_cfg.odor_transition_time_us = poke_manager.get_odor_transition_time();
-    delphi_cfg.vac_setup_time_us = poke_manager.get_vac_setup_time();
-    delphi_cfg.final_valve_energized_time_us = poke_manager.get_final_valve_energized_time();
-    delphi_cfg.min_poke_time_us = poke_manager.get_min_poke_time();
+void read_poke_pin(uint8_t reg_address)
+{
+    app_regs.PokePin = poke_manager.get_poke_pin();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
@@ -149,103 +154,189 @@ void read_delphi_task_config(uint8_t reg_address)
 void write_poke_pin(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-
-    // Apply the configuration.
     poke_manager.set_poke_pin(app_regs.PokePin);
-
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void write_delphi_task_config(msg_t& msg)
+void read_poke_pin_inverted(uint8_t reg_address)
+{
+    app_regs.PokePinInverted = poke_manager.poke_pin_is_inverted();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_poke_pin_inverted(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    delphi_task_config_t& delphi_cfg = app_regs.DelphiTaskConfig;
-
-    // Apply the configuration.
-    poke_manager.set_vacuum_close_time_us(delphi_cfg.vacuum_close_time_us);
-    poke_manager.set_odor_delivery_time_us(delphi_cfg.odor_delivery_time_us);
-    poke_manager.set_odor_transition_time_us(delphi_cfg.odor_transition_time_us);
-    poke_manager.set_vac_setup_time_us(delphi_cfg.vac_setup_time_us);
-    poke_manager.set_final_valve_energized_time_us(delphi_cfg.final_valve_energized_time_us);
-    poke_manager.set_min_poke_time_us(delphi_cfg.min_poke_time_us);
+    poke_manager.set_poke_pin_override_state(gpio_override(app_regs.PokePinInverted));
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void write_next_odor(msg_t& msg)
+void read_poke_state(uint8_t reg_address)
 {
-    // Registered value is updated 
-    HarpCore::copy_msg_payload_to_register(msg); //updates the register
-    poke_manager.update_next_odor(app_regs.NextOdor); //write next odor
-
+    // FIXME
+    //app_regs.PokeState = poke_manager.get_poke_state(); // Doesn't exist.
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);   
+        HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void read_next_odor(uint8_t reg_address)
+void read_pokedometer(uint8_t reg_address)
 {
-    // Get recent poke count value
-    app_regs.NextOdor = poke_manager.get_next_odor();
-
+    app_regs.PokeDometer = poke_manager.get_poke_count();
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);   
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void read_fsm_enabled_state(uint8_t reg_address)
+{
+    // FIXME: doesn't exist.
+//    app_regs.FSMEnabledState = poke_manager.get_enabled_state();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_fsm_enabled_state(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_enabled_state(app_regs.FSMEnabledState);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void write_force_fsm(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.force_poke(); // FIXME: is this the correct way to force the fsm?
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
 void read_current_odor(uint8_t reg_address)
 {
     // Get recent poke count value
-    app_regs.CurrentOdor = poke_manager.get_current_odor();
-
+    app_regs.CurrentOdorIndex = poke_manager.get_current_odor();
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);   
+        HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_restart_fsm(msg_t& msg)
+void write_current_odor(msg_t& msg)
 {
-    // Registered value is updated 
-    HarpCore::copy_msg_payload_to_register(msg); //updates the register
-    if (app_regs.RestartFSM)
-        poke_manager.restart();
-
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_current_odor(app_regs.CurrentOdorIndex);
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);   
-}
-
-void write_pause_fsm(msg_t& msg)
-{
-    // Registered value is updated 
-    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if (app_regs.PauseFSM)
-        poke_manager.pause();
-
-    if (!HarpCore::is_muted())
-    {
         HarpCore::send_harp_reply(WRITE, msg.header.address);
-        app_regs.PauseFSM == 0;
-    }
 }
 
-
-void write_reset_poke_manager_fsm(msg_t& msg)
+void read_next_odor(uint8_t reg_address)
 {
-    // Registered value is updated 
-    HarpCore::copy_msg_payload_to_register(msg); //upfates the register
-    if (app_regs.ResetFSM)
-        poke_manager.reset();
-
+    app_regs.NextOdorIndex = poke_manager.get_next_odor();
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);   
+        HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void read_pokedometer(uint8_t reg_address)
+void write_next_odor(msg_t& msg)
 {
-    // Get recent poke count value
-    app_regs.PokeDometer = poke_manager.get_poke_count();
-
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_next_odor(app_regs.NextOdorIndex);
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);   
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
+
+void read_vacuum_close_time_us(uint8_t reg_address)
+{
+    app_regs.VacuumCloseTimeUS = poke_manager.get_vacuum_close_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_vacuum_close_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_vacuum_close_time_us(app_regs.VacuumCloseTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_odor_delivery_time_us(uint8_t reg_address)
+{
+    app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_odor_delivery_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_vacuum_close_time_us(app_regs.OdorDeliveryTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_odor_transition_time_us(uint8_t reg_address)
+{
+    app_regs.OdorTransitionTimeUS = poke_manager.get_odor_transition_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_odor_transition_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_vacuum_close_time_us(app_regs.OdorTransitionTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_vacuum_setup_time_us(uint8_t reg_address)
+{
+    app_regs.VacuumSetupTimeUS = poke_manager.get_vacuum_setup_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_vacuum_setup_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_vacuum_setup_time_us(app_regs.VacuumSetupTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_final_valve_energized_time_us(uint8_t reg_address)
+{
+    app_regs.FinalValveEnergizedTimeUS =
+        poke_manager.get_final_valve_energized_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_final_valve_energized_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_final_valve_energized_time_us(app_regs.FinalValveEnergizedTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_minimum_poke_time_us(uint8_t reg_address)
+{
+    app_regs.MinimumPokeTimeUS = poke_manager.get_min_poke_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_minimum_poke_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_min_poke_time_us(app_regs.MinimumPokeTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+
+
 
 void read_valves_state(uint8_t reg_address)
 {

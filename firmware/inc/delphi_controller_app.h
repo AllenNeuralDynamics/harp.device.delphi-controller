@@ -14,7 +14,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 35;
+inline constexpr size_t APP_REG_COUNT = 41;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -38,19 +38,6 @@ struct ValveConfig
     float hit_output;
     float hold_output;
     uint32_t hit_duration_us;
-};
-#pragma pack(pop)
-
-// Delphi task timing params
-#pragma pack(push, 1)
-struct delphi_task_config_t
-{
-    uint32_t vacuum_close_time_us;
-    uint32_t odor_delivery_time_us;
-    uint32_t odor_transition_time_us;
-    uint32_t vac_setup_time_us;
-    uint32_t final_valve_energized_time_us;
-    uint32_t min_poke_time_us;
 };
 #pragma pack(pop)
 
@@ -85,14 +72,20 @@ struct app_regs_t
     uint8_t AuxGPIOFallingInputs; // Raw state of which inputs fell (could be multiple)
     
     // Poke Manager app "registers" here.
-    uint32_t PokeDometer; //Read only -- number of pokes the mouse has done since boot
-    uint8_t PauseFSM; // Write only -- 1 = FSM disabled , 0 = FSM enabled (default)
-    uint8_t RestartFSM; // Write only -- 1 = FSM enabled (default), 0 = FSM disabled
-    uint8_t ResetFSM; // Write only -- force FSM into reset state when passed a value of 1, default = 0
-    uint8_t CurrentOdor; //Read only -- Current odor by index [0-(NUM_ODOR_VALVES-1)] that is being delivered 
-    uint8_t NextOdor; //Read and Write -- write the next odor index [0-(NUM_ODOR_VALVES-1)] that is queued
-    delphi_task_config_t DelphiTaskConfig; // write and read
-    uint8_t PokePin; // write only 
+    uint8_t PokePin;
+    uint8_t PokePinInverted;
+    uint8_t PokeState;
+    uint32_t PokeDometer;
+    uint8_t FSMEnabledState;
+    uint8_t ForceFSM;
+    int8_t CurrentOdorIndex;
+    int8_t NextOdorIndex;
+    uint32_t VacuumCloseTimeUS;
+    uint32_t OdorDeliveryTimeUS;
+    uint32_t OdorTransitionTimeUS;
+    uint32_t VacuumSetupTimeUS;
+    uint32_t FinalValveEnergizedTimeUS;
+    uint32_t MinimumPokeTimeUS;
 };
 #pragma pack(pop)
 
@@ -116,10 +109,23 @@ void read_valves_set(uint8_t reg_address);
 void read_valves_clear(uint8_t reg_address);
 void read_any_valve_config(uint8_t reg_address);
 void read_aux_gpio_state(uint8_t reg_address);
+
+void read_poke_pin(uint8_t reg_address);
+void read_poke_pin_inverted(uint8_t reg_address);
+void read_poke_state(uint8_t reg_address);
 void read_pokedometer(uint8_t reg_address);
+
+void read_fsm_enabled_state(uint8_t reg_address);
+//void read_force_fsm(uint8_t reg_address); // aliased to read_reg_generic
 void read_current_odor(uint8_t reg_address);
 void read_next_odor(uint8_t reg_address);
-void read_delphi_task_config(uint8_t reg_address);
+void read_vacuum_close_time_us(uint8_t reg_address);
+void read_odor_delivery_time_us(uint8_t reg_address);
+void read_odor_transition_time_us(uint8_t reg_address);
+void read_vacuum_setup_time_us(uint8_t reg_address);
+void read_final_valve_energized_time_us(uint8_t reg_address);
+void read_minimum_poke_time_us(uint8_t reg_address);
+
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -129,11 +135,20 @@ void write_aux_gpio_dir(msg_t& msg);
 void write_aux_gpio_state(msg_t& msg);
 void write_aux_gpio_set(msg_t& msg);
 void write_aux_gpio_clear(msg_t& msg);
-void write_pause_fsm(msg_t& msg);
-void write_restart_fsm(msg_t& msg);
-void write_reset_poke_manager_fsm(msg_t& msg);
-void write_next_odor(msg_t& msg);
-void write_delphi_task_config(msg_t& msg);
+
 void write_poke_pin(msg_t& msg);
+void write_poke_pin_inverted(msg_t& msg);
+// Cannot write to poke_stage
+// Cannot write to pokedometer
+void write_fsm_enabled_state(msg_t& msg);
+void write_force_fsm(msg_t& msg);
+void write_current_odor(msg_t& msg);
+void write_next_odor(msg_t& msg);
+void write_vacuum_close_time_us(msg_t& msg);
+void write_odor_delivery_time_us(msg_t& msg);
+void write_odor_transition_time_us(msg_t& msg);
+void write_vacuum_setup_time_us(msg_t& msg);
+void write_final_valve_energized_time_us(msg_t& msg);
+void write_minimum_poke_time_us(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H
