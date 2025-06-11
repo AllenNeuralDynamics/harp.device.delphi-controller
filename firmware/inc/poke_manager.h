@@ -109,6 +109,9 @@ public:
         return override_state == GPIO_OVERRIDE_INVERT;
     }
 
+    inline uint32_t get_enabled_state() const
+    {return !disable_fsm_;}
+
     inline uint8_t get_poke_pin() const
     {return poke_pin_;}
 
@@ -190,9 +193,9 @@ private:
 
     // Declare Constants
     static inline constexpr uint32_t DEFAULT_VACUUM_CLOSE_TIME_US = 20e3;
-    static inline constexpr uint32_t DEFAULT_ODOR_DELIVERY_TIME_US = 10e3; 
-    static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3; 
-    static inline constexpr uint32_t DEFAULT_VAC_SETUP_TIME_US = 20e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_DELIVERY_TIME_US = 10e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3;
+    static inline constexpr uint32_t DEFAULT_VACUUM_SETUP_TIME_US = 20e3;
     static inline constexpr uint32_t DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
     static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
     static inline constexpr uint8_t DEFAUT_POKE_PIN = GPIO_PIN_BASE;

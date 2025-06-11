@@ -9,7 +9,7 @@ odor_valve_index_{0}, next_odor_index_{0}, disable_fsm_{false},
 poke_detected_{false},
 beam_broken_{false}, poke_initiated_once_{false}
 {
-    // Nothing else to do!
+    reset(); // set timing constants to defaults.
 }
 
 PokeManager::~PokeManager() //destuctor
@@ -69,42 +69,40 @@ void PokeManager::update_poke_status()
 void PokeManager::reset()
 {
     deenergize_all_valves();
-    odor_valve_index_ = next_odor_index_;
+    disable();
+    odor_valve_index_ = -1;
+    next_odor_index_ = -1;
     poke_count_ = 0;
     poke_detected_ = false;
-    disable_fsm_ = false;
-    state_ = RESET;
     beam_broken_ = false;
     poke_initiated_once_ = false;
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
-    set_vacuum_setup_time_us(DEFAULT_VAC_SETUP_TIME_US);
+    set_vacuum_setup_time_us(DEFAULT_VACUUM_SETUP_TIME_US);
     set_final_valve_energized_time_us(DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US);
 }
 
 void PokeManager::set_enabled_state(bool enabled)
 {
-    // FIXME: validate that this is what we actually want to do.
     if (enabled)
-    {
-        deenergize_all_valves(); // deenergize all valves
         disable_fsm_ = false;
-        poke_detected_ = false;
-        state_ = RESET;
-        beam_broken_ = false;
-        poke_initiated_once_ = false;
-    }
     else
     {
         disable_fsm_ = true;
+        deenergize_all_valves(); // deenergize all valves
+        // Clear internal state machine variables.
+        state_ = RESET;
+        poke_detected_ = false;
+        beam_broken_ = false;
+        poke_initiated_once_ = false;
     }
 }
 
 void PokeManager::update()
 {
     //enabled by default, but if disabled, bail early
-    if (disable_fsm_ == true)
+    if (disable_fsm_)
         return;
 
     //initialize RESET state

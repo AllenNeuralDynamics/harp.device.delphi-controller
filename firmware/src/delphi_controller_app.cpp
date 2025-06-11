@@ -519,10 +519,20 @@ void update_app_state() // Called when app.run() is called -- add poke detection
 
 void reset_app()
 {
-    // Reset poke manager
+    // Reset poke manager and all poke-manager-related registers
     poke_manager.reset();
-    app_regs.PokeDometer = 0;
-    
+    app_regs.PokeDometer = poke_manager.get_poke_count();
+    app_regs.FSMEnabledState = poke_manager.get_enabled_state();
+    app_regs.ForceFSM = 0;
+    app_regs.CurrentOdorIndex = poke_manager.get_current_odor();
+    app_regs.NextOdorIndex = poke_manager.get_next_odor();
+    app_regs.VacuumCloseTimeUS = poke_manager.get_vacuum_close_time_us();
+    app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
+    app_regs.OdorTransitionTimeUS = poke_manager.get_odor_transition_time_us();
+    app_regs.VacuumSetupTimeUS = poke_manager.get_vacuum_setup_time_us();
+    app_regs.FinalValveEnergizedTimeUS = poke_manager.get_final_valve_energized_time_us();
+    app_regs.MinimumPokeTimeUS = poke_manager.get_min_poke_time_us();
+
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;
     app_regs.ValvesSet = 0;

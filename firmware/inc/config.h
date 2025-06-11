@@ -4,12 +4,13 @@
 #define NUM_VALVES (16)
 #define NUM_ODOR_VALVES (3)
 
+
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)
 #define HARP_CORE_LED_PIN (2)
 
-#define VALVE_PIN_BASE (6)
-#define GPIO_PIN_BASE (22)
+inline constexpr uint32_t VALVE_PIN_BASE = 6;
+inline constexpr uint32_t GPIO_PIN_BASE = 22;
 
 #define VALVES_MASK (0x0000FFFF)
 #define GPIOS_MASK (0x000000FF)
