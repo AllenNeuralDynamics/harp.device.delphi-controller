@@ -492,6 +492,15 @@ void write_aux_gpio_clear(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
+void request_next_odor(void)
+{
+    // FIXME: this is hardcoded.
+    const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66;
+    app_regs.NextOdorIndex = -1; // Mark it as "used."
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS);
+}
+
 void update_app_state() // Called when app.run() is called -- add poke detection here
 {
     // Update valve controller state machines.
@@ -514,13 +523,14 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_FALLING_INPUTS_ADDRESS);
 
     // Update poke manager FSM
-    //poke_manager.update();
+    poke_manager.update();
 }
 
 void reset_app()
 {
     // Reset poke manager and all poke-manager-related registers
     poke_manager.reset();
+    poke_manager.set_next_odor_callback_fn(request_next_odor);
     app_regs.PokeDometer = poke_manager.get_poke_count();
     app_regs.FSMEnabledState = poke_manager.get_enabled_state();
     app_regs.ForceFSM = 0;

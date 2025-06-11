@@ -46,6 +46,32 @@ public:
     inline void disable()
     {set_enabled_state(false);}
 
+    inline void set_odor_valve_state(bool enabled)
+    {
+        if (odor_valve_index_ >= 0)
+        {
+            if (enabled)
+                odor_valves_[odor_valve_index_].energize();
+            else
+                odor_valves_[odor_valve_index_].deenergize();
+        }
+    }
+
+    inline void energize_odor_valve()
+    {set_odor_valve_state(1);}
+
+    inline void deenergize_odor_valve()
+    {set_odor_valve_state(0);}
+
+    inline void set_next_odor_callback_fn( void (* fn)(void))
+    {request_next_odor_callback_fn_ = fn;}
+
+    inline void request_next_odor()
+    {
+        if (request_next_odor_callback_fn_ != nullptr)
+            request_next_odor_callback_fn_();
+    }
+
 /*
  * \brief enable (true) or disable (false) the odor delivery state machine.
  */
@@ -190,6 +216,8 @@ private:
     uint32_t vac_setup_time_us_;
     uint32_t final_valve_energized_time_us_;
     uint32_t min_poke_time_us_;
+
+    void (*request_next_odor_callback_fn_)(void);
 
     // Declare Constants
     static inline constexpr uint32_t DEFAULT_VACUUM_CLOSE_TIME_US = 20e3;

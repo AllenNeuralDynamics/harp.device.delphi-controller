@@ -176,8 +176,8 @@ registers:
     NextOdorIndex:
         address: 66
         type: S8
-        access: Write
-        description: "The next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle."
+        access: Event
+        description: "The next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle. An event will issue from this register when it is consumed."
     VacuumCloseTimeUS:
         address: 67
         type: U32

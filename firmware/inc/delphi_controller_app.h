@@ -91,6 +91,13 @@ struct app_regs_t
 
 extern app_regs_t app_regs;
 
+
+/**
+ * \brief callback function to tell the PC we need another odor from
+ *  within the PokeManager state machine logic.
+ */
+void request_next_odor(void);
+
 /**
  * \brief update the app state. Called in a loop.
  */
