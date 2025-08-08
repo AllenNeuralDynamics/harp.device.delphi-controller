@@ -8,7 +8,8 @@ state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
 odor_valve_index_{0}, next_odor_index_{0}, disable_fsm_{false},
 poke_detected_{false},
 beam_broken_{false}, poke_initiated_once_{false},
-request_next_odor_callback_fn_{nullptr}
+request_next_odor_callback_fn_{nullptr},
+poke_pin_is_initialized_{false}
 {
     reset(); // set timing constants to defaults.
 }
@@ -60,6 +61,9 @@ void PokeManager::update_poke_status()
         {
             //Poke was detected!
             poke();
+#if(DEBUG)
+        printf("Poke detected!\r\n");
+#endif
             //Account for the successful poke so that another doesn't occur on the same poke
             poke_initiated_once_ = true;
         }
@@ -77,6 +81,7 @@ void PokeManager::reset()
     poke_detected_ = false;
     beam_broken_ = false;
     poke_initiated_once_ = false;
+    clear_poke_pin();
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);

@@ -103,8 +103,24 @@ public:
 
     inline void set_poke_pin(uint8_t pin)
     {
+        clear_poke_pin();
+        // Init new gpio pin.
         poke_pin_ = pin;
+        gpio_init(poke_pin_);
+        gpio_set_dir(poke_pin_, GPIO_IN);
+        poke_pin_is_initialized_ = true;
+        // Apply override state.
         set_poke_pin_override_state(override_state_);
+    }
+
+    inline void clear_poke_pin()
+    {
+        if (!poke_pin_is_initialized_)
+            return;
+        set_poke_pin_override_state(GPIO_OVERRIDE_NORMAL);
+        gpio_deinit(poke_pin_);
+        poke_pin_ = DEFAUT_POKE_PIN;
+        poke_pin_is_initialized_ = false;
     }
 
     inline void force_poke()
@@ -116,8 +132,9 @@ public:
 */
     inline void set_poke_pin_override_state(gpio_override override_state)
     {
-        gpio_set_inover(poke_pin_, override_state);
-        override_state_ = override_state; // Cache the override state.
+        override_state_ = override_state; // Cache the override setting.
+        if (poke_pin_is_initialized_)
+            gpio_set_inover(poke_pin_, override_state);
     }
 
     void deenergize_all_valves();
@@ -218,6 +235,8 @@ private:
     uint32_t min_poke_time_us_;
 
     void (*request_next_odor_callback_fn_)(void);
+
+    bool poke_pin_is_initialized_;
 
     // Declare Constants
     static inline constexpr uint32_t DEFAULT_VACUUM_CLOSE_TIME_US = 20e3;

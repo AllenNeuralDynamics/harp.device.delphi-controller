@@ -40,7 +40,7 @@ class DelphiOnlyAppRegs(IntEnum):
     PokePinInverted = 60
     PokeState = 61
     PokeDometer = 62
-    FSMState = 63
+    FSMEnabledState = 63
     ForceFSM = 64
     CurrentOdorIndex = 65
     NextOdorIndex = 66

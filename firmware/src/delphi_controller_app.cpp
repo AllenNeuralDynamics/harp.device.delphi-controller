@@ -494,8 +494,7 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void request_next_odor(void)
 {
-    // FIXME: this is hardcoded.
-    const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66;
+    const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
     app_regs.NextOdorIndex = -1; // Mark it as "used."
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS);
@@ -524,6 +523,7 @@ void update_app_state() // Called when app.run() is called -- add poke detection
 
     // Update poke manager FSM
     poke_manager.update();
+    // Issue poke-related state changes as events.
 }
 
 void reset_app()
@@ -535,7 +535,7 @@ void reset_app()
     app_regs.FSMEnabledState = poke_manager.get_enabled_state();
     app_regs.ForceFSM = 0;
     app_regs.CurrentOdorIndex = poke_manager.get_current_odor();
-    app_regs.NextOdorIndex = poke_manager.get_next_odor();
+    app_regs.NextOdorIndex = -1;//poke_manager.get_next_odor();
     app_regs.VacuumCloseTimeUS = poke_manager.get_vacuum_close_time_us();
     app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
     app_regs.OdorTransitionTimeUS = poke_manager.get_odor_transition_time_us();
@@ -566,6 +566,7 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
+
 
 }
 
