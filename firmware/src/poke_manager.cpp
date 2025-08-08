@@ -82,6 +82,7 @@ void PokeManager::reset()
     beam_broken_ = false;
     poke_initiated_once_ = false;
     clear_poke_pin();
+    request_next_odor_callback_fn_ = nullptr;
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
@@ -206,8 +207,8 @@ void PokeManager::update()
         {
             // Energize the final valve
             final_valve_.energize();
-            // FIXME: DO SOMETHING HERE TO READ FROM THE REGISTER TO GET NEXT ODOR
             odor_valve_index_ = next_odor_index_;
+            next_odor_index_ = -1; // Consume next odor.
 #if(DEBUG)
             printf("Odor Valve: %i\r\n", odor_valve_index_); //valve odor index
 #endif

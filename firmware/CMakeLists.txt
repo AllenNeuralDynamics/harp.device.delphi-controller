@@ -49,7 +49,7 @@ if(DEBUG)
     message(WARNING "Debug printf() messages from harp core to UART with baud \
             rate 921600.")
     pico_enable_stdio_uart(${PROJECT_NAME} 1) # UART stdio for printf.
-    pico_enable_stdio_usb(poke_manager 1)
+    pico_enable_stdio_uart(poke_manager 1)
     # Additional libraries need to have stdio init also.
 endif()
 

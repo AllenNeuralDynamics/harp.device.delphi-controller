@@ -492,7 +492,7 @@ void write_aux_gpio_clear(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void request_next_odor(void)
+void request_next_odor()
 {
     const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
     app_regs.NextOdorIndex = -1; // Mark it as "used."
@@ -505,6 +505,11 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update valve controller state machines.
     for (auto& valve_driver: valve_drivers)
         valve_driver.update();
+
+    // Update poke manager FSM
+    poke_manager.update();
+    // TODO: Issue poke-related state changes as events.
+
     // Process AuxGPIO input changes.
     // FIXME: do we need to update old_aux_gpio_inputs if we change (write-to)
     //  app_regs.AuxGPIODir ?
@@ -521,9 +526,6 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     if (app_regs.AuxGPIOInputFallEvent & app_regs.AuxGPIOFallingInputs)
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_FALLING_INPUTS_ADDRESS);
 
-    // Update poke manager FSM
-    poke_manager.update();
-    // Issue poke-related state changes as events.
 }
 
 void reset_app()
@@ -535,7 +537,7 @@ void reset_app()
     app_regs.FSMEnabledState = poke_manager.get_enabled_state();
     app_regs.ForceFSM = 0;
     app_regs.CurrentOdorIndex = poke_manager.get_current_odor();
-    app_regs.NextOdorIndex = -1;//poke_manager.get_next_odor();
+    app_regs.NextOdorIndex = poke_manager.get_next_odor();
     app_regs.VacuumCloseTimeUS = poke_manager.get_vacuum_close_time_us();
     app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
     app_regs.OdorTransitionTimeUS = poke_manager.get_odor_transition_time_us();
