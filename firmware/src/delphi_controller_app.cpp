@@ -269,7 +269,7 @@ void read_odor_delivery_time_us(uint8_t reg_address)
 void write_odor_delivery_time_us(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    poke_manager.set_vacuum_close_time_us(app_regs.OdorDeliveryTimeUS);
+    poke_manager.set_odor_delivery_time_us(app_regs.OdorDeliveryTimeUS);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -284,7 +284,7 @@ void read_odor_transition_time_us(uint8_t reg_address)
 void write_odor_transition_time_us(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    poke_manager.set_vacuum_close_time_us(app_regs.OdorTransitionTimeUS);
+    poke_manager.set_odor_transition_time_us(app_regs.OdorTransitionTimeUS);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -334,8 +334,6 @@ void write_minimum_poke_time_us(msg_t& msg)
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
-
-
 
 
 void read_valves_state(uint8_t reg_address)
