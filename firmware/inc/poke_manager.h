@@ -80,9 +80,6 @@ public:
     inline void set_current_odor(uint32_t odor_index)
     {odor_valve_index_ = odor_index;}
 
-    inline void set_next_odor(uint32_t next_odor)
-    {next_odor_index_ = next_odor;}
-
     inline void set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
     {vacuum_close_time_us_ = vacuum_close_time_us;}
 
@@ -158,14 +155,14 @@ public:
     inline uint8_t get_poke_pin() const
     {return poke_pin_;}
 
+    inline bool get_poke_state() const //do this
+    {return poke_detected_;}
+
     inline size_t get_poke_count() const
     {return poke_count_;}
 
     inline uint32_t get_current_odor() const
     {return odor_valve_index_;}
-
-    inline uint32_t get_next_odor() const
-    {return next_odor_index_;}
 
     inline uint32_t get_vacuum_close_time_us() const
     {return vacuum_close_time_us_;}
@@ -214,7 +211,6 @@ private:
     gpio_override override_state_; /// Whether or not the poke pin is inverted.
 
     int odor_valve_index_;
-    int next_odor_index_;
 
     size_t poke_count_;
     bool poke_detected_;

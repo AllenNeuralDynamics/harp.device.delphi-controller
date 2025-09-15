@@ -5,7 +5,7 @@ PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve,
 : final_valve_{final_valve}, vac_valve_{vac_valve}, odor_valves_{odor_valves},
 num_odor_valves_{num_odor_valves},
 state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
-odor_valve_index_{0}, next_odor_index_{0}, disable_fsm_{false},
+odor_valve_index_{-1}, disable_fsm_{false},
 poke_detected_{false},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr},
@@ -76,7 +76,6 @@ void PokeManager::reset()
     deenergize_all_valves();
     disable();
     odor_valve_index_ = -1;
-    next_odor_index_ = -1;
     poke_count_ = 0;
     poke_detected_ = false;
     beam_broken_ = false;
@@ -131,15 +130,20 @@ void PokeManager::update()
             next_state = ODOR_SETUP;
             break;
         case ODOR_SETUP:
-            if (state_duration_us() >= vacuum_close_time_us_)
+            if (odor_valve_index_ < 0){
+                request_next_odor();
+                // The odor should be primed before a poke
+                poke_detected_ = false;
+            }
+            else if (state_duration_us() >= vacuum_close_time_us_  && odor_valve_index_ != -1)
+            {
                 next_state = ODOR_DISPENSING_TO_EXHAUST;
+            }
             break;
         case ODOR_DISPENSING_TO_EXHAUST:
-            if (poke_detected_)
+            if (poke_detected_) // poke detected and an odor is primed
             {
                 next_state = ODOR_DELIVERY_TO_FINAL_VALVE;
-                if (next_odor_index_ < 0)
-                    request_next_odor();
             }
             break;
         case ODOR_DELIVERY_TO_FINAL_VALVE:
@@ -174,6 +178,7 @@ void PokeManager::update()
         // Next state logic should only be assessed if there is a state transition
         if (next_state == ODOR_SETUP)
         {
+            // explicitly grab odor in the queue
             deenergize_all_valves();
             energize_odor_valve();
         }
@@ -207,8 +212,7 @@ void PokeManager::update()
         {
             // Energize the final valve
             final_valve_.energize();
-            odor_valve_index_ = next_odor_index_;
-            next_odor_index_ = -1; // Consume next odor.
+            odor_valve_index_ = -1; // Consume queued odor.
 #if(DEBUG)
             printf("Odor Valve: %i\r\n", odor_valve_index_); //valve odor index
 #endif
