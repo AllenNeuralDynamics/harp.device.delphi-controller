@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 #define NUM_VALVES (16)
-#define NUM_ODOR_VALVES (3)
+#define NUM_ODOR_VALVES (14)
 
 
 #define UART_TX_PIN (0)
