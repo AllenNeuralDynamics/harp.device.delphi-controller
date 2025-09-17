@@ -72,6 +72,15 @@ public:
             request_next_odor_callback_fn_();
     }
 
+    inline void set_poke_state_callback_fn( void (* fn)(void))
+    {request_poke_state_callback_fn_ = fn;}
+
+    inline void poke_state_changed()
+    {
+        if (request_poke_state_callback_fn_ != nullptr)
+            request_poke_state_callback_fn_();
+    }
+
 /*
  * \brief enable (true) or disable (false) the odor delivery state machine.
  */
@@ -155,8 +164,8 @@ public:
     inline uint8_t get_poke_pin() const
     {return poke_pin_;}
 
-    inline bool get_poke_state() const //do this
-    {return poke_detected_;}
+    inline uint8_t get_poke_state() const 
+    {return poke_state_;}
 
     inline size_t get_poke_count() const
     {return poke_count_;}
@@ -213,6 +222,7 @@ private:
     int odor_valve_index_;
 
     size_t poke_count_;
+    uint8_t poke_state_;
     bool poke_detected_;
     bool disable_fsm_;
     bool beam_broken_; //keep track of beam state
@@ -231,6 +241,7 @@ private:
     uint32_t min_poke_time_us_;
 
     void (*request_next_odor_callback_fn_)(void);
+    void (*request_poke_state_callback_fn_)(void);
 
     bool poke_pin_is_initialized_;
 

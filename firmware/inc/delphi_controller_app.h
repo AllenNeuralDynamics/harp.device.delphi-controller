@@ -98,6 +98,11 @@ extern app_regs_t app_regs;
 void request_next_odor(void);
 
 /**
+ * \brief callback function to tell the PC when the poke state changed
+ */
+void poke_state_changed(void);
+
+/**
  * \brief update the app state. Called in a loop.
  */
 void update_app_state();
