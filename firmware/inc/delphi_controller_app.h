@@ -14,7 +14,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 41;
+inline constexpr size_t APP_REG_COUNT = 42;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -75,6 +75,7 @@ struct app_regs_t
     uint8_t PokePin;
     uint8_t PokePinInverted;
     uint8_t PokeState;
+    uint8_t RawPokeState;
     uint32_t PokeDometer;
     uint8_t FSMEnabledState;
     uint8_t ForceFSM;
@@ -104,6 +105,16 @@ void request_next_odor(void);
 void poke_state_changed(void);
 
 /**
+ * \brief callback function to tell the PC when the beam broke (raw poke)
+ */
+void raw_poke_rise(void);
+
+/**
+ * \brief callback function to tell the PC when the beam broke (raw poke)
+ */
+void raw_poke_fall(void);
+
+/**
  * \brief update the app state. Called in a loop.
  */
 void update_app_state();
@@ -125,8 +136,8 @@ void read_aux_gpio_state(uint8_t reg_address);
 void read_poke_pin(uint8_t reg_address);
 void read_poke_pin_inverted(uint8_t reg_address);
 void read_poke_state(uint8_t reg_address);
+void read_raw_poke_state(uint8_t reg_address);
 void read_pokedometer(uint8_t reg_address);
-
 void read_fsm_enabled_state(uint8_t reg_address);
 //void read_force_fsm(uint8_t reg_address); // aliased to read_reg_generic
 void read_current_odor(uint8_t reg_address);

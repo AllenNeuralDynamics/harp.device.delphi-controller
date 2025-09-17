@@ -63,6 +63,7 @@ public:
     inline void deenergize_odor_valve()
     {set_odor_valve_state(0);}
 
+    // Event Handlers
     inline void set_next_odor_callback_fn( void (* fn)(void))
     {request_next_odor_callback_fn_ = fn;}
 
@@ -79,6 +80,25 @@ public:
     {
         if (request_poke_state_callback_fn_ != nullptr)
             request_poke_state_callback_fn_();
+    }
+
+    // Rise and Fall poke events
+    inline void set_raw_poke_rise_callback_fn( void (* fn)(void))
+    {request_raw_poke_rise_callback_fn_ = fn;}
+
+    inline void raw_poke_rise()
+    {
+        if (request_raw_poke_rise_callback_fn_ != nullptr)
+            request_raw_poke_rise_callback_fn_();
+    }
+
+    inline void set_raw_poke_fall_callback_fn( void (* fn)(void))
+    {request_raw_poke_fall_callback_fn_ = fn;}
+
+    inline void raw_poke_fall()
+    {
+        if (request_raw_poke_fall_callback_fn_ != nullptr)
+            request_raw_poke_fall_callback_fn_();
     }
 
 /*
@@ -148,7 +168,6 @@ public:
 
     void deenergize_all_valves();
 
-
 /**
  * \brief true if the poke pin is inverted.
 */
@@ -169,6 +188,9 @@ public:
 
     inline uint8_t get_poke_state() const 
     {return poke_state_;}
+
+    inline uint8_t get_raw_poke_state() const 
+    {return raw_poke_state_;}
 
     inline size_t get_poke_count() const
     {return poke_count_;}
@@ -229,6 +251,7 @@ private:
 
     size_t poke_count_;
     uint8_t poke_state_;
+    uint8_t raw_poke_state_;
     bool poke_detected_;
     bool disable_fsm_;
     bool beam_broken_; //keep track of beam state
@@ -249,6 +272,8 @@ private:
 
     void (*request_next_odor_callback_fn_)(void);
     void (*request_poke_state_callback_fn_)(void);
+    void (*request_raw_poke_rise_callback_fn_)(void);
+    void (*request_raw_poke_fall_callback_fn_)(void);
 
     bool poke_pin_is_initialized_;
 

@@ -6,9 +6,10 @@ PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve,
 num_odor_valves_{num_odor_valves},
 state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
 odor_valve_index_{-1}, disable_fsm_{false},
-poke_detected_{false}, poke_state_{0},
+poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
+request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
 poke_pin_is_initialized_{false}
 {
     reset(); // set timing constants to defaults.
@@ -20,6 +21,7 @@ PokeManager::~PokeManager() //destuctor
     deenergize_all_valves();
     poke_count_ = 0;
     poke_state_ = 0;
+    raw_poke_state_ = 0;
     poke_detected_ = false;
     disable_fsm_ = false;
     state_ = RESET;
@@ -45,6 +47,24 @@ void PokeManager::update_poke_status()
         beam_broken_ == false;
         poke_start_time_us_ = time_us_32();
         poke_initiated_once_ = false;
+
+        if (raw_poke_state_ == 1)
+        {
+            //falling edge event
+            raw_poke_fall();
+        }
+        raw_poke_state_ = 0;  
+    }
+
+    // Beam broken -- update raw poke state
+    if (gpio_get(poke_pin_))
+    {
+        if (raw_poke_state_ == 0)
+        {
+            //rising edge event
+            raw_poke_rise();
+        }
+        raw_poke_state_ = 1;  
     }
 
     // Poke detected -- start poke timer
@@ -87,6 +107,8 @@ void PokeManager::reset()
     clear_poke_pin();
     request_next_odor_callback_fn_ = nullptr;
     request_poke_state_callback_fn_ = nullptr;
+    request_raw_poke_rise_callback_fn_ = nullptr;
+    request_raw_poke_fall_callback_fn_ = nullptr;
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
     set_min_odor_delivery_time_us(DEFAULT_MIN_ODOR_DELIVERY_TIME_US);
     set_max_odor_delivery_time_us(DEFAULT_MAX_ODOR_DELIVERY_TIME_US);

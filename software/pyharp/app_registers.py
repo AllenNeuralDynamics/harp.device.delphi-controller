@@ -39,17 +39,18 @@ class DelphiOnlyAppRegs(IntEnum):
     PokePin = 59
     PokePinInverted = 60
     PokeState = 61
-    PokeDometer = 62
-    FSMEnabledState = 63
-    ForceFSM = 64
-    QueuedOdorIndex = 65
-    VacuumCloseTimeUS = 66
-    MinOdorDeliveryTimeUS = 67
-    MaxOdorDeliveryTimeUS = 68
-    OdorTransitionTimeUS = 69
-    VacuumSetupTimeUS = 70
-    FinalValveEnergizedTimeUS = 71
-    MinimumPokeTimeUS = 72
+    RawPokeState = 62
+    PokeDometer = 63
+    FSMEnabledState = 64
+    ForceFSM = 65
+    QueuedOdorIndex = 66
+    VacuumCloseTimeUS = 67
+    MinOdorDeliveryTimeUS = 68
+    MaxOdorDeliveryTimeUS = 69
+    OdorTransitionTimeUS = 70
+    VacuumSetupTimeUS = 71
+    FinalValveEnergizedTimeUS = 72
+    MinimumPokeTimeUS = 73
 
 
 DelphiAppRegs = IntEnum("DelphiAppRegs",

@@ -81,6 +81,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.PokePin, sizeof(app_regs.PokePin), U8},
     {(uint8_t*)&app_regs.PokePinInverted, sizeof(app_regs.PokePinInverted), U8},
     {(uint8_t*)&app_regs.PokeState, sizeof(app_regs.PokeState), U8},
+    {(uint8_t*)&app_regs.RawPokeState, sizeof(app_regs.RawPokeState), U8},
     {(uint8_t*)&app_regs.PokeDometer, sizeof(app_regs.PokeDometer), U32},
     {(uint8_t*)&app_regs.FSMEnabledState, sizeof(app_regs.FSMEnabledState), U8},
     {(uint8_t*)&app_regs.ForceFSM, sizeof(app_regs.ForceFSM), U8},
@@ -88,6 +89,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.VacuumCloseTimeUS, sizeof(app_regs.VacuumCloseTimeUS), U32},
     {(uint8_t*)&app_regs.MinOdorDeliveryTimeUS, sizeof(app_regs.MinOdorDeliveryTimeUS), U32},
     {(uint8_t*)&app_regs.MaxOdorDeliveryTimeUS, sizeof(app_regs.MaxOdorDeliveryTimeUS), U32},
+    {(uint8_t*)&app_regs.OdorTransitionTimeUS, sizeof(app_regs.OdorTransitionTimeUS), U32},
     {(uint8_t*)&app_regs.VacuumSetupTimeUS, sizeof(app_regs.VacuumSetupTimeUS), U32},
     {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
@@ -130,6 +132,7 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_poke_pin, write_poke_pin},
     {read_poke_pin_inverted, write_poke_pin_inverted},
     {read_poke_state, HarpCore::write_to_read_only_reg_error},
+    {read_raw_poke_state, HarpCore::write_to_read_only_reg_error},
     {read_pokedometer, HarpCore::write_to_read_only_reg_error},
     {read_fsm_enabled_state, write_fsm_enabled_state},
     {read_force_fsm, write_force_fsm},
@@ -177,7 +180,15 @@ void write_poke_pin_inverted(msg_t& msg)
 void read_poke_state(uint8_t reg_address)
 {
     // FIXME
-    app_regs.PokeState = poke_manager.get_poke_state(); // Doesn't exist.
+    app_regs.PokeState = poke_manager.get_poke_state(); 
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void read_raw_poke_state(uint8_t reg_address)
+{
+    // FIXME
+    app_regs.PokeState = poke_manager.get_raw_poke_state(); 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
@@ -492,7 +503,7 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void request_next_odor()
 {
-    const uint8_t NEXT_ODOR_INDEX_ADDRESS = 65; // FIXME: this is hardcoded.
+    const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
     app_regs.QueuedOdorIndex = -1; // Mark it as "used."
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS);
@@ -503,7 +514,23 @@ void poke_state_changed()
     const uint8_t POKE_STATE_INDEX_ADDRESS = 61; // FIXME: this is hardcoded.
     app_regs.PokeState = 1; // Mark it as "used."
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS);
+        HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+}
+
+void raw_poke_rise()
+{
+    const uint8_t POKE_STATE_INDEX_ADDRESS = 62; // FIXME: this is hardcoded.
+    app_regs.RawPokeState = 1; // Mark it as "used."
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+}
+
+void raw_poke_fall()
+{
+    const uint8_t POKE_STATE_INDEX_ADDRESS = 62; // FIXME: this is hardcoded.
+    app_regs.RawPokeState = 0; // Mark it as "used."
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
 void update_app_state() // Called when app.run() is called -- add poke detection here
@@ -540,6 +567,8 @@ void reset_app()
     poke_manager.reset();
     poke_manager.set_next_odor_callback_fn(request_next_odor);
     poke_manager.set_poke_state_callback_fn(poke_state_changed);
+    poke_manager.set_raw_poke_rise_callback_fn(raw_poke_rise);
+    poke_manager.set_raw_poke_fall_callback_fn(raw_poke_fall);
     app_regs.PokeDometer = poke_manager.get_poke_count();
     app_regs.FSMEnabledState = poke_manager.get_enabled_state();
     app_regs.ForceFSM = 0;
@@ -575,7 +604,6 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
-
 
 }
 
