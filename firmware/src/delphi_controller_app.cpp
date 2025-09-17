@@ -86,7 +86,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.ForceFSM, sizeof(app_regs.ForceFSM), U8},
     {(uint8_t*)&app_regs.QueuedOdorIndex, sizeof(app_regs.QueuedOdorIndex), S8},
     {(uint8_t*)&app_regs.VacuumCloseTimeUS, sizeof(app_regs.VacuumCloseTimeUS), U32},
-    {(uint8_t*)&app_regs.OdorDeliveryTimeUS, sizeof(app_regs.OdorDeliveryTimeUS), U32},
+    {(uint8_t*)&app_regs.MinOdorDeliveryTimeUS, sizeof(app_regs.MinOdorDeliveryTimeUS), U32},
+    {(uint8_t*)&app_regs.MaxOdorDeliveryTimeUS, sizeof(app_regs.MaxOdorDeliveryTimeUS), U32},
     {(uint8_t*)&app_regs.VacuumSetupTimeUS, sizeof(app_regs.VacuumSetupTimeUS), U32},
     {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
@@ -134,7 +135,8 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_force_fsm, write_force_fsm},
     {read_current_odor, write_current_odor},
     {read_vacuum_close_time_us, write_vacuum_close_time_us},
-    {read_odor_delivery_time_us, write_odor_delivery_time_us},
+    {read_min_odor_delivery_time_us, write_min_odor_delivery_time_us},
+    {read_max_odor_delivery_time_us, write_max_odor_delivery_time_us},
     {read_odor_transition_time_us, write_odor_transition_time_us},
     {read_vacuum_setup_time_us, write_vacuum_setup_time_us},
     {read_final_valve_energized_time_us, write_final_valve_energized_time_us},
@@ -242,17 +244,32 @@ void write_vacuum_close_time_us(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_odor_delivery_time_us(uint8_t reg_address)
+void read_min_odor_delivery_time_us(uint8_t reg_address)
 {
-    app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
+    app_regs.MinOdorDeliveryTimeUS = poke_manager.get_min_odor_delivery_time_us();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_odor_delivery_time_us(msg_t& msg)
+void write_min_odor_delivery_time_us(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    poke_manager.set_odor_delivery_time_us(app_regs.OdorDeliveryTimeUS);
+    poke_manager.set_min_odor_delivery_time_us(app_regs.MinOdorDeliveryTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_max_odor_delivery_time_us(uint8_t reg_address)
+{
+    app_regs.MaxOdorDeliveryTimeUS = poke_manager.get_max_odor_delivery_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_max_odor_delivery_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_max_odor_delivery_time_us(app_regs.MaxOdorDeliveryTimeUS);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -528,7 +545,8 @@ void reset_app()
     app_regs.ForceFSM = 0;
     app_regs.QueuedOdorIndex = poke_manager.get_current_odor();
     app_regs.VacuumCloseTimeUS = poke_manager.get_vacuum_close_time_us();
-    app_regs.OdorDeliveryTimeUS = poke_manager.get_odor_delivery_time_us();
+    app_regs.MinOdorDeliveryTimeUS = poke_manager.get_min_odor_delivery_time_us();
+    app_regs.MaxOdorDeliveryTimeUS = poke_manager.get_max_odor_delivery_time_us();
     app_regs.OdorTransitionTimeUS = poke_manager.get_odor_transition_time_us();
     app_regs.VacuumSetupTimeUS = poke_manager.get_vacuum_setup_time_us();
     app_regs.FinalValveEnergizedTimeUS = poke_manager.get_final_valve_energized_time_us();

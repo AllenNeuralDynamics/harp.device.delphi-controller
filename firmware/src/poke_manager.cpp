@@ -88,7 +88,8 @@ void PokeManager::reset()
     request_next_odor_callback_fn_ = nullptr;
     request_poke_state_callback_fn_ = nullptr;
     set_vacuum_close_time_us(DEFAULT_VACUUM_CLOSE_TIME_US);
-    set_odor_delivery_time_us(DEFAULT_ODOR_DELIVERY_TIME_US);
+    set_min_odor_delivery_time_us(DEFAULT_MIN_ODOR_DELIVERY_TIME_US);
+    set_max_odor_delivery_time_us(DEFAULT_MAX_ODOR_DELIVERY_TIME_US);
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
     set_vacuum_setup_time_us(DEFAULT_VACUUM_SETUP_TIME_US);
     set_final_valve_energized_time_us(DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US);
@@ -154,7 +155,7 @@ void PokeManager::update()
             }
             break;
         case ODOR_DELIVERY_TO_FINAL_VALVE:
-            if (state_duration_us() >= odor_delivery_time_us_)
+            if ((state_duration_us() >= min_odor_delivery_time_us_ && !poke_initiated_once_) || state_duration_us() >= max_odor_delivery_time_us_) //adjust to determine if the beam is still broken after the poke (up to max)
                 next_state = ODOR_PRECLEAN;
             break;
         case ODOR_PRECLEAN:

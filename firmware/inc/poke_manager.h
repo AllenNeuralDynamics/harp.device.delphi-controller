@@ -92,8 +92,11 @@ public:
     inline void set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
     {vacuum_close_time_us_ = vacuum_close_time_us;}
 
-    inline void set_odor_delivery_time_us(uint32_t odor_delivery_time_us)
-    {odor_delivery_time_us_ = odor_delivery_time_us;}
+    inline void set_min_odor_delivery_time_us(uint32_t min_odor_delivery_time_us)
+    {min_odor_delivery_time_us_ = min_odor_delivery_time_us;}
+
+    inline void set_max_odor_delivery_time_us(uint32_t max_odor_delivery_time_us)
+    {max_odor_delivery_time_us_ = max_odor_delivery_time_us;}
 
     void set_odor_transition_time_us(uint32_t odor_transition_time_us)
     {odor_transition_time_us_ = odor_transition_time_us;}
@@ -176,8 +179,11 @@ public:
     inline uint32_t get_vacuum_close_time_us() const
     {return vacuum_close_time_us_;}
 
-    inline uint32_t get_odor_delivery_time_us() const
-    {return odor_delivery_time_us_;}
+    inline uint32_t get_min_odor_delivery_time_us() const
+    {return min_odor_delivery_time_us_;}
+
+    inline uint32_t get_max_odor_delivery_time_us() const
+    {return max_odor_delivery_time_us_;}
 
     inline uint32_t get_odor_transition_time_us() const
     {return odor_transition_time_us_;}
@@ -234,7 +240,8 @@ private:
     size_t num_odor_valves_;
 
     uint32_t vacuum_close_time_us_;
-    uint32_t odor_delivery_time_us_;
+    uint32_t min_odor_delivery_time_us_;
+    uint32_t max_odor_delivery_time_us_;
     uint32_t odor_transition_time_us_;
     uint32_t vac_setup_time_us_;
     uint32_t final_valve_energized_time_us_;
@@ -247,7 +254,8 @@ private:
 
     // Declare Constants
     static inline constexpr uint32_t DEFAULT_VACUUM_CLOSE_TIME_US = 20e3;
-    static inline constexpr uint32_t DEFAULT_ODOR_DELIVERY_TIME_US = 10e3;
+    static inline constexpr uint32_t DEFAULT_MIN_ODOR_DELIVERY_TIME_US = 10e3;
+    static inline constexpr uint32_t DEFAULT_MAX_ODOR_DELIVERY_TIME_US = 10e6;
     static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3;
     static inline constexpr uint32_t DEFAULT_VACUUM_SETUP_TIME_US = 20e3;
     static inline constexpr uint32_t DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US = 110e3;

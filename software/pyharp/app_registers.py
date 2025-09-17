@@ -42,10 +42,10 @@ class DelphiOnlyAppRegs(IntEnum):
     PokeDometer = 62
     FSMEnabledState = 63
     ForceFSM = 64
-    CurrentOdorIndex = 65
-    NextOdorIndex = 66
-    VacuumCloseTimeUS = 67
-    OdorDeliveryTimeUS = 68
+    QueuedOdorIndex = 65
+    VacuumCloseTimeUS = 66
+    MinOdorDeliveryTimeUS = 67
+    MaxOdorDeliveryTimeUS = 68
     OdorTransitionTimeUS = 69
     VacuumSetupTimeUS = 70
     FinalValveEnergizedTimeUS = 71
