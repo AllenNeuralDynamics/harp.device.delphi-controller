@@ -1,3 +1,19 @@
+# == DO NOT EDIT THE FOLLOWING LINES for the Raspberry Pi Pico VS Code Extension to work ==
+if(WIN32)
+    set(USERHOME $ENV{USERPROFILE})
+else()
+    set(USERHOME $ENV{HOME})
+endif()
+set(sdkVersion 2.2.0)
+set(toolchainVersion 14_2_Rel1)
+set(picotoolVersion 2.2.0)
+set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
+if (EXISTS ${picoVscode})
+    include(${picoVscode})
+endif()
+# ====================================================================================
+set(PICO_BOARD pico CACHE STRING "Board type")
+
 cmake_minimum_required(VERSION 3.13)
 find_package(Git REQUIRED)
 execute_process(COMMAND "${GIT_EXECUTABLE}" rev-parse --short HEAD OUTPUT_VARIABLE COMMIT_ID OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -35,15 +51,22 @@ add_library(poke_manager
     src/poke_manager.cpp
 )
 
+add_library(pwm_pio
+    src/pwm_pio.cpp
+)
+
 include_directories(inc)
 
-target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
-target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
+target_link_libraries(valve_driver rp2040_pwm pico_stdlib pico_stdio_usb)
+target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl pico_stdio_usb)
+target_link_libraries(pwm_pio hardware_pio pico_stdlib pico_stdio_usb) 
 target_link_libraries(${PROJECT_NAME}
-    harp_core harp_c_app rp2040_pwm poke_manager valve_driver harp_sync
-    pico_stdlib etl::etl)
+    harp_core harp_c_app rp2040_pwm poke_manager hardware_pio  pwm_pio valve_driver harp_sync
+    pico_stdlib etl::etl pico_stdio_usb) #pico_stdio_usb
 
-pico_add_extra_outputs(${PROJECT_NAME})
+# Enable USB CDC (COM port)
+pico_enable_stdio_usb(${PROJECT_NAME} 1)
+pico_enable_stdio_usb(pwm_pio 1)
 
 if(DEBUG)
     message(WARNING "Debug printf() messages from harp core to UART with baud \
@@ -52,4 +75,6 @@ if(DEBUG)
     pico_enable_stdio_uart(poke_manager 1)
     # Additional libraries need to have stdio init also.
 endif()
+
+pico_add_extra_outputs(${PROJECT_NAME})
 

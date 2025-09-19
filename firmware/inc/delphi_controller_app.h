@@ -8,13 +8,14 @@
 #include <harp_c_app.h>
 #include <valve_driver.h>
 #include <poke_manager.h>
+#include <pwm_pio.h>
 #ifdef DEBUG
     #include <stdio.h>
     #include <cstdio> // for printf
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 42;
+inline constexpr size_t APP_REG_COUNT = 47;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -28,6 +29,7 @@ extern HarpCApp& app;
 
 extern ValveDriver valve_drivers[NUM_VALVES];
 extern PokeManager poke_manager;
+extern CameraDriver cam_driver;
 
 extern uint8_t old_aux_gpio_inputs;
 
@@ -87,6 +89,11 @@ struct app_regs_t
     uint32_t VacuumSetupTimeUS;
     uint32_t FinalValveEnergizedTimeUS;
     uint32_t MinimumPokeTimeUS;
+    uint8_t CamPin;
+    uint8_t CamPinState;
+    uint32_t FrameRate;
+    float DutyCycle;
+    uint8_t EnableCamTrigger;
 };
 #pragma pack(pop)
 
@@ -149,6 +156,11 @@ void read_vacuum_setup_time_us(uint8_t reg_address);
 void read_final_valve_energized_time_us(uint8_t reg_address);
 void read_minimum_poke_time_us(uint8_t reg_address);
 
+void read_cam_pin(uint8_t reg_address);
+void read_cam_pin_state(uint8_t reg_address);
+void read_frame_rate(uint8_t reg_address);
+void read_duty_cycle(uint8_t reg_address);
+void read_enable_cam_trigger(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -173,5 +185,10 @@ void write_odor_transition_time_us(msg_t& msg);
 void write_vacuum_setup_time_us(msg_t& msg);
 void write_final_valve_energized_time_us(msg_t& msg);
 void write_minimum_poke_time_us(msg_t& msg);
+
+void write_cam_pin(msg_t& msg);
+void write_frame_rate(msg_t& msg);
+void write_duty_cycle(msg_t& msg);
+void write_enable_cam_trigger(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H

@@ -51,6 +51,11 @@ class DelphiOnlyAppRegs(IntEnum):
     VacuumSetupTimeUS = 71
     FinalValveEnergizedTimeUS = 72
     MinimumPokeTimeUS = 73
+    CamPin = 74
+    CamPinState = 75
+    FrameRate = 76
+    DutyCycle = 77
+    EnableCamTrigger = 78
 
 
 DelphiAppRegs = IntEnum("DelphiAppRegs",

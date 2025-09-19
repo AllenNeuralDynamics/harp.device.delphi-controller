@@ -93,6 +93,11 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.VacuumSetupTimeUS, sizeof(app_regs.VacuumSetupTimeUS), U32},
     {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
+    {(uint8_t*)&app_regs.CamPin, sizeof(app_regs.CamPin), U8},
+    {(uint8_t*)&app_regs.CamPinState, sizeof(app_regs.CamPinState), U8},
+    {(uint8_t*)&app_regs.FrameRate, sizeof(app_regs.FrameRate), U32},
+    {(uint8_t*)&app_regs.DutyCycle, sizeof(app_regs.DutyCycle), Float},
+    {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -143,8 +148,81 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_odor_transition_time_us, write_odor_transition_time_us},
     {read_vacuum_setup_time_us, write_vacuum_setup_time_us},
     {read_final_valve_energized_time_us, write_final_valve_energized_time_us},
-    {read_minimum_poke_time_us, write_minimum_poke_time_us}
+    {read_minimum_poke_time_us, write_minimum_poke_time_us},
+    {read_cam_pin, write_cam_pin}, //Start here
+    {read_cam_pin_state, HarpCore::write_to_read_only_reg_error},
+    {read_frame_rate, write_frame_rate},
+    {read_duty_cycle, write_duty_cycle},
+    {read_enable_cam_trigger, write_enable_cam_trigger}
 };
+
+
+void read_enable_cam_trigger(uint8_t reg_address)
+{
+    app_regs.EnableCamTrigger = cam_driver.get_enable_state();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_enable_cam_trigger(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam_driver.set_enable_state(app_regs.EnableCamTrigger);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_duty_cycle(uint8_t reg_address)
+{
+    app_regs.DutyCycle = cam_driver.get_pwm_duty();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_duty_cycle(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam_driver.set_pwm_duty_cycle(app_regs.DutyCycle);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_frame_rate(uint8_t reg_address)
+{
+    app_regs.FrameRate = cam_driver.get_pwm_freq();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_frame_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam_driver.set_pwm_freq(app_regs.FrameRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_cam_pin(uint8_t reg_address)
+{
+    app_regs.CamPin = cam_driver.get_pio_pwm_pin();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_cam_pin(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam_driver.set_pio_pwm_pin(app_regs.CamPin);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_cam_pin_state(uint8_t reg_address)
+{
+    app_regs.CamPinState = cam_driver.get_pwm_pin_state(); 
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
 
 
 void read_poke_pin(uint8_t reg_address)
@@ -506,7 +584,7 @@ void request_next_odor()
     const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
     app_regs.QueuedOdorIndex = -1; // Mark it as "used."
     if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS);
+        HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
 void poke_state_changed()
@@ -541,7 +619,9 @@ void update_app_state() // Called when app.run() is called -- add poke detection
 
     // Update poke manager FSM
     poke_manager.update();
-    // TODO: Issue poke-related state changes as events.
+
+    // Update Camera Driver FSM 
+    cam_driver.update();
 
     // Process AuxGPIO input changes.
     // FIXME: do we need to update old_aux_gpio_inputs if we change (write-to)
@@ -558,7 +638,6 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_RISING_INPUTS_ADDRESS);
     if (app_regs.AuxGPIOInputFallEvent & app_regs.AuxGPIOFallingInputs)
         HarpCore::send_harp_reply(EVENT, AUX_GPIO_FALLING_INPUTS_ADDRESS);
-
 }
 
 void reset_app()
@@ -580,6 +659,13 @@ void reset_app()
     app_regs.VacuumSetupTimeUS = poke_manager.get_vacuum_setup_time_us();
     app_regs.FinalValveEnergizedTimeUS = poke_manager.get_final_valve_energized_time_us();
     app_regs.MinimumPokeTimeUS = poke_manager.get_min_poke_time_us();
+
+    //Reset cam driver and all related registers
+    cam_driver.reset();
+    app_regs.CamPinState = cam_driver.get_pwm_pin_state();
+    app_regs.FrameRate = cam_driver.get_pwm_freq();
+    app_regs.DutyCycle = cam_driver.get_pwm_duty();
+    app_regs.EnableCamTrigger = cam_driver.get_enable_state();
 
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;

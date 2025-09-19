@@ -3,7 +3,9 @@
 
 #define NUM_VALVES (16)
 #define NUM_ODOR_VALVES (14)
-
+#define FINAL_VALVE_INDEX (0)
+#define VACCUM_VALVE_INDEX (1)
+#define CAM_TRIGGER_PIN (26)
 
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)
