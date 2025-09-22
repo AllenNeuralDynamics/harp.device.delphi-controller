@@ -9,6 +9,7 @@
 #include <valve_driver.h>
 #include <poke_manager.h>
 #include <pwm_pio.h>
+#include <hardware/gpio.h>
 #ifdef DEBUG
     #include <stdio.h>
     #include <cstdio> // for printf
@@ -132,7 +133,7 @@ void update_app_state();
 void reset_app();
 
 inline uint8_t read_aux_gpios()
-{return uint8_t((gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK);}
+{return uint8_t((gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK_INPUT);}
 
 void read_valves_state(uint8_t reg_address);
 void read_valves_set(uint8_t reg_address);

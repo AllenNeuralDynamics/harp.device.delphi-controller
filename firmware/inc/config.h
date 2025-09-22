@@ -15,7 +15,9 @@ inline constexpr uint32_t VALVE_PIN_BASE = 6;
 inline constexpr uint32_t GPIO_PIN_BASE = 22;
 
 #define VALVES_MASK (0x0000FFFF)
-#define GPIOS_MASK (0x000000FF)
+// #define GPIOS_MASK (0x000000FF)
+#define GPIOS_MASK_INPUT (0x03C00000)
+#define GPIOS_MASK_OUTPUT (0x3C000000)
 
 #define HARP_DEVICE_ID (1406)
 #define HW_VERSION_MAJOR (1)

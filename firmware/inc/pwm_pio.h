@@ -89,7 +89,7 @@ public:
 /**
  * \brief Initialize PWM on PIO
  */
-    void pwm_init(PIO pio, uint8_t sm, uint8_t offset, uint8_t pin);
+    void pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t enable_state);
 
 /**
  * \brief Set PWM frequency
@@ -101,30 +101,23 @@ public:
  */
     inline void set_pio_pwm_pin(uint8_t pwm_pio_pin)
     {
-        clear_pio_pwm_pin();
+        gpio_deinit(DEFAULT_PIO_PWM_PIN);
         // Init new gpio pin.
         pwm_pio_pin_ = pwm_pio_pin;
         gpio_init(pwm_pio_pin_);
-        gpio_set_dir(pwm_pio_pin_, true);
-        pin_is_initialized_ = true;
+        gpio_set_dir(pwm_pio_pin_, 1);
+        sm_ = DEFAULT_PIO_SM;
+        uint offset = pio_add_program(pio0, &pwm_program); //FIXME pio0 is hard coded
+        pwm_init(pio0, sm_, offset, DEFAULT_PIO_PWM_PIN, enable_state_); 
+        pio_gpio_init(pio0, pwm_pio_pin_);
+        pio_sm_set_consecutive_pindirs(pio0, sm_, pwm_pio_pin_, 1, true);
+        pio_sm_config c = pwm_program_get_default_config(offset);
+        sm_config_set_clkdiv(&c, 1.0f);  // full speed
+        sm_config_set_set_pins(&c, pwm_pio_pin_, 1);
+        sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE);
+        pio_sm_init(pio0, sm_, offset, &c);
+        pio_sm_set_enabled(pio0, sm_, false);
     }
-
-/**
- * \brief Clear current pio pwm pin
- */
-    inline void clear_pio_pwm_pin()
-    {
-        if (!pin_is_initialized_)
-            return;
-        gpio_deinit(pwm_pio_pin_);
-        pwm_pio_pin_= DEFAULT_PIO_PWM_PIN;
-        pin_is_initialized_ = false;
-    }
-
-/**
- * \brief Check the triggering state of camera
- */
-    void check_camera_trigger_state(uint8_t enable);
 
 /**
  * \brief PWM frequency -- Camera FPS
@@ -142,8 +135,7 @@ public:
  * \brief Enable Camera Triggering
  */
     inline void set_enable_state(uint8_t enable_state)
-    {enable_state_ = enable_state;}
-
+    {pio_sm_set_enabled(pio_, sm_, bool(enable_state));}
 
 // Read functions
 /**
@@ -193,14 +185,14 @@ private:
     float pwm_duty_;
     bool pin_is_initialized_;
     PIO pio_;
-    uint8_t sm_;
+    uint sm_;
     bool disabled_;
 
     // Declare Constants
     static inline constexpr float DEFAULT_DUTY_CYCLE = 0.5f;
     static inline constexpr uint32_t DEFAULT_FREQ = 60;
     static inline constexpr uint8_t DEFAULT_PIO_PWM_PIN = CAM_TRIGGER_PIN;
-    static inline constexpr uint8_t DEFAULT_PIO_SM = 0;
+    static inline constexpr uint DEFAULT_PIO_SM = 0;
 };
 
 

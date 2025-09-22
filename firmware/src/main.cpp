@@ -9,8 +9,6 @@
 #include <valve_driver.h>
 #include <delphi_controller_app.h>
 #include <pwm_pio.h>
-#include <pico/stdlib.h>
-#include <pico/stdio_usb.h>
 #ifdef DEBUG
     #include <pico/stdlib.h> // for uart printing
     #include <cstdio> // for printf
@@ -44,7 +42,6 @@ CameraDriver cam_driver(CAM_TRIGGER_PIN);
 int main()
 {
     // Init Synchronizer.
-    stdio_init_all();
     HarpSynchronizer::init(uart1, HARP_SYNC_RX_PIN);
     app.set_synchronizer(&HarpSynchronizer::instance());
 #ifdef DEBUG

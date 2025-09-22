@@ -533,7 +533,7 @@ void write_aux_gpio_dir(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
     // Apply register settings (set bits are outputs; cleared bits are inputs).
-    gpio_set_dir_masked(uint32_t(GPIOS_MASK) << GPIO_PIN_BASE,
+    gpio_set_dir_masked(uint32_t(GPIOS_MASK_INPUT) << GPIO_PIN_BASE,
                         uint32_t(app_regs.AuxGPIODir) << GPIO_PIN_BASE);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
@@ -611,6 +611,7 @@ void raw_poke_fall()
         HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
+
 void update_app_state() // Called when app.run() is called -- add poke detection here
 {
     // Update valve controller state machines.
@@ -666,7 +667,7 @@ void reset_app()
     app_regs.FrameRate = cam_driver.get_pwm_freq();
     app_regs.DutyCycle = cam_driver.get_pwm_duty();
     app_regs.EnableCamTrigger = cam_driver.get_enable_state();
-
+   
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;
     app_regs.ValvesSet = 0;
@@ -675,15 +676,20 @@ void reset_app()
     for (auto& valve_driver: valve_drivers)
         valve_driver.reset();
 
-    // Init the exposed auxiliary GPIO pins we are using as all-inputs.
+    // Init the exposed auxiliary GPIO pins we are using as 4-inputs.
     // This *must* be called once to setup the AUX GPIOs.
-    gpio_init_mask(GPIOS_MASK << GPIO_PIN_BASE);
-    gpio_set_dir_masked(GPIOS_MASK << GPIO_PIN_BASE, 0);
+    gpio_init_mask(GPIOS_MASK_INPUT << GPIO_PIN_BASE);
+    gpio_set_dir_masked(GPIOS_MASK_INPUT << GPIO_PIN_BASE, 0);
 
     app_regs.AuxGPIODir = 0; // All inputs (consistent with what we just set).
-    app_regs.AuxGPIOState = (gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK;
+    app_regs.AuxGPIOState = (gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK_INPUT;
     app_regs.AuxGPIOSet = 0;
     app_regs.AuxGPIOClear = 0;
+
+    // Init the exposed auxiliary GPIO pins we are using as 4-outputs.
+    // This *must* be called once to setup the AUX GPIOs.
+    gpio_init_mask(GPIOS_MASK_OUTPUT << (GPIO_PIN_BASE + 4));
+    gpio_set_dir_masked(GPIOS_MASK_OUTPUT << (GPIO_PIN_BASE + 4), 1);
 
     // Clear aux input EVENT message configuration.
     app_regs.AuxGPIORisingInputs = 0;

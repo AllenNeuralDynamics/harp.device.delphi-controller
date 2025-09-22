@@ -57,16 +57,12 @@ add_library(pwm_pio
 
 include_directories(inc)
 
-target_link_libraries(valve_driver rp2040_pwm pico_stdlib pico_stdio_usb)
-target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl pico_stdio_usb)
-target_link_libraries(pwm_pio hardware_pio pico_stdlib pico_stdio_usb) 
+target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
+target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
+target_link_libraries(pwm_pio hardware_pio pico_stdlib) 
 target_link_libraries(${PROJECT_NAME}
-    harp_core harp_c_app rp2040_pwm poke_manager hardware_pio  pwm_pio valve_driver harp_sync
-    pico_stdlib etl::etl pico_stdio_usb) #pico_stdio_usb
-
-# Enable USB CDC (COM port)
-pico_enable_stdio_usb(${PROJECT_NAME} 1)
-pico_enable_stdio_usb(pwm_pio 1)
+    harp_core harp_c_app rp2040_pwm poke_manager hardware_pio hardware_gpio pwm_pio valve_driver harp_sync
+    pico_stdlib etl::etl) #pico_stdio_usb
 
 if(DEBUG)
     message(WARNING "Debug printf() messages from harp core to UART with baud \
