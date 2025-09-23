@@ -34,6 +34,13 @@ extern CameraDriver cam_driver;
 
 extern uint8_t old_aux_gpio_inputs;
 
+// struct for HARP event queueing
+static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75;
+struct HarpEvent {
+    uint8_t index;
+    uint64_t timestamp;
+};
+
 // Valve configuration struct for configuring the Hit-and-hold driver
 #pragma pack(push, 1)
 struct ValveConfig
@@ -100,7 +107,6 @@ struct app_regs_t
 
 extern app_regs_t app_regs;
 
-
 /**
  * \brief callback function to tell the PC we need another odor from
  *  within the PokeManager state machine logic.
@@ -121,6 +127,31 @@ void raw_poke_rise(void);
  * \brief callback function to tell the PC when the beam broke (raw poke)
  */
 void raw_poke_fall(void);
+
+
+// USED FOR EVENTS WHEN POOLING THE STATE OF THE PIN
+// /**
+//  * \brief callback function to tell the PC when the rising edge of the camera happened
+//  */
+// void rising_edge_detected(void);
+
+// /**
+//  * \brief callback function to tell the PC when the falling edge of the camera happened
+//  */
+// void falling_edge_detected(void);
+
+
+/**
+ * \brief callback for camera timestamp
+ */
+void camera_timestamp_callback(uint gpio, uint32_t events);
+
+
+/**
+ * \brief function for queueing HARP events
+ */
+void push_event_from_isr(uint8_t index, uint64_t timestamp);
+bool pop_event(HarpEvent &event);
 
 /**
  * \brief update the app state. Called in a loop.

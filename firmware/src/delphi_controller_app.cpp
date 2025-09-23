@@ -212,7 +212,8 @@ void read_cam_pin(uint8_t reg_address)
 void write_cam_pin(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    cam_driver.set_pio_pwm_pin(app_regs.CamPin);
+    cam_driver.set_pio_pwm_pin(app_regs.CamPin); //disable previous camera pin 
+    gpio_set_irq_enabled_with_callback(app_regs.CamPin, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -223,7 +224,6 @@ void read_cam_pin_state(uint8_t reg_address)
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
-
 
 void read_poke_pin(uint8_t reg_address)
 {
@@ -611,6 +611,51 @@ void raw_poke_fall()
         HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
+// FOR EVENTS WHEN POOLING
+// void rising_edge_detected()
+// {
+//     const uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75; // FIXME: this is hardcoded.
+//     app_regs.CamPinState = 1; // 1:rise
+//     if (!HarpCore::is_muted())
+//         HarpCore::send_harp_reply(EVENT, CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+// }
+
+// void falling_edge_detected()
+// {
+//     const uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75; // FIXME: this is hardcoded..
+//     app_regs.CamPinState = 0; // 0:fall
+//     if (!HarpCore::is_muted())
+//         HarpCore::send_harp_reply(EVENT, CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+// }
+
+void camera_timestamp_callback(uint gpio, uint32_t events) {
+    // // Toggle LED for testing
+    // gpio_put(25, !gpio_get(25));
+    push_event_from_isr(CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+
+}
+
+#define QUEUE_SIZE 64
+volatile HarpEvent eventQueue[QUEUE_SIZE];
+volatile uint8_t head = 0;
+volatile uint8_t tail = 0;
+
+void push_event_from_isr(uint8_t index, uint64_t timestamp) {
+    uint8_t next = (head + 1) % QUEUE_SIZE;
+    if (next != tail) { // Prevent overflow
+        eventQueue[head].index = index;
+        eventQueue[head].timestamp = timestamp;
+        head = next;
+    }
+}
+
+bool pop_event(HarpEvent &event) {
+    if (tail == head) return false; // Queue is empty
+    event.index = eventQueue[tail].index;
+    event.timestamp = eventQueue[tail].timestamp;
+    tail = (tail + 1) % QUEUE_SIZE;
+    return true;
+}
 
 void update_app_state() // Called when app.run() is called -- add poke detection here
 {
@@ -623,6 +668,14 @@ void update_app_state() // Called when app.run() is called -- add poke detection
 
     // Update Camera Driver FSM 
     cam_driver.update();
+
+    // Handle harp events
+    HarpEvent evt;
+    while (pop_event(evt)) {
+        if (!HarpCore::is_muted()) {
+            HarpCore::send_harp_reply(EVENT, evt.index, evt.timestamp);
+        }
+    }
 
     // Process AuxGPIO input changes.
     // FIXME: do we need to update old_aux_gpio_inputs if we change (write-to)
@@ -663,11 +716,17 @@ void reset_app()
 
     //Reset cam driver and all related registers
     cam_driver.reset();
+    // cam_driver.set_pwm_rise_callback_fn(rising_edge_detected); //USED FOR POOLING EVENTS
+    // cam_driver.set_pwm_fall_callback_fn(falling_edge_detected); // USED FOR POOLING EVENTS
     app_regs.CamPinState = cam_driver.get_pwm_pin_state();
     app_regs.FrameRate = cam_driver.get_pwm_freq();
     app_regs.DutyCycle = cam_driver.get_pwm_duty();
     app_regs.EnableCamTrigger = cam_driver.get_enable_state();
-   
+
+    // FOR TESTING -- LED blinking
+    // gpio_init(25);
+    // gpio_set_dir(25, GPIO_OUT);
+
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;
     app_regs.ValvesSet = 0;
@@ -696,6 +755,8 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
+
+    // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
 
 }
 

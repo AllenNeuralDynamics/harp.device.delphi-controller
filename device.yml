@@ -152,62 +152,92 @@ registers:
         address: 61
         type: U8
         access: Event
-        description: "The raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state."
-    PokeDometer:
+        description: "The state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time."
+    RawPokeState:
         address: 62
+        type: U8
+        access: Event
+        description: "The raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0)."
+    PokeDometer:
+        address: 63
         type: U32
         access: Read
         description: "number of mouse pokes per port since boot or reset."
     FSMState:
-        address: 63
+        address: 64
         type: U8
         access: Write
         description: "Enable (1) (aka reset) or Disable (0) the poke handling state machine. Note that CurrentOdorIndex must be specified first. Disabling and then enabling a previously-enabled FSM will reset it to its starting state."
     ForceFSM:
-        address: 64
+        address: 65
         type: U8
         access: Write
         description: "Force the poke handling state machine to iterate as if handling a mouse poke. PokeDometers are not incremented."
-    CurrentOdorIndex:
-        address: 65
-        type: S8
-        access: Write
-        description: "The current odor being dispensed to the odor port. Must be specified before enabling the state machine."
-    NextOdorIndex:
+    QueuedOdorIndex:
         address: 66
         type: S8
-        access: Event
-        description: "The next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle. An event will issue from this register when it is consumed."
+        access: Write
+        description: "Queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed"
     VacuumCloseTimeUS:
         address: 67
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the vacuum valve to close."
-    OdorDeliveryTimeUS:
+    MinOdorDeliveryTimeUS:
         address: 68
         type: U32
         access: Write
-        description: "Time alotted (in microseconds) for the odor delivery state."
-    OdorTransitionTimeUS:
+        description: "Minimum time alotted (in microseconds) for the odor delivery state."
+    MaxOdorDeliveryTimeUS:
         address: 69
+        type: U32
+        access: Write
+        description: "Maximum time alotted (in microseconds) for the odor delivery state."
+    OdorTransitionTimeUS:
+        address: 70
         type: U32
         access: Write
         description: "Time alotted (in microseconds) before the vacuum turns on to remove the current odor."
     VacuumSetupTimeUS:
-        address: 70
+        address: 71
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the vacuum to open."
     FinalValveEnergizedTimeUS:
-        address: 71
+        address: 72
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the final valve to open and remain on."
     MinimumPokeTimeUS:
-        address: 72
+        address: 73
         type: U32
         access: Write
         description: "Minimum time (in microseconds) necessary for a mouse poke port beam to be broken before being interpretted as a poke."
+    CamPin:
+        address: 74
+        type: U8
+        access: Write
+        description: "The GPIO output pin used for camera triggering. Default pin is 26."
+    CamPinState:
+        address: 75
+        type: U8
+        access: Event
+        description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
+    FrameRate:
+        address: 76
+        type: U32
+        access: Write
+        description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
+    DutyCycle:
+        address: 77
+        type: Float
+        access: Write
+        description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
+    EnableCamTrigger:
+        address: 78
+        type: U8
+        access: Write
+        description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
 
 groupMasks:
     ValveMask:

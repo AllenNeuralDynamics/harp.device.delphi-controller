@@ -9,13 +9,6 @@
 #include <hardware/clocks.h>
 #include <pico/stdlib.h>
 
-// #if !PICO_NO_HARDWARE
-// #include <hardware/pio.h>
-// #include <config.h>
-// #include <hardware/clocks.h>
-// #include <pico/stdlib.h>
-// #endif
-
 // --- //
 // pwm //
 // --- //
@@ -92,6 +85,42 @@ public:
     void pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t enable_state);
 
 /**
+ * \brief Initialize edge detection
+ */
+    void edge_detection_init(PIO pio, uint sm_edge, uint8_t pin, uint8_t enable_state);
+
+/**
+ * \brief Edge detection
+ */
+    void process_edges(PIO pio, uint sm_edge);
+
+
+// FOR POOLING EVENTS
+/**
+//  * \brief rise event handler
+//  */
+//     inline void set_pwm_rise_callback_fn( void (* fn)(void))
+//     {request_pwm_rise_callback_fn_ = fn;}
+
+//     inline void rising_edge_detected()
+//     {
+//         if (request_pwm_rise_callback_fn_ != nullptr)
+//             request_pwm_rise_callback_fn_();
+//     }
+
+// /**
+//  * \brief fall event handler
+//  */
+//     inline void set_pwm_fall_callback_fn( void (* fn)(void))
+//     {request_pwm_fall_callback_fn_ = fn;}
+
+//     inline void falling_edge_detected()
+//     {
+//         if (request_pwm_fall_callback_fn_ != nullptr)
+//             request_pwm_fall_callback_fn_();
+//     }
+
+/**
  * \brief Set PWM frequency
  */
     void set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq);
@@ -108,15 +137,7 @@ public:
         gpio_set_dir(pwm_pio_pin_, 1);
         sm_ = DEFAULT_PIO_SM;
         uint offset = pio_add_program(pio0, &pwm_program); //FIXME pio0 is hard coded
-        pwm_init(pio0, sm_, offset, DEFAULT_PIO_PWM_PIN, enable_state_); 
-        pio_gpio_init(pio0, pwm_pio_pin_);
-        pio_sm_set_consecutive_pindirs(pio0, sm_, pwm_pio_pin_, 1, true);
-        pio_sm_config c = pwm_program_get_default_config(offset);
-        sm_config_set_clkdiv(&c, 1.0f);  // full speed
-        sm_config_set_set_pins(&c, pwm_pio_pin_, 1);
-        sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE);
-        pio_sm_init(pio0, sm_, offset, &c);
-        pio_sm_set_enabled(pio0, sm_, false);
+        pwm_init(pio0, sm_, offset, pwm_pio_pin_, false); 
     }
 
 /**
@@ -186,7 +207,10 @@ private:
     bool pin_is_initialized_;
     PIO pio_;
     uint sm_;
-    bool disabled_;
+
+    //FOR POOLING EVENTS
+    // void (*request_pwm_rise_callback_fn_)(void);
+    // void (*request_pwm_fall_callback_fn_)(void);
 
     // Declare Constants
     static inline constexpr float DEFAULT_DUTY_CYCLE = 0.5f;

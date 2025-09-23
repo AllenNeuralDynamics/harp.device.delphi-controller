@@ -4,7 +4,7 @@ CameraDriver::CameraDriver(uint8_t pwm_pio_pin)
 : pwm_pio_pin_{pwm_pio_pin}, pwm_freq_{DEFAULT_FREQ}, 
 pwm_duty_{DEFAULT_DUTY_CYCLE}, pin_is_initialized_{false},
 sm_{DEFAULT_PIO_SM}, pio_{pio0}, pwm_pin_state_{0}, 
-enable_state_{0}, disabled_{false}
+enable_state_{0} // request_pwm_rise_callback_fn_{nullptr}, request_pwm_fall_callback_fn_{nullptr}
 {
     reset(); // set timing constants to defaults.
 }
@@ -19,11 +19,24 @@ CameraDriver::~CameraDriver() //destuctor
 // Functions to alter the FSM
 void CameraDriver::reset()
 {
+    // request_pwm_rise_callback_fn_ = nullptr; // FOR POOLING EVENTS
+    // request_pwm_fall_callback_fn_ = nullptr;
     sm_ = DEFAULT_PIO_SM;
     uint offset = pio_add_program(pio_, &pwm_program);
-    pwm_init(pio_, sm_, offset, DEFAULT_PIO_PWM_PIN, enable_state_); //pwm_pio_pin_
+    pwm_init(pio_, sm_, offset, pwm_pio_pin_, enable_state_); 
     pwm_freq_ = DEFAULT_FREQ;
     pwm_duty_ = DEFAULT_DUTY_CYCLE; //50% duty cycle
+}
+
+void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq) 
+{
+    // const uint32_t total_us = 16667;  // 60 Hz period in µs
+    uint32_t sys_clk = clock_get_hz(clk_sys); //125000000;
+    uint32_t period = sys_clk / freq;
+    uint32_t high_us = (uint32_t)(period * duty_cycle);
+    uint32_t low_us = period - high_us;
+    pio_sm_put_blocking(pio, sm, high_us);
+    pio_sm_put_blocking(pio, sm, low_us);
 }
 
 void CameraDriver::pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t enable_state)
@@ -38,19 +51,8 @@ void CameraDriver::pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t 
     pio_sm_set_enabled(pio, sm, enable_state);
 }
 
-void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq) 
-{
-    // const uint32_t total_us = 16667;  // 60 Hz period in µs
-    uint32_t sys_clk = clock_get_hz(clk_sys); //125000000;
-    uint32_t period = sys_clk / freq;
-    uint32_t high_us = (uint32_t)(period * duty_cycle);
-    uint32_t low_us = period - high_us;
-    pio_sm_put_blocking(pio, sm, high_us);
-    pio_sm_put_blocking(pio, sm, low_us);
-}
 
-
-// //Rise and Fall events of camera triggering
+// //Pooling - Rise and Fall edges of camera triggering
 // void CameraDriver::pwm_signal_status()
 // {
 //     // Check to see if poke has been detected
@@ -60,7 +62,7 @@ void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq)
 //         if (pwm_pin_state_ == 1)
 //         {
 //             //falling edge event
-//             // raw_poke_fall();
+//             falling_edge_detected();
 //         }
 //         pwm_pin_state_ = 0;  
 //     }
@@ -71,7 +73,7 @@ void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq)
 //         if (pwm_pin_state_ == 0)
 //         {
 //             //rising edge event
-//             // raw_poke_rise();
+//             rising_edge_detected();
 //         }
 //         pwm_pin_state_ = 1;  
 //     }
@@ -80,17 +82,13 @@ void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq)
 
 void CameraDriver::update()
 {
-    // check pin state -- trigger events
-    // pwm_signal_status();
+    // USING A ISR INSTEAD: check pin state -- trigger events 
+    // pwm_signal_status(); // polling for events works
 
     // set PWM 
-    // set_pwm(pio_, sm_, pwm_duty_, pwm_freq_);
     if (!pio_sm_is_tx_fifo_full(pio_, sm_)) 
-    // if (!pio_sm_is_tx_fifo_full(pio0, 0)) 
     {
         set_pwm(pio_, sm_, pwm_duty_, pwm_freq_);
-        // set_pwm(pio0, 0, 0.5f, 100);
     }
-    // sleep_ms(1); // see about elimininating
 }
 

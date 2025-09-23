@@ -69,6 +69,7 @@ if(DEBUG)
             rate 921600.")
     pico_enable_stdio_uart(${PROJECT_NAME} 1) # UART stdio for printf.
     pico_enable_stdio_uart(poke_manager 1)
+    pico_enable_stdio_uart(pwm_pio 1)
     # Additional libraries need to have stdio init also.
 endif()
 
