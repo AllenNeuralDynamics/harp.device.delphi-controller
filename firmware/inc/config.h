@@ -6,6 +6,7 @@
 #define FINAL_VALVE_INDEX (0)
 #define VACCUM_VALVE_INDEX (1)
 #define CAM_TRIGGER_PIN (26)
+#define LED_ENABLE_PIN (4)
 
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)

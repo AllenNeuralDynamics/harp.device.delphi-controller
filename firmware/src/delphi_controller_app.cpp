@@ -2,6 +2,7 @@
 
 app_regs_t app_regs;
 uint8_t old_aux_gpio_inputs;
+uint8_t led_state;
 
 
 // Create function aliases for readability.
@@ -97,7 +98,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.CamPinState, sizeof(app_regs.CamPinState), U8},
     {(uint8_t*)&app_regs.FrameRate, sizeof(app_regs.FrameRate), U32},
     {(uint8_t*)&app_regs.DutyCycle, sizeof(app_regs.DutyCycle), Float},
-    {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8}
+    {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8},
+    {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -153,9 +155,24 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_cam_pin_state, HarpCore::write_to_read_only_reg_error},
     {read_frame_rate, write_frame_rate},
     {read_duty_cycle, write_duty_cycle},
-    {read_enable_cam_trigger, write_enable_cam_trigger}
+    {read_enable_cam_trigger, write_enable_cam_trigger},
+    {read_valve_leds, write_valve_leds}
 };
 
+void read_valve_leds(uint8_t reg_address)
+{
+    app_regs.EnableValveLeds = gpio_get(LED_ENABLE_PIN);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_valve_leds(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    gpio_put(LED_ENABLE_PIN, app_regs.EnableValveLeds);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_enable_cam_trigger(uint8_t reg_address)
 {
@@ -632,7 +649,6 @@ void camera_timestamp_callback(uint gpio, uint32_t events) {
     // // Toggle LED for testing
     // gpio_put(25, !gpio_get(25));
     push_event_from_isr(CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
-
 }
 
 #define QUEUE_SIZE 64
@@ -724,8 +740,13 @@ void reset_app()
     app_regs.EnableCamTrigger = cam_driver.get_enable_state();
 
     // FOR TESTING -- LED blinking
-    // gpio_init(25);
-    // gpio_set_dir(25, GPIO_OUT);
+    // gpio_init(LED_ENABLE_PIN);
+    // gpio_set_dir(LED_ENABLE_PIN, GPIO_OUT);
+
+    // Valve LED state
+    gpio_init(LED_ENABLE_PIN);
+    gpio_set_dir(LED_ENABLE_PIN, GPIO_OUT);
+    gpio_put(LED_ENABLE_PIN, 0);
 
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;

@@ -56,6 +56,7 @@ class DelphiOnlyAppRegs(IntEnum):
     FrameRate = 76
     DutyCycle = 77
     EnableCamTrigger = 78
+    EnableValveLeds = 79
 
 
 DelphiAppRegs = IntEnum("DelphiAppRegs",

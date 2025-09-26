@@ -238,6 +238,11 @@ registers:
         type: U8
         access: Write
         description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
+    EnableValveLeds:
+        address: 79
+        type: U8
+        access: Write
+        description: "Enable (1) and disable (0) valve LEDs."
 
 groupMasks:
     ValveMask:

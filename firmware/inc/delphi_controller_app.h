@@ -16,7 +16,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 47;
+inline constexpr size_t APP_REG_COUNT = 48;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -102,6 +102,7 @@ struct app_regs_t
     uint32_t FrameRate;
     float DutyCycle;
     uint8_t EnableCamTrigger;
+    uint8_t EnableValveLeds;
 };
 #pragma pack(pop)
 
@@ -193,6 +194,7 @@ void read_cam_pin_state(uint8_t reg_address);
 void read_frame_rate(uint8_t reg_address);
 void read_duty_cycle(uint8_t reg_address);
 void read_enable_cam_trigger(uint8_t reg_address);
+void read_valve_leds(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -222,5 +224,6 @@ void write_cam_pin(msg_t& msg);
 void write_frame_rate(msg_t& msg);
 void write_duty_cycle(msg_t& msg);
 void write_enable_cam_trigger(msg_t& msg);
+void write_valve_leds(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H
