@@ -67,17 +67,24 @@ namespace AllenNeuralDynamics.DelphiController
             { 59, typeof(PokePin) },
             { 60, typeof(PokePinInverted) },
             { 61, typeof(PokeState) },
-            { 62, typeof(PokeDometer) },
-            { 63, typeof(FSMState) },
-            { 64, typeof(ForceFSM) },
-            { 65, typeof(CurrentOdorIndex) },
-            { 66, typeof(NextOdorIndex) },
+            { 62, typeof(RawPokeState) },
+            { 63, typeof(PokeDometer) },
+            { 64, typeof(FSMState) },
+            { 65, typeof(ForceFSM) },
+            { 66, typeof(QueuedOdorIndex) },
             { 67, typeof(VacuumCloseTimeUS) },
-            { 68, typeof(OdorDeliveryTimeUS) },
-            { 69, typeof(OdorTransitionTimeUS) },
-            { 70, typeof(VacuumSetupTimeUS) },
-            { 71, typeof(FinalValveEnergizedTimeUS) },
-            { 72, typeof(MinimumPokeTimeUS) }
+            { 68, typeof(MinOdorDeliveryTimeUS) },
+            { 69, typeof(MaxOdorDeliveryTimeUS) },
+            { 70, typeof(OdorTransitionTimeUS) },
+            { 71, typeof(VacuumSetupTimeUS) },
+            { 72, typeof(FinalValveEnergizedTimeUS) },
+            { 73, typeof(MinimumPokeTimeUS) },
+            { 74, typeof(CamPin) },
+            { 75, typeof(CamPinState) },
+            { 76, typeof(FrameRate) },
+            { 77, typeof(DutyCycle) },
+            { 78, typeof(EnableCamTrigger) },
+            { 79, typeof(EnableValveLeds) }
         };
 
         /// <summary>
@@ -321,17 +328,24 @@ namespace AllenNeuralDynamics.DelphiController
     /// <seealso cref="PokePin"/>
     /// <seealso cref="PokePinInverted"/>
     /// <seealso cref="PokeState"/>
+    /// <seealso cref="RawPokeState"/>
     /// <seealso cref="PokeDometer"/>
     /// <seealso cref="FSMState"/>
     /// <seealso cref="ForceFSM"/>
-    /// <seealso cref="CurrentOdorIndex"/>
-    /// <seealso cref="NextOdorIndex"/>
+    /// <seealso cref="QueuedOdorIndex"/>
     /// <seealso cref="VacuumCloseTimeUS"/>
-    /// <seealso cref="OdorDeliveryTimeUS"/>
+    /// <seealso cref="MinOdorDeliveryTimeUS"/>
+    /// <seealso cref="MaxOdorDeliveryTimeUS"/>
     /// <seealso cref="OdorTransitionTimeUS"/>
     /// <seealso cref="VacuumSetupTimeUS"/>
     /// <seealso cref="FinalValveEnergizedTimeUS"/>
     /// <seealso cref="MinimumPokeTimeUS"/>
+    /// <seealso cref="CamPin"/>
+    /// <seealso cref="CamPinState"/>
+    /// <seealso cref="FrameRate"/>
+    /// <seealso cref="DutyCycle"/>
+    /// <seealso cref="EnableCamTrigger"/>
+    /// <seealso cref="EnableValveLeds"/>
     [XmlInclude(typeof(ValveState))]
     [XmlInclude(typeof(ValvesSet))]
     [XmlInclude(typeof(ValvesClear))]
@@ -362,17 +376,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(PokePin))]
     [XmlInclude(typeof(PokePinInverted))]
     [XmlInclude(typeof(PokeState))]
+    [XmlInclude(typeof(RawPokeState))]
     [XmlInclude(typeof(PokeDometer))]
     [XmlInclude(typeof(FSMState))]
     [XmlInclude(typeof(ForceFSM))]
-    [XmlInclude(typeof(CurrentOdorIndex))]
-    [XmlInclude(typeof(NextOdorIndex))]
+    [XmlInclude(typeof(QueuedOdorIndex))]
     [XmlInclude(typeof(VacuumCloseTimeUS))]
-    [XmlInclude(typeof(OdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MinOdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MaxOdorDeliveryTimeUS))]
     [XmlInclude(typeof(OdorTransitionTimeUS))]
     [XmlInclude(typeof(VacuumSetupTimeUS))]
     [XmlInclude(typeof(FinalValveEnergizedTimeUS))]
     [XmlInclude(typeof(MinimumPokeTimeUS))]
+    [XmlInclude(typeof(CamPin))]
+    [XmlInclude(typeof(CamPinState))]
+    [XmlInclude(typeof(FrameRate))]
+    [XmlInclude(typeof(DutyCycle))]
+    [XmlInclude(typeof(EnableCamTrigger))]
+    [XmlInclude(typeof(EnableValveLeds))]
     [Description("Filters register-specific messages reported by the DelphiController device.")]
     public class FilterRegister : FilterRegisterBuilder, INamedElement
     {
@@ -424,17 +445,24 @@ namespace AllenNeuralDynamics.DelphiController
     /// <seealso cref="PokePin"/>
     /// <seealso cref="PokePinInverted"/>
     /// <seealso cref="PokeState"/>
+    /// <seealso cref="RawPokeState"/>
     /// <seealso cref="PokeDometer"/>
     /// <seealso cref="FSMState"/>
     /// <seealso cref="ForceFSM"/>
-    /// <seealso cref="CurrentOdorIndex"/>
-    /// <seealso cref="NextOdorIndex"/>
+    /// <seealso cref="QueuedOdorIndex"/>
     /// <seealso cref="VacuumCloseTimeUS"/>
-    /// <seealso cref="OdorDeliveryTimeUS"/>
+    /// <seealso cref="MinOdorDeliveryTimeUS"/>
+    /// <seealso cref="MaxOdorDeliveryTimeUS"/>
     /// <seealso cref="OdorTransitionTimeUS"/>
     /// <seealso cref="VacuumSetupTimeUS"/>
     /// <seealso cref="FinalValveEnergizedTimeUS"/>
     /// <seealso cref="MinimumPokeTimeUS"/>
+    /// <seealso cref="CamPin"/>
+    /// <seealso cref="CamPinState"/>
+    /// <seealso cref="FrameRate"/>
+    /// <seealso cref="DutyCycle"/>
+    /// <seealso cref="EnableCamTrigger"/>
+    /// <seealso cref="EnableValveLeds"/>
     [XmlInclude(typeof(ValveState))]
     [XmlInclude(typeof(ValvesSet))]
     [XmlInclude(typeof(ValvesClear))]
@@ -465,17 +493,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(PokePin))]
     [XmlInclude(typeof(PokePinInverted))]
     [XmlInclude(typeof(PokeState))]
+    [XmlInclude(typeof(RawPokeState))]
     [XmlInclude(typeof(PokeDometer))]
     [XmlInclude(typeof(FSMState))]
     [XmlInclude(typeof(ForceFSM))]
-    [XmlInclude(typeof(CurrentOdorIndex))]
-    [XmlInclude(typeof(NextOdorIndex))]
+    [XmlInclude(typeof(QueuedOdorIndex))]
     [XmlInclude(typeof(VacuumCloseTimeUS))]
-    [XmlInclude(typeof(OdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MinOdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MaxOdorDeliveryTimeUS))]
     [XmlInclude(typeof(OdorTransitionTimeUS))]
     [XmlInclude(typeof(VacuumSetupTimeUS))]
     [XmlInclude(typeof(FinalValveEnergizedTimeUS))]
     [XmlInclude(typeof(MinimumPokeTimeUS))]
+    [XmlInclude(typeof(CamPin))]
+    [XmlInclude(typeof(CamPinState))]
+    [XmlInclude(typeof(FrameRate))]
+    [XmlInclude(typeof(DutyCycle))]
+    [XmlInclude(typeof(EnableCamTrigger))]
+    [XmlInclude(typeof(EnableValveLeds))]
     [XmlInclude(typeof(TimestampedValveState))]
     [XmlInclude(typeof(TimestampedValvesSet))]
     [XmlInclude(typeof(TimestampedValvesClear))]
@@ -506,17 +541,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(TimestampedPokePin))]
     [XmlInclude(typeof(TimestampedPokePinInverted))]
     [XmlInclude(typeof(TimestampedPokeState))]
+    [XmlInclude(typeof(TimestampedRawPokeState))]
     [XmlInclude(typeof(TimestampedPokeDometer))]
     [XmlInclude(typeof(TimestampedFSMState))]
     [XmlInclude(typeof(TimestampedForceFSM))]
-    [XmlInclude(typeof(TimestampedCurrentOdorIndex))]
-    [XmlInclude(typeof(TimestampedNextOdorIndex))]
+    [XmlInclude(typeof(TimestampedQueuedOdorIndex))]
     [XmlInclude(typeof(TimestampedVacuumCloseTimeUS))]
-    [XmlInclude(typeof(TimestampedOdorDeliveryTimeUS))]
+    [XmlInclude(typeof(TimestampedMinOdorDeliveryTimeUS))]
+    [XmlInclude(typeof(TimestampedMaxOdorDeliveryTimeUS))]
     [XmlInclude(typeof(TimestampedOdorTransitionTimeUS))]
     [XmlInclude(typeof(TimestampedVacuumSetupTimeUS))]
     [XmlInclude(typeof(TimestampedFinalValveEnergizedTimeUS))]
     [XmlInclude(typeof(TimestampedMinimumPokeTimeUS))]
+    [XmlInclude(typeof(TimestampedCamPin))]
+    [XmlInclude(typeof(TimestampedCamPinState))]
+    [XmlInclude(typeof(TimestampedFrameRate))]
+    [XmlInclude(typeof(TimestampedDutyCycle))]
+    [XmlInclude(typeof(TimestampedEnableCamTrigger))]
+    [XmlInclude(typeof(TimestampedEnableValveLeds))]
     [Description("Filters and selects specific messages reported by the DelphiController device.")]
     public partial class Parse : ParseBuilder, INamedElement
     {
@@ -565,17 +607,24 @@ namespace AllenNeuralDynamics.DelphiController
     /// <seealso cref="PokePin"/>
     /// <seealso cref="PokePinInverted"/>
     /// <seealso cref="PokeState"/>
+    /// <seealso cref="RawPokeState"/>
     /// <seealso cref="PokeDometer"/>
     /// <seealso cref="FSMState"/>
     /// <seealso cref="ForceFSM"/>
-    /// <seealso cref="CurrentOdorIndex"/>
-    /// <seealso cref="NextOdorIndex"/>
+    /// <seealso cref="QueuedOdorIndex"/>
     /// <seealso cref="VacuumCloseTimeUS"/>
-    /// <seealso cref="OdorDeliveryTimeUS"/>
+    /// <seealso cref="MinOdorDeliveryTimeUS"/>
+    /// <seealso cref="MaxOdorDeliveryTimeUS"/>
     /// <seealso cref="OdorTransitionTimeUS"/>
     /// <seealso cref="VacuumSetupTimeUS"/>
     /// <seealso cref="FinalValveEnergizedTimeUS"/>
     /// <seealso cref="MinimumPokeTimeUS"/>
+    /// <seealso cref="CamPin"/>
+    /// <seealso cref="CamPinState"/>
+    /// <seealso cref="FrameRate"/>
+    /// <seealso cref="DutyCycle"/>
+    /// <seealso cref="EnableCamTrigger"/>
+    /// <seealso cref="EnableValveLeds"/>
     [XmlInclude(typeof(ValveState))]
     [XmlInclude(typeof(ValvesSet))]
     [XmlInclude(typeof(ValvesClear))]
@@ -606,17 +655,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(PokePin))]
     [XmlInclude(typeof(PokePinInverted))]
     [XmlInclude(typeof(PokeState))]
+    [XmlInclude(typeof(RawPokeState))]
     [XmlInclude(typeof(PokeDometer))]
     [XmlInclude(typeof(FSMState))]
     [XmlInclude(typeof(ForceFSM))]
-    [XmlInclude(typeof(CurrentOdorIndex))]
-    [XmlInclude(typeof(NextOdorIndex))]
+    [XmlInclude(typeof(QueuedOdorIndex))]
     [XmlInclude(typeof(VacuumCloseTimeUS))]
-    [XmlInclude(typeof(OdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MinOdorDeliveryTimeUS))]
+    [XmlInclude(typeof(MaxOdorDeliveryTimeUS))]
     [XmlInclude(typeof(OdorTransitionTimeUS))]
     [XmlInclude(typeof(VacuumSetupTimeUS))]
     [XmlInclude(typeof(FinalValveEnergizedTimeUS))]
     [XmlInclude(typeof(MinimumPokeTimeUS))]
+    [XmlInclude(typeof(CamPin))]
+    [XmlInclude(typeof(CamPinState))]
+    [XmlInclude(typeof(FrameRate))]
+    [XmlInclude(typeof(DutyCycle))]
+    [XmlInclude(typeof(EnableCamTrigger))]
+    [XmlInclude(typeof(EnableValveLeds))]
     [Description("Formats a sequence of values as specific DelphiController register messages.")]
     public partial class Format : FormatBuilder, INamedElement
     {
@@ -3427,9 +3483,9 @@ namespace AllenNeuralDynamics.DelphiController
     }
 
     /// <summary>
-    /// Represents a register that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+    /// Represents a register that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
     /// </summary>
-    [Description("The raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.")]
+    [Description("The state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.")]
     public partial class PokeState
     {
         /// <summary>
@@ -3523,6 +3579,102 @@ namespace AllenNeuralDynamics.DelphiController
     }
 
     /// <summary>
+    /// Represents a register that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+    /// </summary>
+    [Description("The raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).")]
+    public partial class RawPokeState
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="RawPokeState"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 62;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="RawPokeState"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U8;
+
+        /// <summary>
+        /// Represents the length of the <see cref="RawPokeState"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="RawPokeState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static byte GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="RawPokeState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="RawPokeState"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="RawPokeState"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="RawPokeState"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="RawPokeState"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// RawPokeState register.
+    /// </summary>
+    /// <seealso cref="RawPokeState"/>
+    [Description("Filters and selects timestamped messages from the RawPokeState register.")]
+    public partial class TimestampedRawPokeState
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="RawPokeState"/> register. This field is constant.
+        /// </summary>
+        public const int Address = RawPokeState.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="RawPokeState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetPayload(HarpMessage message)
+        {
+            return RawPokeState.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
     /// Represents a register that number of mouse pokes per port since boot or reset.
     /// </summary>
     [Description("number of mouse pokes per port since boot or reset.")]
@@ -3531,7 +3683,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="PokeDometer"/> register. This field is constant.
         /// </summary>
-        public const int Address = 62;
+        public const int Address = 63;
 
         /// <summary>
         /// Represents the payload type of the <see cref="PokeDometer"/> register. This field is constant.
@@ -3627,7 +3779,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="FSMState"/> register. This field is constant.
         /// </summary>
-        public const int Address = 63;
+        public const int Address = 64;
 
         /// <summary>
         /// Represents the payload type of the <see cref="FSMState"/> register. This field is constant.
@@ -3723,7 +3875,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="ForceFSM"/> register. This field is constant.
         /// </summary>
-        public const int Address = 64;
+        public const int Address = 65;
 
         /// <summary>
         /// Represents the payload type of the <see cref="ForceFSM"/> register. This field is constant.
@@ -3811,124 +3963,28 @@ namespace AllenNeuralDynamics.DelphiController
     }
 
     /// <summary>
-    /// Represents a register that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+    /// Represents a register that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
     /// </summary>
-    [Description("The current odor being dispensed to the odor port. Must be specified before enabling the state machine.")]
-    public partial class CurrentOdorIndex
+    [Description("Queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed")]
+    public partial class QueuedOdorIndex
     {
         /// <summary>
-        /// Represents the address of the <see cref="CurrentOdorIndex"/> register. This field is constant.
-        /// </summary>
-        public const int Address = 65;
-
-        /// <summary>
-        /// Represents the payload type of the <see cref="CurrentOdorIndex"/> register. This field is constant.
-        /// </summary>
-        public const PayloadType RegisterType = PayloadType.S8;
-
-        /// <summary>
-        /// Represents the length of the <see cref="CurrentOdorIndex"/> register. This field is constant.
-        /// </summary>
-        public const int RegisterLength = 1;
-
-        /// <summary>
-        /// Returns the payload data for <see cref="CurrentOdorIndex"/> register messages.
-        /// </summary>
-        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
-        /// <returns>A value representing the message payload.</returns>
-        public static sbyte GetPayload(HarpMessage message)
-        {
-            return message.GetPayloadSByte();
-        }
-
-        /// <summary>
-        /// Returns the timestamped payload data for <see cref="CurrentOdorIndex"/> register messages.
-        /// </summary>
-        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
-        /// <returns>A value representing the timestamped message payload.</returns>
-        public static Timestamped<sbyte> GetTimestampedPayload(HarpMessage message)
-        {
-            return message.GetTimestampedPayloadSByte();
-        }
-
-        /// <summary>
-        /// Returns a Harp message for the <see cref="CurrentOdorIndex"/> register.
-        /// </summary>
-        /// <param name="messageType">The type of the Harp message.</param>
-        /// <param name="value">The value to be stored in the message payload.</param>
-        /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="CurrentOdorIndex"/> register
-        /// with the specified message type and payload.
-        /// </returns>
-        public static HarpMessage FromPayload(MessageType messageType, sbyte value)
-        {
-            return HarpMessage.FromSByte(Address, messageType, value);
-        }
-
-        /// <summary>
-        /// Returns a timestamped Harp message for the <see cref="CurrentOdorIndex"/>
-        /// register.
-        /// </summary>
-        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
-        /// <param name="messageType">The type of the Harp message.</param>
-        /// <param name="value">The value to be stored in the message payload.</param>
-        /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="CurrentOdorIndex"/> register
-        /// with the specified message type, timestamp, and payload.
-        /// </returns>
-        public static HarpMessage FromPayload(double timestamp, MessageType messageType, sbyte value)
-        {
-            return HarpMessage.FromSByte(Address, timestamp, messageType, value);
-        }
-    }
-
-    /// <summary>
-    /// Provides methods for manipulating timestamped messages from the
-    /// CurrentOdorIndex register.
-    /// </summary>
-    /// <seealso cref="CurrentOdorIndex"/>
-    [Description("Filters and selects timestamped messages from the CurrentOdorIndex register.")]
-    public partial class TimestampedCurrentOdorIndex
-    {
-        /// <summary>
-        /// Represents the address of the <see cref="CurrentOdorIndex"/> register. This field is constant.
-        /// </summary>
-        public const int Address = CurrentOdorIndex.Address;
-
-        /// <summary>
-        /// Returns timestamped payload data for <see cref="CurrentOdorIndex"/> register messages.
-        /// </summary>
-        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
-        /// <returns>A value representing the timestamped message payload.</returns>
-        public static Timestamped<sbyte> GetPayload(HarpMessage message)
-        {
-            return CurrentOdorIndex.GetTimestampedPayload(message);
-        }
-    }
-
-    /// <summary>
-    /// Represents a register that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-    /// </summary>
-    [Description("The next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.")]
-    public partial class NextOdorIndex
-    {
-        /// <summary>
-        /// Represents the address of the <see cref="NextOdorIndex"/> register. This field is constant.
+        /// Represents the address of the <see cref="QueuedOdorIndex"/> register. This field is constant.
         /// </summary>
         public const int Address = 66;
 
         /// <summary>
-        /// Represents the payload type of the <see cref="NextOdorIndex"/> register. This field is constant.
+        /// Represents the payload type of the <see cref="QueuedOdorIndex"/> register. This field is constant.
         /// </summary>
         public const PayloadType RegisterType = PayloadType.S8;
 
         /// <summary>
-        /// Represents the length of the <see cref="NextOdorIndex"/> register. This field is constant.
+        /// Represents the length of the <see cref="QueuedOdorIndex"/> register. This field is constant.
         /// </summary>
         public const int RegisterLength = 1;
 
         /// <summary>
-        /// Returns the payload data for <see cref="NextOdorIndex"/> register messages.
+        /// Returns the payload data for <see cref="QueuedOdorIndex"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the message payload.</returns>
@@ -3938,7 +3994,7 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns the timestamped payload data for <see cref="NextOdorIndex"/> register messages.
+        /// Returns the timestamped payload data for <see cref="QueuedOdorIndex"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the timestamped message payload.</returns>
@@ -3948,12 +4004,12 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns a Harp message for the <see cref="NextOdorIndex"/> register.
+        /// Returns a Harp message for the <see cref="QueuedOdorIndex"/> register.
         /// </summary>
         /// <param name="messageType">The type of the Harp message.</param>
         /// <param name="value">The value to be stored in the message payload.</param>
         /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="NextOdorIndex"/> register
+        /// A <see cref="HarpMessage"/> object for the <see cref="QueuedOdorIndex"/> register
         /// with the specified message type and payload.
         /// </returns>
         public static HarpMessage FromPayload(MessageType messageType, sbyte value)
@@ -3962,14 +4018,14 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns a timestamped Harp message for the <see cref="NextOdorIndex"/>
+        /// Returns a timestamped Harp message for the <see cref="QueuedOdorIndex"/>
         /// register.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">The type of the Harp message.</param>
         /// <param name="value">The value to be stored in the message payload.</param>
         /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="NextOdorIndex"/> register
+        /// A <see cref="HarpMessage"/> object for the <see cref="QueuedOdorIndex"/> register
         /// with the specified message type, timestamp, and payload.
         /// </returns>
         public static HarpMessage FromPayload(double timestamp, MessageType messageType, sbyte value)
@@ -3980,25 +4036,25 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Provides methods for manipulating timestamped messages from the
-    /// NextOdorIndex register.
+    /// QueuedOdorIndex register.
     /// </summary>
-    /// <seealso cref="NextOdorIndex"/>
-    [Description("Filters and selects timestamped messages from the NextOdorIndex register.")]
-    public partial class TimestampedNextOdorIndex
+    /// <seealso cref="QueuedOdorIndex"/>
+    [Description("Filters and selects timestamped messages from the QueuedOdorIndex register.")]
+    public partial class TimestampedQueuedOdorIndex
     {
         /// <summary>
-        /// Represents the address of the <see cref="NextOdorIndex"/> register. This field is constant.
+        /// Represents the address of the <see cref="QueuedOdorIndex"/> register. This field is constant.
         /// </summary>
-        public const int Address = NextOdorIndex.Address;
+        public const int Address = QueuedOdorIndex.Address;
 
         /// <summary>
-        /// Returns timestamped payload data for <see cref="NextOdorIndex"/> register messages.
+        /// Returns timestamped payload data for <see cref="QueuedOdorIndex"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the timestamped message payload.</returns>
         public static Timestamped<sbyte> GetPayload(HarpMessage message)
         {
-            return NextOdorIndex.GetTimestampedPayload(message);
+            return QueuedOdorIndex.GetTimestampedPayload(message);
         }
     }
 
@@ -4099,28 +4155,28 @@ namespace AllenNeuralDynamics.DelphiController
     }
 
     /// <summary>
-    /// Represents a register that time alotted (in microseconds) for the odor delivery state.
+    /// Represents a register that minimum time alotted (in microseconds) for the odor delivery state.
     /// </summary>
-    [Description("Time alotted (in microseconds) for the odor delivery state.")]
-    public partial class OdorDeliveryTimeUS
+    [Description("Minimum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class MinOdorDeliveryTimeUS
     {
         /// <summary>
-        /// Represents the address of the <see cref="OdorDeliveryTimeUS"/> register. This field is constant.
+        /// Represents the address of the <see cref="MinOdorDeliveryTimeUS"/> register. This field is constant.
         /// </summary>
         public const int Address = 68;
 
         /// <summary>
-        /// Represents the payload type of the <see cref="OdorDeliveryTimeUS"/> register. This field is constant.
+        /// Represents the payload type of the <see cref="MinOdorDeliveryTimeUS"/> register. This field is constant.
         /// </summary>
         public const PayloadType RegisterType = PayloadType.U32;
 
         /// <summary>
-        /// Represents the length of the <see cref="OdorDeliveryTimeUS"/> register. This field is constant.
+        /// Represents the length of the <see cref="MinOdorDeliveryTimeUS"/> register. This field is constant.
         /// </summary>
         public const int RegisterLength = 1;
 
         /// <summary>
-        /// Returns the payload data for <see cref="OdorDeliveryTimeUS"/> register messages.
+        /// Returns the payload data for <see cref="MinOdorDeliveryTimeUS"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the message payload.</returns>
@@ -4130,7 +4186,7 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns the timestamped payload data for <see cref="OdorDeliveryTimeUS"/> register messages.
+        /// Returns the timestamped payload data for <see cref="MinOdorDeliveryTimeUS"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the timestamped message payload.</returns>
@@ -4140,12 +4196,12 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns a Harp message for the <see cref="OdorDeliveryTimeUS"/> register.
+        /// Returns a Harp message for the <see cref="MinOdorDeliveryTimeUS"/> register.
         /// </summary>
         /// <param name="messageType">The type of the Harp message.</param>
         /// <param name="value">The value to be stored in the message payload.</param>
         /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="OdorDeliveryTimeUS"/> register
+        /// A <see cref="HarpMessage"/> object for the <see cref="MinOdorDeliveryTimeUS"/> register
         /// with the specified message type and payload.
         /// </returns>
         public static HarpMessage FromPayload(MessageType messageType, uint value)
@@ -4154,14 +4210,14 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Returns a timestamped Harp message for the <see cref="OdorDeliveryTimeUS"/>
+        /// Returns a timestamped Harp message for the <see cref="MinOdorDeliveryTimeUS"/>
         /// register.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">The type of the Harp message.</param>
         /// <param name="value">The value to be stored in the message payload.</param>
         /// <returns>
-        /// A <see cref="HarpMessage"/> object for the <see cref="OdorDeliveryTimeUS"/> register
+        /// A <see cref="HarpMessage"/> object for the <see cref="MinOdorDeliveryTimeUS"/> register
         /// with the specified message type, timestamp, and payload.
         /// </returns>
         public static HarpMessage FromPayload(double timestamp, MessageType messageType, uint value)
@@ -4172,25 +4228,121 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Provides methods for manipulating timestamped messages from the
-    /// OdorDeliveryTimeUS register.
+    /// MinOdorDeliveryTimeUS register.
     /// </summary>
-    /// <seealso cref="OdorDeliveryTimeUS"/>
-    [Description("Filters and selects timestamped messages from the OdorDeliveryTimeUS register.")]
-    public partial class TimestampedOdorDeliveryTimeUS
+    /// <seealso cref="MinOdorDeliveryTimeUS"/>
+    [Description("Filters and selects timestamped messages from the MinOdorDeliveryTimeUS register.")]
+    public partial class TimestampedMinOdorDeliveryTimeUS
     {
         /// <summary>
-        /// Represents the address of the <see cref="OdorDeliveryTimeUS"/> register. This field is constant.
+        /// Represents the address of the <see cref="MinOdorDeliveryTimeUS"/> register. This field is constant.
         /// </summary>
-        public const int Address = OdorDeliveryTimeUS.Address;
+        public const int Address = MinOdorDeliveryTimeUS.Address;
 
         /// <summary>
-        /// Returns timestamped payload data for <see cref="OdorDeliveryTimeUS"/> register messages.
+        /// Returns timestamped payload data for <see cref="MinOdorDeliveryTimeUS"/> register messages.
         /// </summary>
         /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
         /// <returns>A value representing the timestamped message payload.</returns>
         public static Timestamped<uint> GetPayload(HarpMessage message)
         {
-            return OdorDeliveryTimeUS.GetTimestampedPayload(message);
+            return MinOdorDeliveryTimeUS.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that maximum time alotted (in microseconds) for the odor delivery state.
+    /// </summary>
+    [Description("Maximum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class MaxOdorDeliveryTimeUS
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="MaxOdorDeliveryTimeUS"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 69;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="MaxOdorDeliveryTimeUS"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U32;
+
+        /// <summary>
+        /// Represents the length of the <see cref="MaxOdorDeliveryTimeUS"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="MaxOdorDeliveryTimeUS"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static uint GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadUInt32();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="MaxOdorDeliveryTimeUS"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<uint> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadUInt32();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="MaxOdorDeliveryTimeUS"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="MaxOdorDeliveryTimeUS"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, uint value)
+        {
+            return HarpMessage.FromUInt32(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="MaxOdorDeliveryTimeUS"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="MaxOdorDeliveryTimeUS"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, uint value)
+        {
+            return HarpMessage.FromUInt32(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// MaxOdorDeliveryTimeUS register.
+    /// </summary>
+    /// <seealso cref="MaxOdorDeliveryTimeUS"/>
+    [Description("Filters and selects timestamped messages from the MaxOdorDeliveryTimeUS register.")]
+    public partial class TimestampedMaxOdorDeliveryTimeUS
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="MaxOdorDeliveryTimeUS"/> register. This field is constant.
+        /// </summary>
+        public const int Address = MaxOdorDeliveryTimeUS.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="MaxOdorDeliveryTimeUS"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<uint> GetPayload(HarpMessage message)
+        {
+            return MaxOdorDeliveryTimeUS.GetTimestampedPayload(message);
         }
     }
 
@@ -4203,7 +4355,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="OdorTransitionTimeUS"/> register. This field is constant.
         /// </summary>
-        public const int Address = 69;
+        public const int Address = 70;
 
         /// <summary>
         /// Represents the payload type of the <see cref="OdorTransitionTimeUS"/> register. This field is constant.
@@ -4299,7 +4451,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="VacuumSetupTimeUS"/> register. This field is constant.
         /// </summary>
-        public const int Address = 70;
+        public const int Address = 71;
 
         /// <summary>
         /// Represents the payload type of the <see cref="VacuumSetupTimeUS"/> register. This field is constant.
@@ -4395,7 +4547,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="FinalValveEnergizedTimeUS"/> register. This field is constant.
         /// </summary>
-        public const int Address = 71;
+        public const int Address = 72;
 
         /// <summary>
         /// Represents the payload type of the <see cref="FinalValveEnergizedTimeUS"/> register. This field is constant.
@@ -4491,7 +4643,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// <summary>
         /// Represents the address of the <see cref="MinimumPokeTimeUS"/> register. This field is constant.
         /// </summary>
-        public const int Address = 72;
+        public const int Address = 73;
 
         /// <summary>
         /// Represents the payload type of the <see cref="MinimumPokeTimeUS"/> register. This field is constant.
@@ -4579,6 +4731,582 @@ namespace AllenNeuralDynamics.DelphiController
     }
 
     /// <summary>
+    /// Represents a register that the GPIO output pin used for camera triggering. Default pin is 26.
+    /// </summary>
+    [Description("The GPIO output pin used for camera triggering. Default pin is 26.")]
+    public partial class CamPin
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="CamPin"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 74;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="CamPin"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U8;
+
+        /// <summary>
+        /// Represents the length of the <see cref="CamPin"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="CamPin"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static byte GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="CamPin"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="CamPin"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="CamPin"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="CamPin"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="CamPin"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// CamPin register.
+    /// </summary>
+    /// <seealso cref="CamPin"/>
+    [Description("Filters and selects timestamped messages from the CamPin register.")]
+    public partial class TimestampedCamPin
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="CamPin"/> register. This field is constant.
+        /// </summary>
+        public const int Address = CamPin.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="CamPin"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetPayload(HarpMessage message)
+        {
+            return CamPin.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+    /// </summary>
+    [Description("Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.")]
+    public partial class CamPinState
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="CamPinState"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 75;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="CamPinState"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U8;
+
+        /// <summary>
+        /// Represents the length of the <see cref="CamPinState"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="CamPinState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static byte GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="CamPinState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="CamPinState"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="CamPinState"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="CamPinState"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="CamPinState"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// CamPinState register.
+    /// </summary>
+    /// <seealso cref="CamPinState"/>
+    [Description("Filters and selects timestamped messages from the CamPinState register.")]
+    public partial class TimestampedCamPinState
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="CamPinState"/> register. This field is constant.
+        /// </summary>
+        public const int Address = CamPinState.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="CamPinState"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetPayload(HarpMessage message)
+        {
+            return CamPinState.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that set the frame rate of the camera trigger/ frequency of the PWM signal.
+    /// </summary>
+    [Description("Set the frame rate of the camera trigger/ frequency of the PWM signal.")]
+    public partial class FrameRate
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="FrameRate"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 76;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="FrameRate"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U32;
+
+        /// <summary>
+        /// Represents the length of the <see cref="FrameRate"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="FrameRate"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static uint GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadUInt32();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="FrameRate"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<uint> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadUInt32();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="FrameRate"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="FrameRate"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, uint value)
+        {
+            return HarpMessage.FromUInt32(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="FrameRate"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="FrameRate"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, uint value)
+        {
+            return HarpMessage.FromUInt32(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// FrameRate register.
+    /// </summary>
+    /// <seealso cref="FrameRate"/>
+    [Description("Filters and selects timestamped messages from the FrameRate register.")]
+    public partial class TimestampedFrameRate
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="FrameRate"/> register. This field is constant.
+        /// </summary>
+        public const int Address = FrameRate.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="FrameRate"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<uint> GetPayload(HarpMessage message)
+        {
+            return FrameRate.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+    /// </summary>
+    [Description("Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.")]
+    public partial class DutyCycle
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="DutyCycle"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 77;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="DutyCycle"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.Float;
+
+        /// <summary>
+        /// Represents the length of the <see cref="DutyCycle"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="DutyCycle"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static float GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadSingle();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="DutyCycle"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<float> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadSingle();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="DutyCycle"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="DutyCycle"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, float value)
+        {
+            return HarpMessage.FromSingle(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="DutyCycle"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="DutyCycle"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, float value)
+        {
+            return HarpMessage.FromSingle(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// DutyCycle register.
+    /// </summary>
+    /// <seealso cref="DutyCycle"/>
+    [Description("Filters and selects timestamped messages from the DutyCycle register.")]
+    public partial class TimestampedDutyCycle
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="DutyCycle"/> register. This field is constant.
+        /// </summary>
+        public const int Address = DutyCycle.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="DutyCycle"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<float> GetPayload(HarpMessage message)
+        {
+            return DutyCycle.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that enable (1) and disable (0) camera triggering/ the PWM signal.
+    /// </summary>
+    [Description("Enable (1) and disable (0) camera triggering/ the PWM signal.")]
+    public partial class EnableCamTrigger
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="EnableCamTrigger"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 78;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="EnableCamTrigger"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U8;
+
+        /// <summary>
+        /// Represents the length of the <see cref="EnableCamTrigger"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="EnableCamTrigger"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static byte GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="EnableCamTrigger"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="EnableCamTrigger"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="EnableCamTrigger"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="EnableCamTrigger"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="EnableCamTrigger"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// EnableCamTrigger register.
+    /// </summary>
+    /// <seealso cref="EnableCamTrigger"/>
+    [Description("Filters and selects timestamped messages from the EnableCamTrigger register.")]
+    public partial class TimestampedEnableCamTrigger
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="EnableCamTrigger"/> register. This field is constant.
+        /// </summary>
+        public const int Address = EnableCamTrigger.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="EnableCamTrigger"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetPayload(HarpMessage message)
+        {
+            return EnableCamTrigger.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
+    /// Represents a register that enable (1) and disable (0) valve LEDs.
+    /// </summary>
+    [Description("Enable (1) and disable (0) valve LEDs.")]
+    public partial class EnableValveLeds
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="EnableValveLeds"/> register. This field is constant.
+        /// </summary>
+        public const int Address = 79;
+
+        /// <summary>
+        /// Represents the payload type of the <see cref="EnableValveLeds"/> register. This field is constant.
+        /// </summary>
+        public const PayloadType RegisterType = PayloadType.U8;
+
+        /// <summary>
+        /// Represents the length of the <see cref="EnableValveLeds"/> register. This field is constant.
+        /// </summary>
+        public const int RegisterLength = 1;
+
+        /// <summary>
+        /// Returns the payload data for <see cref="EnableValveLeds"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the message payload.</returns>
+        public static byte GetPayload(HarpMessage message)
+        {
+            return message.GetPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns the timestamped payload data for <see cref="EnableValveLeds"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetTimestampedPayload(HarpMessage message)
+        {
+            return message.GetTimestampedPayloadByte();
+        }
+
+        /// <summary>
+        /// Returns a Harp message for the <see cref="EnableValveLeds"/> register.
+        /// </summary>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="EnableValveLeds"/> register
+        /// with the specified message type and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, messageType, value);
+        }
+
+        /// <summary>
+        /// Returns a timestamped Harp message for the <see cref="EnableValveLeds"/>
+        /// register.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">The type of the Harp message.</param>
+        /// <param name="value">The value to be stored in the message payload.</param>
+        /// <returns>
+        /// A <see cref="HarpMessage"/> object for the <see cref="EnableValveLeds"/> register
+        /// with the specified message type, timestamp, and payload.
+        /// </returns>
+        public static HarpMessage FromPayload(double timestamp, MessageType messageType, byte value)
+        {
+            return HarpMessage.FromByte(Address, timestamp, messageType, value);
+        }
+    }
+
+    /// <summary>
+    /// Provides methods for manipulating timestamped messages from the
+    /// EnableValveLeds register.
+    /// </summary>
+    /// <seealso cref="EnableValveLeds"/>
+    [Description("Filters and selects timestamped messages from the EnableValveLeds register.")]
+    public partial class TimestampedEnableValveLeds
+    {
+        /// <summary>
+        /// Represents the address of the <see cref="EnableValveLeds"/> register. This field is constant.
+        /// </summary>
+        public const int Address = EnableValveLeds.Address;
+
+        /// <summary>
+        /// Returns timestamped payload data for <see cref="EnableValveLeds"/> register messages.
+        /// </summary>
+        /// <param name="message">A <see cref="HarpMessage"/> object representing the register message.</param>
+        /// <returns>A value representing the timestamped message payload.</returns>
+        public static Timestamped<byte> GetPayload(HarpMessage message)
+        {
+            return EnableValveLeds.GetTimestampedPayload(message);
+        }
+    }
+
+    /// <summary>
     /// Represents an operator which creates standard message payloads for the
     /// DelphiController device.
     /// </summary>
@@ -4612,17 +5340,24 @@ namespace AllenNeuralDynamics.DelphiController
     /// <seealso cref="CreatePokePinPayload"/>
     /// <seealso cref="CreatePokePinInvertedPayload"/>
     /// <seealso cref="CreatePokeStatePayload"/>
+    /// <seealso cref="CreateRawPokeStatePayload"/>
     /// <seealso cref="CreatePokeDometerPayload"/>
     /// <seealso cref="CreateFSMStatePayload"/>
     /// <seealso cref="CreateForceFSMPayload"/>
-    /// <seealso cref="CreateCurrentOdorIndexPayload"/>
-    /// <seealso cref="CreateNextOdorIndexPayload"/>
+    /// <seealso cref="CreateQueuedOdorIndexPayload"/>
     /// <seealso cref="CreateVacuumCloseTimeUSPayload"/>
-    /// <seealso cref="CreateOdorDeliveryTimeUSPayload"/>
+    /// <seealso cref="CreateMinOdorDeliveryTimeUSPayload"/>
+    /// <seealso cref="CreateMaxOdorDeliveryTimeUSPayload"/>
     /// <seealso cref="CreateOdorTransitionTimeUSPayload"/>
     /// <seealso cref="CreateVacuumSetupTimeUSPayload"/>
     /// <seealso cref="CreateFinalValveEnergizedTimeUSPayload"/>
     /// <seealso cref="CreateMinimumPokeTimeUSPayload"/>
+    /// <seealso cref="CreateCamPinPayload"/>
+    /// <seealso cref="CreateCamPinStatePayload"/>
+    /// <seealso cref="CreateFrameRatePayload"/>
+    /// <seealso cref="CreateDutyCyclePayload"/>
+    /// <seealso cref="CreateEnableCamTriggerPayload"/>
+    /// <seealso cref="CreateEnableValveLedsPayload"/>
     [XmlInclude(typeof(CreateValveStatePayload))]
     [XmlInclude(typeof(CreateValvesSetPayload))]
     [XmlInclude(typeof(CreateValvesClearPayload))]
@@ -4653,17 +5388,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(CreatePokePinPayload))]
     [XmlInclude(typeof(CreatePokePinInvertedPayload))]
     [XmlInclude(typeof(CreatePokeStatePayload))]
+    [XmlInclude(typeof(CreateRawPokeStatePayload))]
     [XmlInclude(typeof(CreatePokeDometerPayload))]
     [XmlInclude(typeof(CreateFSMStatePayload))]
     [XmlInclude(typeof(CreateForceFSMPayload))]
-    [XmlInclude(typeof(CreateCurrentOdorIndexPayload))]
-    [XmlInclude(typeof(CreateNextOdorIndexPayload))]
+    [XmlInclude(typeof(CreateQueuedOdorIndexPayload))]
     [XmlInclude(typeof(CreateVacuumCloseTimeUSPayload))]
-    [XmlInclude(typeof(CreateOdorDeliveryTimeUSPayload))]
+    [XmlInclude(typeof(CreateMinOdorDeliveryTimeUSPayload))]
+    [XmlInclude(typeof(CreateMaxOdorDeliveryTimeUSPayload))]
     [XmlInclude(typeof(CreateOdorTransitionTimeUSPayload))]
     [XmlInclude(typeof(CreateVacuumSetupTimeUSPayload))]
     [XmlInclude(typeof(CreateFinalValveEnergizedTimeUSPayload))]
     [XmlInclude(typeof(CreateMinimumPokeTimeUSPayload))]
+    [XmlInclude(typeof(CreateCamPinPayload))]
+    [XmlInclude(typeof(CreateCamPinStatePayload))]
+    [XmlInclude(typeof(CreateFrameRatePayload))]
+    [XmlInclude(typeof(CreateDutyCyclePayload))]
+    [XmlInclude(typeof(CreateEnableCamTriggerPayload))]
+    [XmlInclude(typeof(CreateEnableValveLedsPayload))]
     [XmlInclude(typeof(CreateTimestampedValveStatePayload))]
     [XmlInclude(typeof(CreateTimestampedValvesSetPayload))]
     [XmlInclude(typeof(CreateTimestampedValvesClearPayload))]
@@ -4694,17 +5436,24 @@ namespace AllenNeuralDynamics.DelphiController
     [XmlInclude(typeof(CreateTimestampedPokePinPayload))]
     [XmlInclude(typeof(CreateTimestampedPokePinInvertedPayload))]
     [XmlInclude(typeof(CreateTimestampedPokeStatePayload))]
+    [XmlInclude(typeof(CreateTimestampedRawPokeStatePayload))]
     [XmlInclude(typeof(CreateTimestampedPokeDometerPayload))]
     [XmlInclude(typeof(CreateTimestampedFSMStatePayload))]
     [XmlInclude(typeof(CreateTimestampedForceFSMPayload))]
-    [XmlInclude(typeof(CreateTimestampedCurrentOdorIndexPayload))]
-    [XmlInclude(typeof(CreateTimestampedNextOdorIndexPayload))]
+    [XmlInclude(typeof(CreateTimestampedQueuedOdorIndexPayload))]
     [XmlInclude(typeof(CreateTimestampedVacuumCloseTimeUSPayload))]
-    [XmlInclude(typeof(CreateTimestampedOdorDeliveryTimeUSPayload))]
+    [XmlInclude(typeof(CreateTimestampedMinOdorDeliveryTimeUSPayload))]
+    [XmlInclude(typeof(CreateTimestampedMaxOdorDeliveryTimeUSPayload))]
     [XmlInclude(typeof(CreateTimestampedOdorTransitionTimeUSPayload))]
     [XmlInclude(typeof(CreateTimestampedVacuumSetupTimeUSPayload))]
     [XmlInclude(typeof(CreateTimestampedFinalValveEnergizedTimeUSPayload))]
     [XmlInclude(typeof(CreateTimestampedMinimumPokeTimeUSPayload))]
+    [XmlInclude(typeof(CreateTimestampedCamPinPayload))]
+    [XmlInclude(typeof(CreateTimestampedCamPinStatePayload))]
+    [XmlInclude(typeof(CreateTimestampedFrameRatePayload))]
+    [XmlInclude(typeof(CreateTimestampedDutyCyclePayload))]
+    [XmlInclude(typeof(CreateTimestampedEnableCamTriggerPayload))]
+    [XmlInclude(typeof(CreateTimestampedEnableValveLedsPayload))]
     [Description("Creates standard message payloads for the DelphiController device.")]
     public partial class CreateMessage : CreateMessageBuilder, INamedElement
     {
@@ -6287,16 +7036,16 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+    /// that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
     /// </summary>
     [DisplayName("PokeStatePayload")]
-    [Description("Creates a message payload that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.")]
+    [Description("Creates a message payload that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.")]
     public partial class CreatePokeStatePayload
     {
         /// <summary>
-        /// Gets or sets the value that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+        /// Gets or sets the value that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
         /// </summary>
-        [Description("The value that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.")]
+        [Description("The value that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.")]
         public byte PokeState { get; set; }
 
         /// <summary>
@@ -6309,7 +7058,7 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Creates a message that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+        /// Creates a message that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
         /// <returns>A new message for the PokeState register.</returns>
@@ -6321,14 +7070,14 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+    /// that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
     /// </summary>
     [DisplayName("TimestampedPokeStatePayload")]
-    [Description("Creates a timestamped message payload that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.")]
+    [Description("Creates a timestamped message payload that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.")]
     public partial class CreateTimestampedPokeStatePayload : CreatePokeStatePayload
     {
         /// <summary>
-        /// Creates a timestamped message that the raw state of all poke ports. Upon receiving a poke (rising-edge), this register will issue an event containing the current poke state.
+        /// Creates a timestamped message that the state of the poke port. An event will be triggered given a poke/ beam break that is greater than the min poke time.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
@@ -6336,6 +7085,60 @@ namespace AllenNeuralDynamics.DelphiController
         public HarpMessage GetMessage(double timestamp, MessageType messageType)
         {
             return AllenNeuralDynamics.DelphiController.PokeState.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+    /// </summary>
+    [DisplayName("RawPokeStatePayload")]
+    [Description("Creates a message payload that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).")]
+    public partial class CreateRawPokeStatePayload
+    {
+        /// <summary>
+        /// Gets or sets the value that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+        /// </summary>
+        [Description("The value that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).")]
+        public byte RawPokeState { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the RawPokeState register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public byte GetPayload()
+        {
+            return RawPokeState;
+        }
+
+        /// <summary>
+        /// Creates a message that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the RawPokeState register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.RawPokeState.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+    /// </summary>
+    [DisplayName("TimestampedRawPokeStatePayload")]
+    [Description("Creates a timestamped message payload that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).")]
+    public partial class CreateTimestampedRawPokeStatePayload : CreateRawPokeStatePayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that the raw state of the poke pin. Events will be triggered at the onset of a beam break (1) and offset (0).
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the RawPokeState register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.RawPokeState.FromPayload(timestamp, messageType, GetPayload());
         }
     }
 
@@ -6503,109 +7306,55 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+    /// that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
     /// </summary>
-    [DisplayName("CurrentOdorIndexPayload")]
-    [Description("Creates a message payload that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.")]
-    public partial class CreateCurrentOdorIndexPayload
+    [DisplayName("QueuedOdorIndexPayload")]
+    [Description("Creates a message payload that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.")]
+    public partial class CreateQueuedOdorIndexPayload
     {
         /// <summary>
-        /// Gets or sets the value that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+        /// Gets or sets the value that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
         /// </summary>
-        [Description("The value that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.")]
-        public sbyte CurrentOdorIndex { get; set; }
+        [Description("The value that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.")]
+        public sbyte QueuedOdorIndex { get; set; }
 
         /// <summary>
-        /// Creates a message payload for the CurrentOdorIndex register.
+        /// Creates a message payload for the QueuedOdorIndex register.
         /// </summary>
         /// <returns>The created message payload value.</returns>
         public sbyte GetPayload()
         {
-            return CurrentOdorIndex;
+            return QueuedOdorIndex;
         }
 
         /// <summary>
-        /// Creates a message that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+        /// Creates a message that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new message for the CurrentOdorIndex register.</returns>
+        /// <returns>A new message for the QueuedOdorIndex register.</returns>
         public HarpMessage GetMessage(MessageType messageType)
         {
-            return AllenNeuralDynamics.DelphiController.CurrentOdorIndex.FromPayload(messageType, GetPayload());
+            return AllenNeuralDynamics.DelphiController.QueuedOdorIndex.FromPayload(messageType, GetPayload());
         }
     }
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+    /// that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
     /// </summary>
-    [DisplayName("TimestampedCurrentOdorIndexPayload")]
-    [Description("Creates a timestamped message payload that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.")]
-    public partial class CreateTimestampedCurrentOdorIndexPayload : CreateCurrentOdorIndexPayload
+    [DisplayName("TimestampedQueuedOdorIndexPayload")]
+    [Description("Creates a timestamped message payload that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.")]
+    public partial class CreateTimestampedQueuedOdorIndexPayload : CreateQueuedOdorIndexPayload
     {
         /// <summary>
-        /// Creates a timestamped message that the current odor being dispensed to the odor port. Must be specified before enabling the state machine.
+        /// Creates a timestamped message that queued odor (value: odor valve index) that will be delievered to the odor port given a register poke. After an odor has been dispensed, the register will be set to -1, which indicates that a new odor is needed.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new timestamped message for the CurrentOdorIndex register.</returns>
+        /// <returns>A new timestamped message for the QueuedOdorIndex register.</returns>
         public HarpMessage GetMessage(double timestamp, MessageType messageType)
         {
-            return AllenNeuralDynamics.DelphiController.CurrentOdorIndex.FromPayload(timestamp, messageType, GetPayload());
-        }
-    }
-
-    /// <summary>
-    /// Represents an operator that creates a message payload
-    /// that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-    /// </summary>
-    [DisplayName("NextOdorIndexPayload")]
-    [Description("Creates a message payload that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.")]
-    public partial class CreateNextOdorIndexPayload
-    {
-        /// <summary>
-        /// Gets or sets the value that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-        /// </summary>
-        [Description("The value that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.")]
-        public sbyte NextOdorIndex { get; set; }
-
-        /// <summary>
-        /// Creates a message payload for the NextOdorIndex register.
-        /// </summary>
-        /// <returns>The created message payload value.</returns>
-        public sbyte GetPayload()
-        {
-            return NextOdorIndex;
-        }
-
-        /// <summary>
-        /// Creates a message that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-        /// </summary>
-        /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new message for the NextOdorIndex register.</returns>
-        public HarpMessage GetMessage(MessageType messageType)
-        {
-            return AllenNeuralDynamics.DelphiController.NextOdorIndex.FromPayload(messageType, GetPayload());
-        }
-    }
-
-    /// <summary>
-    /// Represents an operator that creates a timestamped message payload
-    /// that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-    /// </summary>
-    [DisplayName("TimestampedNextOdorIndexPayload")]
-    [Description("Creates a timestamped message payload that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.")]
-    public partial class CreateTimestampedNextOdorIndexPayload : CreateNextOdorIndexPayload
-    {
-        /// <summary>
-        /// Creates a timestamped message that the next odor to be dispensed to the odor port after. Must be specified before the Odor Delivery FSM finishes a cycle.
-        /// </summary>
-        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
-        /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new timestamped message for the NextOdorIndex register.</returns>
-        public HarpMessage GetMessage(double timestamp, MessageType messageType)
-        {
-            return AllenNeuralDynamics.DelphiController.NextOdorIndex.FromPayload(timestamp, messageType, GetPayload());
+            return AllenNeuralDynamics.DelphiController.QueuedOdorIndex.FromPayload(timestamp, messageType, GetPayload());
         }
     }
 
@@ -6665,55 +7414,109 @@ namespace AllenNeuralDynamics.DelphiController
 
     /// <summary>
     /// Represents an operator that creates a message payload
-    /// that time alotted (in microseconds) for the odor delivery state.
+    /// that minimum time alotted (in microseconds) for the odor delivery state.
     /// </summary>
-    [DisplayName("OdorDeliveryTimeUSPayload")]
-    [Description("Creates a message payload that time alotted (in microseconds) for the odor delivery state.")]
-    public partial class CreateOdorDeliveryTimeUSPayload
+    [DisplayName("MinOdorDeliveryTimeUSPayload")]
+    [Description("Creates a message payload that minimum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class CreateMinOdorDeliveryTimeUSPayload
     {
         /// <summary>
-        /// Gets or sets the value that time alotted (in microseconds) for the odor delivery state.
+        /// Gets or sets the value that minimum time alotted (in microseconds) for the odor delivery state.
         /// </summary>
-        [Description("The value that time alotted (in microseconds) for the odor delivery state.")]
-        public uint OdorDeliveryTimeUS { get; set; }
+        [Description("The value that minimum time alotted (in microseconds) for the odor delivery state.")]
+        public uint MinOdorDeliveryTimeUS { get; set; }
 
         /// <summary>
-        /// Creates a message payload for the OdorDeliveryTimeUS register.
+        /// Creates a message payload for the MinOdorDeliveryTimeUS register.
         /// </summary>
         /// <returns>The created message payload value.</returns>
         public uint GetPayload()
         {
-            return OdorDeliveryTimeUS;
+            return MinOdorDeliveryTimeUS;
         }
 
         /// <summary>
-        /// Creates a message that time alotted (in microseconds) for the odor delivery state.
+        /// Creates a message that minimum time alotted (in microseconds) for the odor delivery state.
         /// </summary>
         /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new message for the OdorDeliveryTimeUS register.</returns>
+        /// <returns>A new message for the MinOdorDeliveryTimeUS register.</returns>
         public HarpMessage GetMessage(MessageType messageType)
         {
-            return AllenNeuralDynamics.DelphiController.OdorDeliveryTimeUS.FromPayload(messageType, GetPayload());
+            return AllenNeuralDynamics.DelphiController.MinOdorDeliveryTimeUS.FromPayload(messageType, GetPayload());
         }
     }
 
     /// <summary>
     /// Represents an operator that creates a timestamped message payload
-    /// that time alotted (in microseconds) for the odor delivery state.
+    /// that minimum time alotted (in microseconds) for the odor delivery state.
     /// </summary>
-    [DisplayName("TimestampedOdorDeliveryTimeUSPayload")]
-    [Description("Creates a timestamped message payload that time alotted (in microseconds) for the odor delivery state.")]
-    public partial class CreateTimestampedOdorDeliveryTimeUSPayload : CreateOdorDeliveryTimeUSPayload
+    [DisplayName("TimestampedMinOdorDeliveryTimeUSPayload")]
+    [Description("Creates a timestamped message payload that minimum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class CreateTimestampedMinOdorDeliveryTimeUSPayload : CreateMinOdorDeliveryTimeUSPayload
     {
         /// <summary>
-        /// Creates a timestamped message that time alotted (in microseconds) for the odor delivery state.
+        /// Creates a timestamped message that minimum time alotted (in microseconds) for the odor delivery state.
         /// </summary>
         /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
         /// <param name="messageType">Specifies the type of the created message.</param>
-        /// <returns>A new timestamped message for the OdorDeliveryTimeUS register.</returns>
+        /// <returns>A new timestamped message for the MinOdorDeliveryTimeUS register.</returns>
         public HarpMessage GetMessage(double timestamp, MessageType messageType)
         {
-            return AllenNeuralDynamics.DelphiController.OdorDeliveryTimeUS.FromPayload(timestamp, messageType, GetPayload());
+            return AllenNeuralDynamics.DelphiController.MinOdorDeliveryTimeUS.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that maximum time alotted (in microseconds) for the odor delivery state.
+    /// </summary>
+    [DisplayName("MaxOdorDeliveryTimeUSPayload")]
+    [Description("Creates a message payload that maximum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class CreateMaxOdorDeliveryTimeUSPayload
+    {
+        /// <summary>
+        /// Gets or sets the value that maximum time alotted (in microseconds) for the odor delivery state.
+        /// </summary>
+        [Description("The value that maximum time alotted (in microseconds) for the odor delivery state.")]
+        public uint MaxOdorDeliveryTimeUS { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the MaxOdorDeliveryTimeUS register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public uint GetPayload()
+        {
+            return MaxOdorDeliveryTimeUS;
+        }
+
+        /// <summary>
+        /// Creates a message that maximum time alotted (in microseconds) for the odor delivery state.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the MaxOdorDeliveryTimeUS register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.MaxOdorDeliveryTimeUS.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that maximum time alotted (in microseconds) for the odor delivery state.
+    /// </summary>
+    [DisplayName("TimestampedMaxOdorDeliveryTimeUSPayload")]
+    [Description("Creates a timestamped message payload that maximum time alotted (in microseconds) for the odor delivery state.")]
+    public partial class CreateTimestampedMaxOdorDeliveryTimeUSPayload : CreateMaxOdorDeliveryTimeUSPayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that maximum time alotted (in microseconds) for the odor delivery state.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the MaxOdorDeliveryTimeUS register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.MaxOdorDeliveryTimeUS.FromPayload(timestamp, messageType, GetPayload());
         }
     }
 
@@ -6930,6 +7733,330 @@ namespace AllenNeuralDynamics.DelphiController
         public HarpMessage GetMessage(double timestamp, MessageType messageType)
         {
             return AllenNeuralDynamics.DelphiController.MinimumPokeTimeUS.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that the GPIO output pin used for camera triggering. Default pin is 26.
+    /// </summary>
+    [DisplayName("CamPinPayload")]
+    [Description("Creates a message payload that the GPIO output pin used for camera triggering. Default pin is 26.")]
+    public partial class CreateCamPinPayload
+    {
+        /// <summary>
+        /// Gets or sets the value that the GPIO output pin used for camera triggering. Default pin is 26.
+        /// </summary>
+        [Description("The value that the GPIO output pin used for camera triggering. Default pin is 26.")]
+        public byte CamPin { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the CamPin register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public byte GetPayload()
+        {
+            return CamPin;
+        }
+
+        /// <summary>
+        /// Creates a message that the GPIO output pin used for camera triggering. Default pin is 26.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the CamPin register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.CamPin.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that the GPIO output pin used for camera triggering. Default pin is 26.
+    /// </summary>
+    [DisplayName("TimestampedCamPinPayload")]
+    [Description("Creates a timestamped message payload that the GPIO output pin used for camera triggering. Default pin is 26.")]
+    public partial class CreateTimestampedCamPinPayload : CreateCamPinPayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that the GPIO output pin used for camera triggering. Default pin is 26.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the CamPin register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.CamPin.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+    /// </summary>
+    [DisplayName("CamPinStatePayload")]
+    [Description("Creates a message payload that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.")]
+    public partial class CreateCamPinStatePayload
+    {
+        /// <summary>
+        /// Gets or sets the value that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+        /// </summary>
+        [Description("The value that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.")]
+        public byte CamPinState { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the CamPinState register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public byte GetPayload()
+        {
+            return CamPinState;
+        }
+
+        /// <summary>
+        /// Creates a message that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the CamPinState register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.CamPinState.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+    /// </summary>
+    [DisplayName("TimestampedCamPinStatePayload")]
+    [Description("Creates a timestamped message payload that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.")]
+    public partial class CreateTimestampedCamPinStatePayload : CreateCamPinStatePayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the CamPinState register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.CamPinState.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that set the frame rate of the camera trigger/ frequency of the PWM signal.
+    /// </summary>
+    [DisplayName("FrameRatePayload")]
+    [Description("Creates a message payload that set the frame rate of the camera trigger/ frequency of the PWM signal.")]
+    public partial class CreateFrameRatePayload
+    {
+        /// <summary>
+        /// Gets or sets the value that set the frame rate of the camera trigger/ frequency of the PWM signal.
+        /// </summary>
+        [Description("The value that set the frame rate of the camera trigger/ frequency of the PWM signal.")]
+        public uint FrameRate { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the FrameRate register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public uint GetPayload()
+        {
+            return FrameRate;
+        }
+
+        /// <summary>
+        /// Creates a message that set the frame rate of the camera trigger/ frequency of the PWM signal.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the FrameRate register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.FrameRate.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that set the frame rate of the camera trigger/ frequency of the PWM signal.
+    /// </summary>
+    [DisplayName("TimestampedFrameRatePayload")]
+    [Description("Creates a timestamped message payload that set the frame rate of the camera trigger/ frequency of the PWM signal.")]
+    public partial class CreateTimestampedFrameRatePayload : CreateFrameRatePayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that set the frame rate of the camera trigger/ frequency of the PWM signal.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the FrameRate register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.FrameRate.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+    /// </summary>
+    [DisplayName("DutyCyclePayload")]
+    [Description("Creates a message payload that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.")]
+    public partial class CreateDutyCyclePayload
+    {
+        /// <summary>
+        /// Gets or sets the value that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+        /// </summary>
+        [Description("The value that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.")]
+        public float DutyCycle { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the DutyCycle register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public float GetPayload()
+        {
+            return DutyCycle;
+        }
+
+        /// <summary>
+        /// Creates a message that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the DutyCycle register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.DutyCycle.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+    /// </summary>
+    [DisplayName("TimestampedDutyCyclePayload")]
+    [Description("Creates a timestamped message payload that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.")]
+    public partial class CreateTimestampedDutyCyclePayload : CreateDutyCyclePayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the DutyCycle register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.DutyCycle.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that enable (1) and disable (0) camera triggering/ the PWM signal.
+    /// </summary>
+    [DisplayName("EnableCamTriggerPayload")]
+    [Description("Creates a message payload that enable (1) and disable (0) camera triggering/ the PWM signal.")]
+    public partial class CreateEnableCamTriggerPayload
+    {
+        /// <summary>
+        /// Gets or sets the value that enable (1) and disable (0) camera triggering/ the PWM signal.
+        /// </summary>
+        [Description("The value that enable (1) and disable (0) camera triggering/ the PWM signal.")]
+        public byte EnableCamTrigger { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the EnableCamTrigger register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public byte GetPayload()
+        {
+            return EnableCamTrigger;
+        }
+
+        /// <summary>
+        /// Creates a message that enable (1) and disable (0) camera triggering/ the PWM signal.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the EnableCamTrigger register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.EnableCamTrigger.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that enable (1) and disable (0) camera triggering/ the PWM signal.
+    /// </summary>
+    [DisplayName("TimestampedEnableCamTriggerPayload")]
+    [Description("Creates a timestamped message payload that enable (1) and disable (0) camera triggering/ the PWM signal.")]
+    public partial class CreateTimestampedEnableCamTriggerPayload : CreateEnableCamTriggerPayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that enable (1) and disable (0) camera triggering/ the PWM signal.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the EnableCamTrigger register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.EnableCamTrigger.FromPayload(timestamp, messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a message payload
+    /// that enable (1) and disable (0) valve LEDs.
+    /// </summary>
+    [DisplayName("EnableValveLedsPayload")]
+    [Description("Creates a message payload that enable (1) and disable (0) valve LEDs.")]
+    public partial class CreateEnableValveLedsPayload
+    {
+        /// <summary>
+        /// Gets or sets the value that enable (1) and disable (0) valve LEDs.
+        /// </summary>
+        [Description("The value that enable (1) and disable (0) valve LEDs.")]
+        public byte EnableValveLeds { get; set; }
+
+        /// <summary>
+        /// Creates a message payload for the EnableValveLeds register.
+        /// </summary>
+        /// <returns>The created message payload value.</returns>
+        public byte GetPayload()
+        {
+            return EnableValveLeds;
+        }
+
+        /// <summary>
+        /// Creates a message that enable (1) and disable (0) valve LEDs.
+        /// </summary>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new message for the EnableValveLeds register.</returns>
+        public HarpMessage GetMessage(MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.EnableValveLeds.FromPayload(messageType, GetPayload());
+        }
+    }
+
+    /// <summary>
+    /// Represents an operator that creates a timestamped message payload
+    /// that enable (1) and disable (0) valve LEDs.
+    /// </summary>
+    [DisplayName("TimestampedEnableValveLedsPayload")]
+    [Description("Creates a timestamped message payload that enable (1) and disable (0) valve LEDs.")]
+    public partial class CreateTimestampedEnableValveLedsPayload : CreateEnableValveLedsPayload
+    {
+        /// <summary>
+        /// Creates a timestamped message that enable (1) and disable (0) valve LEDs.
+        /// </summary>
+        /// <param name="timestamp">The timestamp of the message payload, in seconds.</param>
+        /// <param name="messageType">Specifies the type of the created message.</param>
+        /// <returns>A new timestamped message for the EnableValveLeds register.</returns>
+        public HarpMessage GetMessage(double timestamp, MessageType messageType)
+        {
+            return AllenNeuralDynamics.DelphiController.EnableValveLeds.FromPayload(timestamp, messageType, GetPayload());
         }
     }
 
