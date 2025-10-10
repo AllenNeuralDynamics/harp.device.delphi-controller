@@ -10,7 +10,7 @@ poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
 request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
-poke_pin_is_initialized_{false}
+poke_pin_is_initialized_{false}, valve_state_{false}
 {
     reset(); // set timing constants to defaults.
 }
@@ -27,6 +27,7 @@ PokeManager::~PokeManager() //destuctor
     state_ = RESET;
     beam_broken_ = false;
     poke_initiated_once_ = false;
+    valve_state_ = false;
 }
 
 void PokeManager::deenergize_all_valves()
@@ -96,6 +97,7 @@ void PokeManager::update_poke_status()
 // Functions to alter the FSM
 void PokeManager::reset()
 {
+    state_ = RESET;
     deenergize_all_valves();
     disable();
     odor_valve_index_ = -1;
@@ -104,6 +106,7 @@ void PokeManager::reset()
     poke_detected_ = false;
     beam_broken_ = false;
     poke_initiated_once_ = false;
+    valve_state_ = false;
     clear_poke_pin();
     request_next_odor_callback_fn_ = nullptr;
     request_poke_state_callback_fn_ = nullptr;
@@ -131,6 +134,7 @@ void PokeManager::set_enabled_state(bool enabled)
         poke_state_ = 0;
         beam_broken_ = false;
         poke_initiated_once_ = false;
+        valve_state_ = false;
     }
 }
 
@@ -139,13 +143,6 @@ void PokeManager::update()
     //enabled by default, but if disabled, bail early
     if (disable_fsm_)
         return;
-
-    //initialize RESET state
-    if (state_ == RESET) //need to query state_ for initital 
-    {
-        // state_entry_time_us_ = time_us_32();
-        deenergize_all_valves();
-    }
 
     // check for poke
     update_poke_status();
@@ -156,14 +153,19 @@ void PokeManager::update()
     switch (state_)
     {
         case RESET:
+            //initialize RESET state by turning off all valves
+            deenergize_all_valves();
             next_state = ODOR_SETUP;
             break;
         case ODOR_SETUP:
             if (odor_valve_index_ < 0){
-                request_next_odor();
                 // The odor should be primed before a poke
                 poke_detected_ = false;
                 poke_state_ = 0; 
+            }
+            
+            else if (odor_valve_index_ != -1 && !valve_state_){
+                energize_odor_valve(); // Need to initiated the event that the odor was consumed before this
             }
             else if (state_duration_us() >= vacuum_close_time_us_  && odor_valve_index_ != -1)
             {
@@ -210,7 +212,6 @@ void PokeManager::update()
         {
             // explicitly grab odor in the queue
             deenergize_all_valves();
-            energize_odor_valve();
         }
 
         // Don't need to do anything because odor is being sent to exhaust and
@@ -244,6 +245,8 @@ void PokeManager::update()
             // Energize the final valve
             final_valve_.energize();
             odor_valve_index_ = -1; // Consume queued odor.
+            request_next_odor(); //request
+            
 #if(DEBUG)
             printf("Odor Valve: %i\r\n", odor_valve_index_); //valve odor index
 #endif

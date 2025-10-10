@@ -167,7 +167,7 @@ registers:
         address: 64
         type: U8
         access: Write
-        description: "Enable (1) (aka reset) or Disable (0) the poke handling state machine. Note that CurrentOdorIndex must be specified first. Disabling and then enabling a previously-enabled FSM will reset it to its starting state."
+        description: "Enable (1) (aka reset) or Disable (0) the poke handling state machine. Note that QueuedOdorIndex must be specified first. Disabling and then enabling a previously-enabled FSM will reset it to its starting state."
     ForceFSM:
         address: 65
         type: U8

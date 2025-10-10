@@ -58,10 +58,14 @@ public:
     }
 
     inline void energize_odor_valve()
-    {set_odor_valve_state(1);}
+    {set_odor_valve_state(1);
+     valve_state_ = true;
+    }
 
     inline void deenergize_odor_valve()
-    {set_odor_valve_state(0);}
+    {set_odor_valve_state(0);
+     valve_state_ = false;
+    }
 
     // Event Handlers
     inline void set_next_odor_callback_fn( void (* fn)(void))
@@ -252,6 +256,7 @@ private:
     size_t poke_count_;
     uint8_t poke_state_;
     uint8_t raw_poke_state_;
+    bool valve_state_;
     bool poke_detected_;
     bool disable_fsm_;
     bool beam_broken_; //keep track of beam state
