@@ -68,15 +68,15 @@ void PokeManager::update_poke_status()
         raw_poke_state_ = 1;  
     }
 
-    // Poke detected -- start poke timer
-    if (gpio_get(poke_pin_) && !beam_broken_)
+    // Poke detected during  -- start poke timer
+    if (gpio_get(poke_pin_) && !beam_broken_ && state_ == ODOR_DISPENSING_TO_EXHAUST)
     {
         poke_start_time_us_ = time_us_32();
         beam_broken_ = true;
     }
 
     // Check duration since beam break/poke
-    if (gpio_get(poke_pin_) && beam_broken_)
+    if (gpio_get(poke_pin_) && beam_broken_ && state_ == ODOR_DISPENSING_TO_EXHAUST)
     {
         //gpio_put(LED_PIN, 1); // Turn on LED whenever the beam is broken
         if ((time_us_32() - poke_start_time_us_) >= min_poke_time_us_ && poke_initiated_once_ == false)
