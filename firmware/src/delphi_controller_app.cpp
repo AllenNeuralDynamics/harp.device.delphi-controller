@@ -283,7 +283,7 @@ void read_poke_state(uint8_t reg_address)
 void read_raw_poke_state(uint8_t reg_address)
 {
     // FIXME
-    app_regs.PokeState = poke_manager.get_raw_poke_state(); 
+    app_regs.RawPokeState = poke_manager.get_raw_poke_state(); 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
