@@ -550,7 +550,7 @@ void write_aux_gpio_dir(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
     // Apply register settings (set bits are outputs; cleared bits are inputs).
-    gpio_set_dir_masked(uint32_t(GPIOS_MASK_INPUT) << GPIO_PIN_BASE,
+    gpio_set_dir_masked(uint32_t(GPIOS_MASK) << GPIO_PIN_BASE,
                         uint32_t(app_regs.AuxGPIODir) << GPIO_PIN_BASE);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
@@ -633,14 +633,6 @@ void raw_poke_fall()
 // {
 //     const uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75; // FIXME: this is hardcoded.
 //     app_regs.CamPinState = 1; // 1:rise
-//     if (!HarpCore::is_muted())
-//         HarpCore::send_harp_reply(EVENT, CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
-// }
-
-// void falling_edge_detected()
-// {
-//     const uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75; // FIXME: this is hardcoded..
-//     app_regs.CamPinState = 0; // 0:fall
 //     if (!HarpCore::is_muted())
 //         HarpCore::send_harp_reply(EVENT, CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 // }
@@ -758,18 +750,16 @@ void reset_app()
 
     // Init the exposed auxiliary GPIO pins we are using as 4-inputs.
     // This *must* be called once to setup the AUX GPIOs.
-    gpio_init_mask(GPIOS_MASK_INPUT << GPIO_PIN_BASE);
-    gpio_set_dir_masked(GPIOS_MASK_INPUT << GPIO_PIN_BASE, 0);
+    gpio_init_mask(GPIOS_MASK << GPIO_PIN_BASE);
+    gpio_set_dir_masked(GPIOS_MASK << GPIO_PIN_BASE, 0);
 
-    app_regs.AuxGPIODir = 0; // All inputs (consistent with what we just set).
-    app_regs.AuxGPIOState = (gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK_INPUT;
+    app_regs.AuxGPIODir = 0b11110000; // GPIO pins 25-29 as outputs
+    app_regs.AuxGPIOState = (gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK; //all pins are set low
     app_regs.AuxGPIOSet = 0;
     app_regs.AuxGPIOClear = 0;
 
-    // Init the exposed auxiliary GPIO pins we are using as 4-outputs.
-    // This *must* be called once to setup the AUX GPIOs.
-    gpio_init_mask(GPIOS_MASK_OUTPUT << (GPIO_PIN_BASE + 4));
-    gpio_set_dir_masked(GPIOS_MASK_OUTPUT << (GPIO_PIN_BASE + 4), 1);
+    gpio_set_dir_masked(uint32_t(GPIOS_MASK) << GPIO_PIN_BASE,
+                    uint32_t(app_regs.AuxGPIODir) << GPIO_PIN_BASE);
 
     // Clear aux input EVENT message configuration.
     app_regs.AuxGPIORisingInputs = 0;

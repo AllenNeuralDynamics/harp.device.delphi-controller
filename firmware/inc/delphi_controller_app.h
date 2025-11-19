@@ -165,7 +165,7 @@ void update_app_state();
 void reset_app();
 
 inline uint8_t read_aux_gpios()
-{return uint8_t((gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK_INPUT);}
+{return uint8_t((gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK);}
 
 void read_valves_state(uint8_t reg_address);
 void read_valves_set(uint8_t reg_address);
