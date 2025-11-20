@@ -101,7 +101,7 @@ registers:
         type: U8
         maskType: AuxGPIOMask
         access: Write
-        description: "Set the state (one or off) of any auxiliary GPIO pins specified as outputs."
+        description: "Set the state (on or off) of any auxiliary GPIO pins specified as outputs."
     AuxGPIOSet:
         address: 53
         type: U8
@@ -267,11 +267,11 @@ groupMasks:
     AuxGPIOMask:
         description: "Auxiliary GPIO index."
         values:
-            AuxGPIO0: 0x0
-            AuxGPIO1: 0x1
-            AuxGPIO2: 0x2
-            AuxGPIO3: 0x3
-            AuxGPIO4: 0x4
-            AuxGPIO5: 0x5
-            AuxGPIO6: 0x6
-            AuxGPIO7: 0x7
+            AuxGPIO0: 00000001
+            AuxGPIO1: 00000010
+            AuxGPIO2: 00000100
+            AuxGPIO3: 00001000
+            AuxGPIO4: 00010000
+            AuxGPIO5: 00100000
+            AuxGPIO6: 01000000
+            AuxGPIO7: 10000000
