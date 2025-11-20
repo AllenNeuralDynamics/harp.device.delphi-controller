@@ -97,30 +97,6 @@ public:
 
 // FOR POOLING EVENTS
 /**
-//  * \brief rise event handler
-//  */
-//     inline void set_pwm_rise_callback_fn( void (* fn)(void))
-//     {request_pwm_rise_callback_fn_ = fn;}
-
-//     inline void rising_edge_detected()
-//     {
-//         if (request_pwm_rise_callback_fn_ != nullptr)
-//             request_pwm_rise_callback_fn_();
-//     }
-
-// /**
-//  * \brief fall event handler
-//  */
-//     inline void set_pwm_fall_callback_fn( void (* fn)(void))
-//     {request_pwm_fall_callback_fn_ = fn;}
-
-//     inline void falling_edge_detected()
-//     {
-//         if (request_pwm_fall_callback_fn_ != nullptr)
-//             request_pwm_fall_callback_fn_();
-//     }
-
-/**
  * \brief Set PWM frequency
  */
     void set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq);
@@ -189,8 +165,6 @@ public:
     inline float get_enable_state() const 
     {return enable_state_;}
 
-
-
 private:
 
 /**
@@ -207,10 +181,6 @@ private:
     bool pin_is_initialized_;
     PIO pio_;
     uint sm_;
-
-    //FOR POOLING EVENTS
-    // void (*request_pwm_rise_callback_fn_)(void);
-    // void (*request_pwm_fall_callback_fn_)(void);
 
     // Declare Constants
     static inline constexpr float DEFAULT_DUTY_CYCLE = 0.5f;

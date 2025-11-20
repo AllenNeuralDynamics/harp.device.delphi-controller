@@ -5,7 +5,7 @@ PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve,
 : final_valve_{final_valve}, vac_valve_{vac_valve}, odor_valves_{odor_valves},
 num_odor_valves_{num_odor_valves},
 state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
-odor_valve_index_{-1}, disable_fsm_{false},
+odor_valve_mask_{0}, disable_fsm_{false},
 poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
@@ -100,7 +100,7 @@ void PokeManager::reset()
     state_ = RESET;
     deenergize_all_valves();
     disable();
-    odor_valve_index_ = -1;
+    odor_valve_mask_ = 0;
     poke_count_ = 0;
     poke_state_ = 0;
     poke_detected_ = false;
@@ -158,16 +158,16 @@ void PokeManager::update()
             next_state = ODOR_SETUP;
             break;
         case ODOR_SETUP:
-            if (odor_valve_index_ < 0){
+            if (odor_valve_mask_ == 0){
                 // The odor should be primed before a poke
                 poke_detected_ = false;
                 poke_state_ = 0; 
             }
             
-            else if (odor_valve_index_ != -1 && !valve_state_){
+            else if (odor_valve_mask_ > 0 && !valve_state_){
                 energize_odor_valve(); // Need to initiated the event that the odor was consumed before this
             }
-            else if (state_duration_us() >= vacuum_close_time_us_  && odor_valve_index_ != -1)
+            else if (state_duration_us() >= vacuum_close_time_us_  && odor_valve_mask_ != 0)
             {
                 next_state = ODOR_DISPENSING_TO_EXHAUST;
             }
@@ -244,11 +244,11 @@ void PokeManager::update()
         {
             // Energize the final valve
             final_valve_.energize();
-            odor_valve_index_ = -1; // Consume queued odor.
+            odor_valve_mask_ = 0; // Clear the mask
             request_next_odor(); //request
             
 #if(DEBUG)
-            printf("Odor Valve: %i\r\n", odor_valve_index_); //valve odor index
+            printf("Odor Valves: %i\r\n", odor_valve_mask_); //valve odor index
 #endif
         }
     }

@@ -1,7 +1,7 @@
 """ValveController app registers. Later these will be extracted from the device.yaml"""
+
 from enum import IntEnum
 from itertools import chain
-
 
 
 class AppRegs(IntEnum):
@@ -43,7 +43,7 @@ class DelphiOnlyAppRegs(IntEnum):
     PokeDometer = 63
     FSMEnabledState = 64
     ForceFSM = 65
-    QueuedOdorIndex = 66
+    QueuedOdorMask = 66
     VacuumCloseTimeUS = 67
     MinOdorDeliveryTimeUS = 68
     MaxOdorDeliveryTimeUS = 69
@@ -59,5 +59,6 @@ class DelphiOnlyAppRegs(IntEnum):
     EnableValveLeds = 79
 
 
-DelphiAppRegs = IntEnum("DelphiAppRegs",
-    [(i.name, i.value) for i in chain(AppRegs, DelphiOnlyAppRegs)])
+DelphiAppRegs = IntEnum(
+    "DelphiAppRegs", [(i.name, i.value) for i in chain(AppRegs, DelphiOnlyAppRegs)]
+)

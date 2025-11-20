@@ -46,14 +46,24 @@ public:
     inline void disable()
     {set_enabled_state(false);}
 
+    // Generate an ETL vector of which odor valves are queued
+    inline etl::vector<int, 16> bit_positions(uint16_t mask) {
+        etl::vector<int, 16> positions;
+        for (int i = 0; i < 16; ++i) if (mask & (1 << i)) positions.push_back(i);
+        return positions;
+    }
+
     inline void set_odor_valve_state(bool enabled)
     {
-        if (odor_valve_index_ >= 0)
-        {
-            if (enabled)
-                odor_valves_[odor_valve_index_].energize();
-            else
-                odor_valves_[odor_valve_index_].deenergize();
+        auto odor_valve_indices = bit_positions(odor_valve_mask_); // get positions valves to activate
+        for (int odor_valve_index: odor_valve_indices){
+            if (odor_valve_index < 14) // Only 14 odor valves -- any odor valve specified above this is ignored
+            {
+                if (enabled)
+                    odor_valves_[odor_valve_index].energize();
+                else
+                    odor_valves_[odor_valve_index].deenergize();
+            }
         }
     }
 
@@ -110,8 +120,8 @@ public:
  */
     void set_enabled_state(bool enabled);
 
-    inline void set_current_odor(uint32_t odor_index)
-    {odor_valve_index_ = odor_index;}
+    inline void set_current_odors(uint16_t odor_mask)
+    {odor_valve_mask_ = odor_mask;}
 
     inline void set_vacuum_close_time_us(uint32_t vacuum_close_time_us)
     {vacuum_close_time_us_ = vacuum_close_time_us;}
@@ -199,8 +209,8 @@ public:
     inline size_t get_poke_count() const
     {return poke_count_;}
 
-    inline uint32_t get_current_odor() const
-    {return odor_valve_index_;}
+    inline uint16_t get_current_odors() const
+    {return odor_valve_mask_;}
 
     inline uint32_t get_vacuum_close_time_us() const
     {return vacuum_close_time_us_;}
@@ -251,7 +261,7 @@ private:
     uint8_t poke_pin_;
     gpio_override override_state_; /// Whether or not the poke pin is inverted.
 
-    int odor_valve_index_;
+    uint16_t odor_valve_mask_;
 
     size_t poke_count_;
     uint8_t poke_state_;

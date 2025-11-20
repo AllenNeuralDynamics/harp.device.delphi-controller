@@ -52,39 +52,8 @@ void CameraDriver::pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t 
 }
 
 
-// //Pooling - Rise and Fall edges of camera triggering
-// void CameraDriver::pwm_signal_status()
-// {
-//     // Check to see if poke has been detected
-//     // Beam is no longer broken
-//     if (!gpio_get(pwm_pio_pin_))
-//     {
-//         if (pwm_pin_state_ == 1)
-//         {
-//             //falling edge event
-//             falling_edge_detected();
-//         }
-//         pwm_pin_state_ = 0;  
-//     }
-
-//     // Beam broken -- update raw poke state
-//     if (gpio_get(pwm_pio_pin_))
-//     {
-//         if (pwm_pin_state_ == 0)
-//         {
-//             //rising edge event
-//             rising_edge_detected();
-//         }
-//         pwm_pin_state_ = 1;  
-//     }
-// }
-
-
 void CameraDriver::update()
 {
-    // USING A ISR INSTEAD: check pin state -- trigger events 
-    // pwm_signal_status(); // polling for events works
-
     // set PWM 
     if (!pio_sm_is_tx_fifo_full(pio_, sm_)) 
     {

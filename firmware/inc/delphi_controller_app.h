@@ -89,7 +89,7 @@ struct app_regs_t
     uint32_t PokeDometer;
     uint8_t FSMEnabledState;
     uint8_t ForceFSM;
-    int8_t QueuedOdorIndex;
+    int16_t QueuedOdorMask;
     uint32_t VacuumCloseTimeUS;
     uint32_t MinOdorDeliveryTimeUS;
     uint32_t MaxOdorDeliveryTimeUS;
@@ -129,19 +129,6 @@ void raw_poke_rise(void);
  */
 void raw_poke_fall(void);
 
-
-// USED FOR EVENTS WHEN POOLING THE STATE OF THE PIN
-// /**
-//  * \brief callback function to tell the PC when the rising edge of the camera happened
-//  */
-// void rising_edge_detected(void);
-
-// /**
-//  * \brief callback function to tell the PC when the falling edge of the camera happened
-//  */
-// void falling_edge_detected(void);
-
-
 /**
  * \brief callback for camera timestamp
  */
@@ -180,7 +167,7 @@ void read_raw_poke_state(uint8_t reg_address);
 void read_pokedometer(uint8_t reg_address);
 void read_fsm_enabled_state(uint8_t reg_address);
 //void read_force_fsm(uint8_t reg_address); // aliased to read_reg_generic
-void read_current_odor(uint8_t reg_address);
+void read_current_odors(uint8_t reg_address);
 void read_vacuum_close_time_us(uint8_t reg_address);
 void read_min_odor_delivery_time_us(uint8_t reg_address);
 void read_max_odor_delivery_time_us(uint8_t reg_address);
@@ -211,7 +198,7 @@ void write_poke_pin_inverted(msg_t& msg);
 // Cannot write to pokedometer
 void write_fsm_enabled_state(msg_t& msg);
 void write_force_fsm(msg_t& msg);
-void write_current_odor(msg_t& msg);
+void write_current_odors(msg_t& msg);
 void write_vacuum_close_time_us(msg_t& msg);
 void write_min_odor_delivery_time_us(msg_t& msg);
 void write_max_odor_delivery_time_us(msg_t& msg);
