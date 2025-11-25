@@ -8532,6 +8532,15 @@
 				(hide yes)
 			)
 		)
+		(property "Alternate" "SN74AVC2T45DCUR or SN74LVC2T45DCURG4"
+			(at 107.95 35.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "103ea4bb-6b99-4cf3-a9e4-a0e1cc0ebb01")
 		)
@@ -9758,6 +9767,15 @@
 				(hide yes)
 			)
 		)
+		(property "Alternate" "SN74AVC2T45DCUR or SN74LVC2T45DCURG4"
+			(at 107.95 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "1c25a190-e9f5-481c-9509-7184bab754b0")
 		)
@@ -10866,6 +10884,15 @@
 				(hide yes)
 			)
 		)
+		(property "Alternate" "SN74AVC2T45DCUR or SN74LVC2T45DCURG4"
+			(at 107.95 163.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "923a6aa4-2f59-4405-89d3-02cb7831ac29")
 		)
@@ -11430,6 +11457,15 @@
 			)
 		)
 		(property "MFG" ""
+			(at 107.95 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Alternate" "SN74AVC2T45DCUR or SN74LVC2T45DCURG4"
 			(at 107.95 121.92 0)
 			(effects
 				(font
