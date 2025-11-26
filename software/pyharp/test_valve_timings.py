@@ -51,11 +51,11 @@ reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).fr
 print("Camera Pin")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.CamPin, 26).frame)
 print("FPS")
-reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 1).frame)
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 100).frame)
 print("Duty Cycle")
 reply = device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.DutyCycle, 0.5).frame)
 print("Enable")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 0).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 1).frame)
 print("Enable Valve LEDS")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 0).frame)
 
@@ -76,11 +76,11 @@ odor_i = -1
 try:
     while True:
         for msg in device.get_events():
-            print(msg)
-            print()
-            print_poke_counts(device)
-            print(f"event address: {msg.address}")
-            print(f"event payload: {msg.payload[0]}")
+            # print(msg)
+            # print()
+            # print_poke_counts(device)
+            # print(f"event address: {msg.address}")
+            # print(f"event payload: {msg.payload[0]}")
 
             """EVENT BASED ODOR UPDATING"""
             event_address = msg.address
@@ -97,8 +97,13 @@ try:
                         ).frame
                     )
 
-        """READ BASED ODOR UPDATING"""
-        # reply = device.send(HarpMessage.ReadU8(DelphiOnlyAppRegs.QueuedOdorIndex).frame)
+            """READ BASED ODOR UPDATING"""
+            if event_address == 32:
+                event_payload = msg.payload[0]
+                print(f"Valves State: {event_payload}")
+        # reply = device.send(HarpMessage.ReadU16(AppRegs.ValvesState).frame)
+        # if reply.payload[0] != 0:
+        # print(f"Valves State: {reply.payload[0]:16b}")
         # if reply.payload[0] == -1:
         # odor_i+=1
         # if odor_i > 3:

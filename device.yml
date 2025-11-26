@@ -10,7 +10,7 @@ registers:
         address: 32
         type: U16
         maskType: ValveMask
-        access: Write
+        access: Event
         description: "Set the enabled/disabled state (enabled = 1) of all valves"
     ValvesSet:
         address: 33
@@ -264,6 +264,7 @@ groupMasks:
             Valve13: 0xD
             Valve14: 0xE
             Valve15: 0xF
+            AllValves: 0xFFFF
     AuxGPIOMask:
         description: "Auxiliary GPIO index."
         values:

@@ -444,12 +444,7 @@ void write_minimum_poke_time_us(msg_t& msg)
 
 void read_valves_state(uint8_t reg_address)
 {
-    for (size_t valve_index = 0; valve_index < NUM_VALVES; ++valve_index)
-    {
-        app_regs.ValvesState = 0;
-        if (valve_drivers[valve_index].is_energized())
-            app_regs.ValvesState |= (typeof(app_regs.ValvesState))(1) << valve_index;
-    }
+    app_regs.ValvesState = get_valve_mask();  // Store the mask
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
@@ -628,28 +623,21 @@ void raw_poke_fall()
         HarpCore::send_harp_reply(EVENT, POKE_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
-// FOR EVENTS WHEN POOLING
-// void rising_edge_detected()
-// {
-//     const uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75; // FIXME: this is hardcoded.
-//     app_regs.CamPinState = 1; // 1:rise
-//     if (!HarpCore::is_muted())
-//         HarpCore::send_harp_reply(EVENT, CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
-// }
-
 void camera_timestamp_callback(uint gpio, uint32_t events) {
     // // Toggle LED for testing
     // gpio_put(25, !gpio_get(25));
     push_event_from_isr(CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
-#define QUEUE_SIZE 64
-volatile HarpEvent eventQueue[QUEUE_SIZE];
+// Delphi specific functions
+#define QUEUE_SIZE 128
+#define QUEUE_MASK (QUEUE_SIZE - 1)
+HarpEvent eventQueue[QUEUE_SIZE];
 volatile uint8_t head = 0;
 volatile uint8_t tail = 0;
 
 void push_event_from_isr(uint8_t index, uint64_t timestamp) {
-    uint8_t next = (head + 1) % QUEUE_SIZE;
+    uint8_t next = (head + 1) & QUEUE_MASK;
     if (next != tail) { // Prevent overflow
         eventQueue[head].index = index;
         eventQueue[head].timestamp = timestamp;
@@ -661,9 +649,26 @@ bool pop_event(HarpEvent &event) {
     if (tail == head) return false; // Queue is empty
     event.index = eventQueue[tail].index;
     event.timestamp = eventQueue[tail].timestamp;
-    tail = (tail + 1) % QUEUE_SIZE;
+    tail = (tail + 1) & QUEUE_MASK;
     return true;
 }
+
+// Valve state mask
+uint16_t get_valve_mask() {
+    uint16_t mask = 0;  // Start with all bits cleared
+
+    for (size_t valve_index = 0; valve_index < NUM_VALVES && valve_index < 16; ++valve_index) // limit considers num valves and bit mask size
+    {
+        if (valve_drivers[valve_index].is_energized())
+        {
+            // mask |= (uint16_t)(1) << valve_index;  // Set bit for this valve
+            mask |= (1u << valve_index);
+        }
+    }
+    return mask;
+}
+
+uint16_t previous_mask = 0; // Initialize to zero or read initial state
 
 void update_app_state() // Called when app.run() is called -- add poke detection here
 {
@@ -685,9 +690,17 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         }
     }
 
+    // Handle valve state changes
+    uint16_t current_mask = get_valve_mask();
+    if (current_mask != previous_mask) {
+        app_regs.ValvesState = current_mask;
+        if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, VALVES_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+        previous_mask = current_mask;
+    }
+
     // Process AuxGPIO input changes.
     // FIXME: do we need to update old_aux_gpio_inputs if we change (write-to)
-    //  app_regs.AuxGPIODir ?
     uint8_t aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
     uint8_t changed_inputs = (old_aux_gpio_inputs ^ aux_gpio_inputs);
     app_regs.AuxGPIORisingInputs = app_regs.AuxGPIOInputRiseEvent & aux_gpio_inputs & changed_inputs;

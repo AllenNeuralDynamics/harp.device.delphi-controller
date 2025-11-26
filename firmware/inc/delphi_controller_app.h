@@ -41,6 +41,9 @@ struct HarpEvent {
     uint64_t timestamp;
 };
 
+//Valves state mask variables
+const uint8_t VALVES_STATE_INDEX_ADDRESS = 32;
+
 // Valve configuration struct for configuring the Hit-and-hold driver
 #pragma pack(push, 1)
 struct ValveConfig
@@ -140,6 +143,12 @@ void camera_timestamp_callback(uint gpio, uint32_t events);
  */
 void push_event_from_isr(uint8_t index, uint64_t timestamp);
 bool pop_event(HarpEvent &event);
+
+/**
+ * \brief function getting valve state mask
+ */
+uint16_t get_valve_mask();
+
 
 /**
  * \brief update the app state. Called in a loop.
