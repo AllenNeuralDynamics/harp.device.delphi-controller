@@ -3,13 +3,12 @@
 # yaml-language-server: $schema=https://harp-tech.org/draft-02/schema/device.json
 device: DelphiController
 whoAmI: 1407
-firmwareVersion: "0.0.0"
-hardwareTargets: "1.0.0"
+firmwareVersion: "0.0"
+hardwareTargets: "1.0"
 registers:
     ValveState:
         address: 32
         type: U16
-        maskType: ValveMask
         access: Event
         description: "Set the enabled/disabled state (enabled = 1) of all valves"
     ValvesSet:
@@ -176,7 +175,7 @@ registers:
     QueuedOdorMask:
         address: 66
         type: U16
-        access: Write
+        access: Event
         description: "Queued odors (value: odor valve mask) that will be delivered to the odor port given a register poke. After odors have been dispensed, the register will be set to 0, which indicates that new odors are needed"
     VacuumCloseTimeUS:
         address: 67
