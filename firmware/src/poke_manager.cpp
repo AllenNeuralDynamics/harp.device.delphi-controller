@@ -10,7 +10,7 @@ poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
 request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
-poke_pin_is_initialized_{false}, valve_state_{false}
+poke_pin_is_initialized_{false}, valve_state_{false}, block_poke_detection_{false}
 {
     reset(); // set timing constants to defaults.
 }
@@ -28,6 +28,7 @@ PokeManager::~PokeManager() //destuctor
     beam_broken_ = false;
     poke_initiated_once_ = false;
     valve_state_ = false;
+    block_poke_detection_ = false;
 }
 
 void PokeManager::deenergize_all_valves()
@@ -45,13 +46,12 @@ void PokeManager::update_poke_status()
     // Beam is no longer broken
     if (!gpio_get(poke_pin_))
     {
-        beam_broken_ == false;
         poke_start_time_us_ = time_us_32();
-        poke_initiated_once_ = false;
-
         if (raw_poke_state_ == 1)
         {
             //falling edge event
+            beam_broken_ == false;
+            poke_initiated_once_ = false;
             raw_poke_fall();
         }
         raw_poke_state_ = 0;  
@@ -63,22 +63,23 @@ void PokeManager::update_poke_status()
         if (raw_poke_state_ == 0)
         {
             //rising edge event
+            beam_broken_ = true;
+            if (!block_poke_detection_)
+            {
+                poke_start_time_us_ = time_us_32();
+            }
+            else 
+            {
+                beam_broken_ = false;  //prevent a poke from being initiated during the state machine
+            }
             raw_poke_rise();
         }
         raw_poke_state_ = 1;  
     }
 
-    // Poke detected during  -- start poke timer
-    if (gpio_get(poke_pin_) && !beam_broken_ && state_ == ODOR_DISPENSING_TO_EXHAUST)
-    {
-        poke_start_time_us_ = time_us_32();
-        beam_broken_ = true;
-    }
-
     // Check duration since beam break/poke
-    if (gpio_get(poke_pin_) && beam_broken_ && state_ == ODOR_DISPENSING_TO_EXHAUST)
+    if (beam_broken_) // Prevent pokes from being registered until correct state
     {
-        //gpio_put(LED_PIN, 1); // Turn on LED whenever the beam is broken
         if ((time_us_32() - poke_start_time_us_) >= min_poke_time_us_ && poke_initiated_once_ == false)
         {
             //Poke was detected!
@@ -105,6 +106,7 @@ void PokeManager::reset()
     poke_state_ = 0;
     poke_detected_ = false;
     beam_broken_ = false;
+    block_poke_detection_ = false;
     poke_initiated_once_ = false;
     valve_state_ = false;
     clear_poke_pin();
@@ -135,6 +137,7 @@ void PokeManager::set_enabled_state(bool enabled)
         beam_broken_ = false;
         poke_initiated_once_ = false;
         valve_state_ = false;
+        block_poke_detection_ = false;
     }
 }
 
@@ -216,17 +219,21 @@ void PokeManager::update()
 
         // Don't need to do anything because odor is being sent to exhaust and
         // we are waiting for a poke
-        if (next_state == ODOR_DISPENSING_TO_EXHAUST){}
+        if (next_state == ODOR_DISPENSING_TO_EXHAUST)
+        {
+            block_poke_detection_ = false;
+        }
 
         if (next_state == ODOR_DELIVERY_TO_FINAL_VALVE)
         {
             final_valve_.energize();
             ++poke_count_;
+            poke_detected_ = false;
+            block_poke_detection_ = true;
+            poke_state_ = 0;
 #if(DEBUG)
             printf("Number of pokes = %i\r\n", poke_count_);
 #endif
-            poke_detected_ = false;
-            poke_state_ = 0;
         }
 
         if (next_state == ODOR_PRECLEAN)

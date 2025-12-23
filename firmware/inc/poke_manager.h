@@ -271,6 +271,7 @@ private:
     bool disable_fsm_;
     bool beam_broken_; //keep track of beam state
     bool poke_initiated_once_; //Only trigger the FSM on 1 poke
+    bool block_poke_detection_;
     ValveDriver& vac_valve_;
     ValveDriver& final_valve_;
 
