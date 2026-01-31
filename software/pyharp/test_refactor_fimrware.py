@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+from pyharp.device import Device
+from pyharp.messages import HarpMessage
+from app_registers_refactor import DelphiOnlyAppRegs
+
+import logging
+
+logger = logging.getLogger()
+logger.addHandler(logging.StreamHandler())
+
+
+# functions
+def print_poke_counts(
+    device,
+):
+    reply = device.send(HarpMessage.ReadU8(DelphiOnlyAppRegs.PokeDometer).frame)
+    print(f"Current pokedometer count is: {reply.payload}.")
+    return None
+
+
+# Open serial connection with the first Valve Controller.
+com_port = "COM8"  #'COM3' #None
+device = Device(com_port)
+device.info()  # Display device's info on screen
+
+print()
+print("Enabling aux gpios 25-29 as outputs")
+# gpio_dir = 32
+# reply = device.send(HarpMessage.WriteU8(AppRegs.AuxGPIODir, gpio_dir).frame)
+# print(f"reply: {reply.payload[0]:08b}")
+# gpio_set = 0b00100000
+# reply = device.send(HarpMessage.WriteU8(AppRegs.AuxGPIOSet, gpio_set).frame)
+# print(f"reply: {reply}")
+# print(f"reply: {reply.payload[0]:08b}")
+# reply = device.send(HarpMessage.WriteU8(AppRegs.AuxGPIOClear, gpio_set).frame)
+# print(f"reply: {reply.payload[0]:08b}")
+
+
+print()
+print_poke_counts(device)
+print("Setting odor.")
+reply = device.send(
+    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0100).frame
+)
+print("Assigning poke pin.")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
+print("Inverting poke pin.")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePinInverted, 1).frame)
+print("Enabling FSM")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame)
+print("Camera Pin")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.CamPin, 26).frame)
+print("FPS")
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 100).frame)
+print("Duty Cycle")
+reply = device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.DutyCycle, 0.5).frame)
+print("Enable")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 1).frame)
+print("Enable Valve LEDS")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
+
+"""Set Timings"""
+print("Min Poke Time")
+reply = device.send(
+    HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 10000).frame
+)
+
+print()
+odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
+print(odor_masks)
+odor_i = -1
+try:
+    while True:
+        for msg in device.get_events():
+            # print(msg)
+            # print()
+            # print_poke_counts(device)
+            # print(f"event address: {msg.address}")
+            # print(f"event payload: {msg.payload[0]}")
+
+            """EVENT BASED ODOR UPDATING"""
+            event_address = msg.address
+            if event_address == 66:
+                event_payload = msg.payload[0]
+                if event_payload == 0:  # -1 previously
+                    odor_i += 1
+                    if odor_i > len(odor_masks) - 1:
+                        odor_i = 0
+                    print(f"New odor index: {odor_masks[odor_i]}")
+                    reply = device.send(
+                        HarpMessage.WriteU16(
+                            DelphiOnlyAppRegs.QueuedOdorMask, odor_masks[odor_i]
+                        ).frame
+                    )
+
+            """VALVE STATE EVENT"""
+            if event_address == 32:
+                event_payload = msg.payload[0]
+                print(f"Valves State: {event_payload}")
+
+except KeyboardInterrupt:
+    print("Disabling FSM.")
+    reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
+    device.disconnect()

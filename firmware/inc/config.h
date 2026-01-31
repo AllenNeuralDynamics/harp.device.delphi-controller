@@ -2,9 +2,10 @@
 #define CONFIG_H
 
 #define NUM_VALVES (16)
-#define NUM_ODOR_VALVES (14)
-#define FINAL_VALVE_INDEX (0)
-#define VACCUM_VALVE_INDEX (1)
+#define NUM_ODOR_VALVES (12)
+#define FINAL_VALVE_INDEX (3)
+#define ODOR_VALVE_INDEX_START (4)
+#define PROPORTIONAL_VALVE_INDEX_START (0)
 #define CAM_TRIGGER_PIN (26)
 #define LED_ENABLE_PIN (4)
 

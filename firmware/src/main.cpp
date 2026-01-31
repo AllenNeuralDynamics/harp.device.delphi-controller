@@ -26,14 +26,16 @@ HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
                                reg_handler_fns, APP_REG_COUNT, update_app_state,
                                reset_app);
 
-    ValveDriver& final_valve = valve_drivers[FINAL_VALVE_INDEX]; 
-    ValveDriver& vac_valve = valve_drivers[VACCUM_VALVE_INDEX];
-    // Consider the rest of the valves as odor delivery valves.
-    ValveDriver* odor_valves_start = valve_drivers + 2;
-    ValveDriver (&odor_valves)[] = *reinterpret_cast<ValveDriver(*)[]>(odor_valves_start);
+
+// Final valve driver
+ValveDriver& final_valve = valve_drivers[FINAL_VALVE_INDEX]; 
+
+// Consider the rest of the valves as odor delivery valves.
+ValveDriver* odor_valves_start = valve_drivers + ODOR_VALVE_INDEX_START; // Odor valves start after the final valve
+ValveDriver (&odor_valves)[] = *reinterpret_cast<ValveDriver(*)[]>(odor_valves_start);
 
 // Pass valves into the poke manager constructor
-PokeManager poke_manager(final_valve, vac_valve, odor_valves, NUM_ODOR_VALVES);
+PokeManager poke_manager(final_valve, odor_valves, NUM_ODOR_VALVES);
 
 // Select Cam pin for the CAM DRIVER constuctor
 CameraDriver cam_driver(CAM_TRIGGER_PIN);

@@ -16,7 +16,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 48;
+inline constexpr size_t APP_REG_COUNT = 45;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -35,7 +35,7 @@ extern CameraDriver cam_driver;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
-static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75;
+static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 72;
 struct HarpEvent {
     uint8_t index;
     uint64_t timestamp;
@@ -93,12 +93,9 @@ struct app_regs_t
     uint8_t FSMEnabledState;
     uint8_t ForceFSM;
     int16_t QueuedOdorMask;
-    uint32_t VacuumCloseTimeUS;
+    uint32_t OdorSetupTimeUS;
     uint32_t MinOdorDeliveryTimeUS;
     uint32_t MaxOdorDeliveryTimeUS;
-    uint32_t OdorTransitionTimeUS;
-    uint32_t VacuumSetupTimeUS;
-    uint32_t FinalValveEnergizedTimeUS;
     uint32_t MinimumPokeTimeUS;
     uint8_t CamPin;
     uint8_t CamPinState;
@@ -136,7 +133,6 @@ void raw_poke_fall(void);
  * \brief callback for camera timestamp
  */
 void camera_timestamp_callback(uint gpio, uint32_t events);
-
 
 /**
  * \brief function for queueing HARP events
@@ -177,12 +173,9 @@ void read_pokedometer(uint8_t reg_address);
 void read_fsm_enabled_state(uint8_t reg_address);
 //void read_force_fsm(uint8_t reg_address); // aliased to read_reg_generic
 void read_current_odors(uint8_t reg_address);
-void read_vacuum_close_time_us(uint8_t reg_address);
+void read_odor_setup_time_us(uint8_t reg_address);
 void read_min_odor_delivery_time_us(uint8_t reg_address);
 void read_max_odor_delivery_time_us(uint8_t reg_address);
-void read_odor_transition_time_us(uint8_t reg_address);
-void read_vacuum_setup_time_us(uint8_t reg_address);
-void read_final_valve_energized_time_us(uint8_t reg_address);
 void read_minimum_poke_time_us(uint8_t reg_address);
 
 void read_cam_pin(uint8_t reg_address);
@@ -208,12 +201,9 @@ void write_poke_pin_inverted(msg_t& msg);
 void write_fsm_enabled_state(msg_t& msg);
 void write_force_fsm(msg_t& msg);
 void write_current_odors(msg_t& msg);
-void write_vacuum_close_time_us(msg_t& msg);
+void write_odor_setup_time_us(msg_t& msg);
 void write_min_odor_delivery_time_us(msg_t& msg);
 void write_max_odor_delivery_time_us(msg_t& msg);
-void write_odor_transition_time_us(msg_t& msg);
-void write_vacuum_setup_time_us(msg_t& msg);
-void write_final_valve_energized_time_us(msg_t& msg);
 void write_minimum_poke_time_us(msg_t& msg);
 
 void write_cam_pin(msg_t& msg);
