@@ -9,7 +9,7 @@ poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
 request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
-poke_pin_is_initialized_{false}, valve_state_{false}, block_poke_detection_{false}
+poke_pin_is_initialized_{false}, block_poke_detection_{false}
 {
     reset(); // set timing constants to defaults.
 }
@@ -26,7 +26,6 @@ PokeManager::~PokeManager() //destuctor
     state_ = RESET;
     beam_broken_ = false;
     poke_initiated_once_ = false;
-    valve_state_ = false;
     block_poke_detection_ = false;
 }
 
@@ -106,7 +105,6 @@ void PokeManager::reset()
     beam_broken_ = false;
     block_poke_detection_ = false;
     poke_initiated_once_ = false;
-    valve_state_ = false;
     clear_poke_pin();
     request_next_odor_callback_fn_ = nullptr;
     request_poke_state_callback_fn_ = nullptr;
@@ -131,7 +129,6 @@ void PokeManager::set_enabled_state(bool enabled)
         poke_state_ = 0;
         beam_broken_ = false;
         poke_initiated_once_ = false;
-        valve_state_ = false;
         block_poke_detection_ = false;
     }
 }
