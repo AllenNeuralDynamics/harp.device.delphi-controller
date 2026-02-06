@@ -269,7 +269,7 @@ private:
     static inline constexpr uint32_t DEFAULT_MIN_ODOR_DELIVERY_TIME_US = 10e3;
     static inline constexpr uint32_t DEFAULT_MAX_ODOR_DELIVERY_TIME_US = 10e6;
     static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
-    static inline constexpr uint8_t DEFAUT_POKE_PIN = GPIO_PIN_BASE;
+    static inline constexpr uint8_t DEFAUT_POKE_PIN = POKE_PIN;
 };
 
 #endif // POKE_MANAGER_H

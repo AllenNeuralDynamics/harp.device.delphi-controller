@@ -711,7 +711,7 @@ void reset_app()
     gpio_init_mask(GPIOS_MASK << GPIO_PIN_BASE);
     gpio_set_dir_masked(GPIOS_MASK << GPIO_PIN_BASE, 0);
 
-    app_regs.AuxGPIODir = 0b11110000; // GPIO pins 25-29 as outputs
+    app_regs.AuxGPIODir = 0b00001110; // GPIO pins 23-25 as outputs
     app_regs.AuxGPIOState = (gpio_get_all() >> GPIO_PIN_BASE) & GPIOS_MASK; //all pins are set low
     app_regs.AuxGPIOSet = 0;
     app_regs.AuxGPIOClear = 0;

@@ -6,7 +6,8 @@
 #define FINAL_VALVE_INDEX (3)
 #define ODOR_VALVE_INDEX_START (4)
 #define PROPORTIONAL_VALVE_INDEX_START (0)
-#define CAM_TRIGGER_PIN (26)
+#define POKE_PIN (22)
+#define CAM_TRIGGER_PIN (23)
 #define LED_ENABLE_PIN (4)
 
 #define UART_TX_PIN (0)
