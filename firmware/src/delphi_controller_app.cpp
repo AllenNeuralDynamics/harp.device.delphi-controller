@@ -396,7 +396,7 @@ void write_fsm_enabled_state(msg_t& msg)
 void write_force_fsm(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    poke_manager.force_poke(); // FIXME: is this the correct way to force the fsm?
+    poke_manager.force_poke();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }

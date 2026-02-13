@@ -153,9 +153,15 @@ try:
         # print(f"Latest ADC Sample: {reply.payload}")
 
         now = time.monotonic()
-        if now - last_print >= 1.0:
+        if now - last_print >= 1.0:  # print and change the valve every 1 second
             print(read_float4_from_u8(reply.payload))
             last_print = now
+
+            # Force Poke
+            print("Forcing poke event.")
+            reply = device.send(
+                HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame
+            )
 
         # # Expect 20 bytes: <Iffff  (little-endian: uint32 + 4 floats)
         # EXPECTED = struct.calcsize("<Iffff")  # 20
