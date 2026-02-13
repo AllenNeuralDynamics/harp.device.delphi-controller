@@ -8,6 +8,9 @@
 #define PROPORTIONAL_VALVE_INDEX_START (0)
 #define POKE_PIN (22)
 #define CAM_TRIGGER_PIN (23)
+#define ADC_PIN_START (26)
+#define ADC_MASK (0x0F)  // Assuming 4 ADC pins, mask is 0b00001111
+#define NUM_ADC_PINS (4)
 #define LED_ENABLE_PIN (4)
 
 #define UART_TX_PIN (0)
@@ -18,7 +21,7 @@ inline constexpr uint32_t VALVE_PIN_BASE = 6;
 inline constexpr uint32_t GPIO_PIN_BASE = 22;
 
 #define VALVES_MASK (0x0000FFFF)
-#define GPIOS_MASK (0x000000FF)
+#define GPIOS_MASK (0x0000000F) // Was 0x000000FF for 8 GPIOs
 
 #define HARP_DEVICE_ID (1409)
 #define HW_VERSION_MAJOR (1)

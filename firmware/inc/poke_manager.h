@@ -22,7 +22,6 @@ public:
         ODOR_DELIVERY_TO_FINAL_VALVE,
     };
 
-
     // Declare constructor
     PokeManager(
         ValveDriver& final_valve, //Pass by reference (work of this org. object)

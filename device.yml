@@ -227,7 +227,32 @@ registers:
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."
-
+    LatestAdcSample:
+        address: 77
+        type: U8
+        access: Read
+        description: "Latest volatage measurement sample from ADC0-3."
+    EnableAdcSampling:
+        address: 78
+        type: U8
+        access: Write
+        description: "Enable (1) and disable (0) ADC sampling."
+    AdcSamplingRate:
+        address: 79
+        type: Float
+        access: Write
+        description: "Set the ADC sampling rate."
+    LeakAdcChannel:
+        address: 80
+        type: S8
+        maskType: AdcMask
+        access: Event
+        description: "Set the ADC channel for leak detection."
+    LeakThreshold:
+        address: 81
+        type: Float
+        access: Write
+        description: "Set the threshold for leak detection."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"
@@ -260,3 +285,10 @@ groupMasks:
             AuxGPIO5: 0x20
             AuxGPIO6: 0x40
             AuxGPIO7: 0x80
+    AdcMask:
+        description: "ADC channel index."
+        values:
+            Adc0: 0x1
+            Adc1: 0x2
+            Adc2: 0x4
+            Adc3: 0x8

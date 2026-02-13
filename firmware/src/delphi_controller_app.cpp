@@ -96,7 +96,12 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.FrameRate, sizeof(app_regs.FrameRate), U32},
     {(uint8_t*)&app_regs.DutyCycle, sizeof(app_regs.DutyCycle), Float},
     {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8},
-    {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8}
+    {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8},
+    {(uint8_t*)&app_regs.LatestAdcSample, sizeof(app_regs.LatestAdcSample), U8},
+    {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
+    {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
+    {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
+    {(uint8_t*)&app_regs.LeakThreshold, sizeof(app_regs.LeakThreshold), Float}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -150,8 +155,82 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_frame_rate, write_frame_rate},
     {read_duty_cycle, write_duty_cycle},
     {read_enable_cam_trigger, write_enable_cam_trigger},
-    {read_valve_leds, write_valve_leds}
+    {read_valve_leds, write_valve_leds},
+
+    // ADC handler functions
+    {read_adc, HarpCore::write_to_read_only_reg_error},
+    {read_adc_enable, write_adc_enable},
+    {read_adc_sampling_rate, write_adc_sampling_rate},
+    {read_leak_adc_channel, write_leak_adc_channel},
+    {read_leak_threshold, write_leak_threshold}
 };
+
+void read_leak_threshold(uint8_t reg_address)
+{
+    app_regs.LeakThreshold = flow_detection.get_leak_threshold();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_leak_threshold(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_leak_threshold(app_regs.LeakThreshold);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_leak_adc_channel(uint8_t reg_address)
+{
+    app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_leak_adc_channel(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_leak_adc(app_regs.LeakAdcChannel);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_adc_sampling_rate(uint8_t reg_address)
+{
+    app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_adc_sampling_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_sampling_rate_hz(app_regs.AdcSamplingRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_adc(uint8_t reg_address)
+{
+    app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address, HarpCore::harp_time_us_64());
+}
+
+void read_adc_enable(uint8_t reg_address)
+{
+    app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_adc_enable(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_sampling_enabled(app_regs.EnableAdcSampling);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_valve_leds(uint8_t reg_address)
 {
@@ -630,6 +709,9 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update Camera Driver FSM 
     cam_driver.update();
 
+    // Update Flow Detection
+    flow_detection.update();
+
     // Handle harp events
     HarpEvent evt;
     while (pop_event(evt)) {
@@ -724,6 +806,14 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
+
+    // Reset flow detection and all related registers
+    flow_detection.reset();
+    app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
+    app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
+    app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
+    app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
+    app_regs.LeakThreshold = flow_detection.get_leak_threshold();
 
     // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
 

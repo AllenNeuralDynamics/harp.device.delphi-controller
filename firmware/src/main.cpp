@@ -40,6 +40,9 @@ PokeManager poke_manager(final_valve, odor_valves, NUM_ODOR_VALVES);
 // Select Cam pin for the CAM DRIVER constuctor
 CameraDriver cam_driver(CAM_TRIGGER_PIN);
 
+// Construct Flow Detection Object
+FlowDetection flow_detection(ADC_MASK, NUM_ADC_PINS);
+
 // Core0 main.
 int main()
 {

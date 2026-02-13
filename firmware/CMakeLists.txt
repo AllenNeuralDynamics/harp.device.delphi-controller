@@ -47,6 +47,10 @@ add_library(valve_driver
     src/valve_driver.cpp
 )
 
+add_library(flow_detection
+    src/flow_detection.cpp
+)
+
 add_library(poke_manager
     src/poke_manager.cpp
 )
@@ -57,12 +61,12 @@ add_library(pwm_pio
 
 include_directories(inc)
 
+target_link_libraries(flow_detection pico_stdlib hardware_adc hardware_dma hardware_irq hardware_clocks hardware_gpio etl::etl)
 target_link_libraries(valve_driver rp2040_pwm pico_stdlib)
 target_link_libraries(poke_manager pico_stdlib valve_driver etl::etl)
 target_link_libraries(pwm_pio hardware_pio pico_stdlib) 
 target_link_libraries(${PROJECT_NAME}
-    harp_core harp_c_app rp2040_pwm poke_manager hardware_pio hardware_gpio pwm_pio valve_driver harp_sync
-    pico_stdlib etl::etl) #pico_stdio_usb
+    harp_core harp_c_app rp2040_pwm poke_manager hardware_pio hardware_gpio pwm_pio valve_driver harp_sync flow_detection pico_stdlib etl::etl) #pico_stdio_usb
 
 if(DEBUG)
     message(WARNING "Debug printf() messages from harp core to UART with baud \

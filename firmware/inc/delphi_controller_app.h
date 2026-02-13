@@ -9,6 +9,7 @@
 #include <valve_driver.h>
 #include <poke_manager.h>
 #include <pwm_pio.h>
+#include <flow_detection.h>
 #include <hardware/gpio.h>
 #ifdef DEBUG
     #include <stdio.h>
@@ -16,7 +17,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 45;
+inline constexpr size_t APP_REG_COUNT = 50;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -31,7 +32,7 @@ extern HarpCApp& app;
 extern ValveDriver valve_drivers[NUM_VALVES];
 extern PokeManager poke_manager;
 extern CameraDriver cam_driver;
-
+extern FlowDetection flow_detection;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
@@ -97,12 +98,21 @@ struct app_regs_t
     uint32_t MinOdorDeliveryTimeUS;
     uint32_t MaxOdorDeliveryTimeUS;
     uint32_t MinimumPokeTimeUS;
+
+    // Camera registers
     uint8_t CamPin;
     uint8_t CamPinState;
     uint32_t FrameRate;
     float DutyCycle;
     uint8_t EnableCamTrigger;
     uint8_t EnableValveLeds;
+
+    // ADC registers
+    FlowDetection::ADC_Samples LatestAdcSample; //Read Only (timestamp + 4 float ADC voltages)
+    uint8_t EnableAdcSampling;
+    float AdcSamplingRate;
+    int8_t LeakAdcChannel;
+    float LeakThreshold;
 };
 #pragma pack(pop)
 
@@ -185,6 +195,12 @@ void read_duty_cycle(uint8_t reg_address);
 void read_enable_cam_trigger(uint8_t reg_address);
 void read_valve_leds(uint8_t reg_address);
 
+void read_adc(uint8_t reg_address);
+void read_adc_enable(uint8_t reg_address);
+void read_adc_sampling_rate(uint8_t reg_address);
+void read_leak_adc_channel(uint8_t reg_address);
+void read_leak_threshold(uint8_t reg_address);
+
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
 void write_valves_clear(msg_t& msg);
@@ -211,5 +227,10 @@ void write_frame_rate(msg_t& msg);
 void write_duty_cycle(msg_t& msg);
 void write_enable_cam_trigger(msg_t& msg);
 void write_valve_leds(msg_t& msg);
+
+void write_adc_enable(msg_t& msg);
+void write_adc_sampling_rate(msg_t& msg);
+void write_leak_adc_channel(msg_t& msg);
+void write_leak_threshold(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H
