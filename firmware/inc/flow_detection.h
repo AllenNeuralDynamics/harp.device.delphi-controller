@@ -67,6 +67,11 @@ public:
     void setup_round_robin();
 
 /**
+ * \brief Detect and initiate events for leaks
+ */
+    void leak_monitor();
+
+/**
  * \brief Configure the sampling rate in Hz.
  */
     void configure_sampling_rate_hz(float sampling_rate_hz);
@@ -167,6 +172,21 @@ public:
         return leak_threshold_;
     }
 
+    inline uint8_t get_leak_state() const
+    {
+        return leak_state_;
+    }
+
+    // Event Handlers
+    inline void leak_state_alert_callback_fn( void (* fn)(void))
+    {leak_state_alert_callback_fn_ = fn;}
+
+    inline void leak_state_alert()
+    {
+        if (leak_state_alert_callback_fn_ != nullptr)
+            leak_state_alert_callback_fn_();
+    }
+
 
 private:
 
@@ -176,10 +196,13 @@ private:
     uint8_t num_adc_chs_;
     float adc_sample_rate_;
     float leak_threshold_;
+    uint8_t leak_state_;
     bool sampling_enabled_;
     int dma_chan_;
     bool dma_complete_;
     ADC_Samples latest_adc_sample_;
+
+    void (*leak_state_alert_callback_fn_)(void);
     
     // DMA handler setup
     static FlowDetection* s_instance_;       // holds the active instance

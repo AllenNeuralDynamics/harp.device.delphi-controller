@@ -59,6 +59,7 @@ class DelphiOnlyAppRegs(IntEnum):
     AdcSamplingRate = 79
     LeakAdcChannel = 80
     LeakThreshold = 81
+    LeakState = 82
 
 
 DelphiAppRegs = IntEnum(

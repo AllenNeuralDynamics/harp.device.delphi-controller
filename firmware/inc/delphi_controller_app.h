@@ -17,7 +17,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 50;
+inline constexpr size_t APP_REG_COUNT = 51;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -113,10 +113,16 @@ struct app_regs_t
     float AdcSamplingRate;
     int8_t LeakAdcChannel;
     float LeakThreshold;
+    uint8_t LeakState;
 };
 #pragma pack(pop)
 
 extern app_regs_t app_regs;
+
+/**
+ * \brief callback function to alert when the leak status changes
+ */
+void leak_state_alert(void);
 
 /**
  * \brief callback function to tell the PC we need another odor from
@@ -200,6 +206,7 @@ void read_adc_enable(uint8_t reg_address);
 void read_adc_sampling_rate(uint8_t reg_address);
 void read_leak_adc_channel(uint8_t reg_address);
 void read_leak_threshold(uint8_t reg_address);
+void read_leak_state(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);

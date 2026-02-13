@@ -2,7 +2,8 @@
 
 FlowDetection::FlowDetection(uint8_t adc_mask, uint8_t num_adc_chs): 
 adc_mask_{adc_mask}, num_adc_chs_{num_adc_chs}, dma_chan_{-1}, dma_complete_{false},
-adc_sample_rate_{DEFAULT_SAMPLE_RATE}, leak_threshold_{DEFAULT_LEAK_THRESHOLD}, sampling_enabled_{false}, leak_adc_{-1}
+adc_sample_rate_{DEFAULT_SAMPLE_RATE}, leak_threshold_{DEFAULT_LEAK_THRESHOLD}, 
+sampling_enabled_{false}, leak_adc_{-1}, leak_state_{0}, leak_state_alert_callback_fn_{nullptr}
 {
     reset();
 }
@@ -57,6 +58,8 @@ FlowDetection::~FlowDetection() {
         dma_chan_ = -1;
     }
     if (s_instance_ == this) s_instance_ = nullptr;
+    leak_state_ = 0; // reset leak state on destruction
+    leak_adc_ = -1; // reset leak ADC on destruction
 }
 
     
@@ -67,8 +70,10 @@ void FlowDetection::reset()
     dma_complete_ = false;
     sampling_enabled_ = false;
     leak_adc_ = -1;
+    leak_state_ = 0;
     setup_round_robin();
     setup_dma();
+    leak_state_alert_callback_fn_ = nullptr;
 }
 
 
@@ -161,6 +166,38 @@ void FlowDetection::setup_round_robin()
     configure_sampling_rate_hz(adc_sample_rate_);
 }
 
+// Monitor for leaks
+void FlowDetection::leak_monitor()
+{
+    // Check if leak detection is configured
+    if (leak_adc_ < 0 || leak_adc_ >= num_adc_chs_) {
+        leak_state_ = 0; // Not configured for leak detection
+        return;
+    }
+
+    // Check if the latest sample for the leak ADC exceeds the threshold
+    float leak_adc_volts = latest_adc_sample_.v[leak_adc_];
+    if (leak_adc_volts < leak_threshold_) {
+        if (leak_state_ == 0)
+        {
+            leak_state_ = 1; // Leak detected
+
+            // Initiate alert
+            leak_state_alert();
+
+        }
+        
+    } else {
+        if (leak_state_ == 1)
+        {
+            leak_state_ = 0; // No leak
+
+            // Initiate alert
+            leak_state_alert();
+        }
+    }
+}
+
 void FlowDetection::update()
 {
     // Only sample if sampling is enabled
@@ -175,5 +212,8 @@ void FlowDetection::update()
         dma_complete_ = false; // reset for next round
         process_adc_samples();
     }
+
+    // Monitor for leaks
+    leak_monitor();
 }
 

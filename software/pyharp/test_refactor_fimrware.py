@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import time
 import struct
 from pyharp.device import Device
 from pyharp.messages import HarpMessage
@@ -92,6 +93,13 @@ print("ADC Sampling Rate")
 reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 10.0).frame
 )
+print("Select Leak ADC Channel")
+reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 0).frame)
+
+print("Select Leak Threshold")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.LeakThreshold, 1.85).frame
+)  # ~75 mL/min flow rate
 
 """Set Timings"""
 print("Min Poke Time")
@@ -103,6 +111,7 @@ print()
 odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
 print(odor_masks)
 odor_i = -1
+last_print = 0.0
 try:
     while True:
         for msg in device.get_events():
@@ -132,12 +141,21 @@ try:
             #     event_payload = msg.payload[0]
             #     print(f"Valves State: {event_payload}")
 
+            """LEAK STATE EVENT"""
+            if event_address == 82:
+                event_payload = msg.payload[0]
+                print(f"Leak State: {event_payload}")
+
         """Read ADC"""
         reply = device.send(
             HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestAdcSample).frame
         )
         # print(f"Latest ADC Sample: {reply.payload}")
-        print(read_float4_from_u8(reply.payload))
+
+        now = time.monotonic()
+        if now - last_print >= 1.0:
+            print(read_float4_from_u8(reply.payload))
+            last_print = now
 
         # # Expect 20 bytes: <Iffff  (little-endian: uint32 + 4 floats)
         # EXPECTED = struct.calcsize("<Iffff")  # 20

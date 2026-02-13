@@ -101,7 +101,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
     {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
     {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
-    {(uint8_t*)&app_regs.LeakThreshold, sizeof(app_regs.LeakThreshold), Float}
+    {(uint8_t*)&app_regs.LeakThreshold, sizeof(app_regs.LeakThreshold), Float},
+    {(uint8_t*)&app_regs.LeakState, sizeof(app_regs.LeakState), U8}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -162,8 +163,16 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_adc_enable, write_adc_enable},
     {read_adc_sampling_rate, write_adc_sampling_rate},
     {read_leak_adc_channel, write_leak_adc_channel},
-    {read_leak_threshold, write_leak_threshold}
+    {read_leak_threshold, write_leak_threshold},
+    {read_leak_state, HarpCore::write_to_read_only_reg_error},
 };
+
+void read_leak_state(uint8_t reg_address)
+{
+    app_regs.LeakState = flow_detection.get_leak_state();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
 
 void read_leak_threshold(uint8_t reg_address)
 {
@@ -530,7 +539,6 @@ void write_valves_clear(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-
 void read_any_valve_config(uint8_t reg_address)
 {
     uint8_t valve_index = reg_address - VALVE_START_APP_ADDRESS;
@@ -543,7 +551,6 @@ void read_any_valve_config(uint8_t reg_address)
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
-
 
 void write_any_valve_config(msg_t& msg)
 {
@@ -616,6 +623,14 @@ void write_aux_gpio_clear(msg_t& msg)
         0);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void leak_state_alert()
+{
+    const uint8_t LEAK_STATE_INDEX_ADDRESS = 82; // FIXME: this is hardcoded.
+    app_regs.LeakState = flow_detection.get_leak_state(); // Update leak state
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, LEAK_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
 void request_next_odor()
@@ -809,12 +824,14 @@ void reset_app()
 
     // Reset flow detection and all related registers
     flow_detection.reset();
+    flow_detection.leak_state_alert_callback_fn(leak_state_alert);
     app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
     app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
     app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
     app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
     app_regs.LeakThreshold = flow_detection.get_leak_threshold();
-
+    app_regs.LeakState = flow_detection.get_leak_state();
+    
     // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
 
 }

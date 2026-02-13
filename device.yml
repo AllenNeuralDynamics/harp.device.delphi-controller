@@ -246,13 +246,18 @@ registers:
         address: 80
         type: S8
         maskType: AdcMask
-        access: Event
-        description: "Set the ADC channel for leak detection."
+        access: Write
+        description: "Set the ADC channel for leak detection. Leak detection is off by Default (-1)."
     LeakThreshold:
         address: 81
         type: Float
         access: Write
         description: "Set the threshold for leak detection."
+    LeakState:
+        address: 82
+        type: U8
+        access: Event
+        description: "Set the state for leak detection."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"
@@ -288,7 +293,7 @@ groupMasks:
     AdcMask:
         description: "ADC channel index."
         values:
-            Adc0: 0x1
-            Adc1: 0x2
-            Adc2: 0x4
-            Adc3: 0x8
+            Adc0: 0
+            Adc1: 1
+            Adc2: 2
+            Adc3: 3
