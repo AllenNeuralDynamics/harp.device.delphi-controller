@@ -94,12 +94,25 @@ reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 10.0).frame
 )
 print("Select Leak ADC Channel")
-reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 0).frame)
+reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 1).frame)
 
 print("Select Leak Threshold")
 reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.LeakThreshold, 1.85).frame
 )  # ~75 mL/min flow rate
+
+print("Select Manual Flow Meter")
+reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 0).frame)
+
+print("Nominal Flow Rate")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.NominalFlowRate, 1.85).frame
+)
+
+print("Flow Rate Tolerance")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.FlowRateTolerance, 0.1).frame
+)
 
 """Set Timings"""
 print("Min Poke Time")
@@ -146,6 +159,11 @@ try:
                 event_payload = msg.payload[0]
                 print(f"Leak State: {event_payload}")
 
+            """MANUAL FLOW METER STATE EVENT"""
+            if event_address == 86:
+                event_payload = msg.payload[0]
+                print(f"Manual Flow Meter State: {event_payload}")
+
         """Read ADC"""
         reply = device.send(
             HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestAdcSample).frame
@@ -157,11 +175,11 @@ try:
             print(read_float4_from_u8(reply.payload))
             last_print = now
 
-            # Force Poke
-            print("Forcing poke event.")
-            reply = device.send(
-                HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame
-            )
+            # # Force Poke
+            # print("Forcing poke event.")
+            # reply = device.send(
+            #     HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame
+            # )
 
         # # Expect 20 bytes: <Iffff  (little-endian: uint32 + 4 floats)
         # EXPECTED = struct.calcsize("<Iffff")  # 20

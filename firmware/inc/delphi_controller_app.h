@@ -17,7 +17,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 51;
+inline constexpr size_t APP_REG_COUNT = 55;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -114,6 +114,12 @@ struct app_regs_t
     int8_t LeakAdcChannel;
     float LeakThreshold;
     uint8_t LeakState;
+
+    // Manual flow meter calibration registers
+    int8_t ManualFlowMeter; // ADC channel used for manual flow meter calibration
+    float NominalFlowRate; // Nominal flow rate for manual flow meter calibration 
+    float FlowRateTolerance; // Tolerance for flow rate detection (e.g., +-0.1 L/min)
+    uint8_t ManualFlowMeterState; // State of manual flow meter (0 = normal, 1 = alert)
 };
 #pragma pack(pop)
 
@@ -123,6 +129,11 @@ extern app_regs_t app_regs;
  * \brief callback function to alert when the leak status changes
  */
 void leak_state_alert(void);
+
+/**
+ * \brief callback function to alert when the manual flow meter status changes
+ */
+void manual_flow_meter_alert(void);
 
 /**
  * \brief callback function to tell the PC we need another odor from
@@ -207,6 +218,10 @@ void read_adc_sampling_rate(uint8_t reg_address);
 void read_leak_adc_channel(uint8_t reg_address);
 void read_leak_threshold(uint8_t reg_address);
 void read_leak_state(uint8_t reg_address);
+void read_manual_flow_meter(uint8_t reg_address);
+void read_nominal_flow_rate(uint8_t reg_address);
+void read_flow_rate_tolerance(uint8_t reg_address);
+void read_manual_flow_meter_state(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -239,5 +254,9 @@ void write_adc_enable(msg_t& msg);
 void write_adc_sampling_rate(msg_t& msg);
 void write_leak_adc_channel(msg_t& msg);
 void write_leak_threshold(msg_t& msg);
+
+void write_manual_flow_meter(msg_t& msg);
+void write_nominal_flow_rate(msg_t& msg);
+void write_flow_rate_tolerance(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H

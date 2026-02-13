@@ -3,7 +3,9 @@
 FlowDetection::FlowDetection(uint8_t adc_mask, uint8_t num_adc_chs): 
 adc_mask_{adc_mask}, num_adc_chs_{num_adc_chs}, dma_chan_{-1}, dma_complete_{false},
 adc_sample_rate_{DEFAULT_SAMPLE_RATE}, leak_threshold_{DEFAULT_LEAK_THRESHOLD}, 
-sampling_enabled_{false}, leak_adc_{-1}, leak_state_{0}, leak_state_alert_callback_fn_{nullptr}
+sampling_enabled_{false}, leak_adc_{-1}, leak_state_{0}, leak_state_alert_callback_fn_{nullptr},
+manual_flow_meter_{-1}, nominal_flow_rate_{DEFAULT_FLOW_RATE}, flow_rate_tolerance_{FLOW_RATE_TOLERANCE},
+ manual_flow_meter_state_{0}, manual_flow_meter_alert_callback_fn_{nullptr}
 {
     reset();
 }
@@ -60,6 +62,8 @@ FlowDetection::~FlowDetection() {
     if (s_instance_ == this) s_instance_ = nullptr;
     leak_state_ = 0; // reset leak state on destruction
     leak_adc_ = -1; // reset leak ADC on destruction
+    manual_flow_meter_ = -1; // reset manual flow meter on destruction
+    manual_flow_meter_state_ = 0; // reset manual flow meter state on destruction
 }
 
     
@@ -70,10 +74,13 @@ void FlowDetection::reset()
     dma_complete_ = false;
     sampling_enabled_ = false;
     leak_adc_ = -1;
+    manual_flow_meter_ = -1;
     leak_state_ = 0;
+    manual_flow_meter_state_ = 0;
     setup_round_robin();
     setup_dma();
     leak_state_alert_callback_fn_ = nullptr;
+    manual_flow_meter_alert_callback_fn_ = nullptr;
 }
 
 
@@ -198,6 +205,39 @@ void FlowDetection::leak_monitor()
     }
 }
 
+// Monitor for manual flow meter events
+void FlowDetection::manual_flow_meter_monitor()
+{
+    // Check if manual flow meter monitoring is configured
+    if (manual_flow_meter_ < 0 || manual_flow_meter_ >= num_adc_chs_) {
+        manual_flow_meter_state_ = 0; // Not configured for manual flow meter monitoring
+        return;
+    }
+
+    // Check if the latest sample for the manual flow meter ADC deviates from nominal by more than tolerance
+    float flow_meter_volts = latest_adc_sample_.v[manual_flow_meter_];
+    float lower_bound = nominal_flow_rate_ - flow_rate_tolerance_;
+    float upper_bound = nominal_flow_rate_ + flow_rate_tolerance_;
+
+    if (flow_meter_volts < lower_bound || flow_meter_volts > upper_bound) {
+        if (manual_flow_meter_state_ == 0)
+        {
+                manual_flow_meter_state_ = 1; // Alert: flow rate out of expected range
+    
+                // Initiate alert
+                manual_flow_meter_alert();
+        }
+    } else {
+        if (manual_flow_meter_state_ == 1)
+        {
+            manual_flow_meter_state_ = 0; // Normal
+    
+            // Initiate alert
+            manual_flow_meter_alert();
+        }
+    }
+}
+
 void FlowDetection::update()
 {
     // Only sample if sampling is enabled
@@ -215,5 +255,8 @@ void FlowDetection::update()
 
     // Monitor for leaks
     leak_monitor();
+
+    // Monitor for manual flow meter events
+    manual_flow_meter_monitor();
 }
 

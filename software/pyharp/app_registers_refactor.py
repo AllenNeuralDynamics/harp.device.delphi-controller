@@ -60,6 +60,10 @@ class DelphiOnlyAppRegs(IntEnum):
     LeakAdcChannel = 80
     LeakThreshold = 81
     LeakState = 82
+    ManualFlowMeter = 83
+    NominalFlowRate = 84
+    FlowRateTolerance = 85
+    ManualFlowMeterState = 86
 
 
 DelphiAppRegs = IntEnum(

@@ -258,6 +258,27 @@ registers:
         type: U8
         access: Event
         description: "Set the state for leak detection."
+    ManualFlowMeter:
+        address: 83
+        type: S8
+        maskType: AdcMask
+        access: Write
+        description: "Set which ADC channel (if any) is being used for manual flow meter calibration. Set to -1 for no manual flow meter calibration."
+    NominalFlowRate:
+        address: 84
+        type: Float
+        access: Write
+        description: "Set the nominal flow rate for manual flow meter calibration."
+    FlowRateTolerance:
+        address: 85
+        type: Float
+        access: Write
+        description: "Set the tolerance for flow rate detection (e.g., +-0.1 mL/min)."
+    ManualFlowMeterState:
+        address: 86
+        type: U8
+        access: Event
+        description: "Set the state for manual flow meter calibration."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"

@@ -102,7 +102,11 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
     {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
     {(uint8_t*)&app_regs.LeakThreshold, sizeof(app_regs.LeakThreshold), Float},
-    {(uint8_t*)&app_regs.LeakState, sizeof(app_regs.LeakState), U8}
+    {(uint8_t*)&app_regs.LeakState, sizeof(app_regs.LeakState), U8},
+    {(uint8_t*)&app_regs.ManualFlowMeter, sizeof(app_regs.ManualFlowMeter), S8},
+    {(uint8_t*)&app_regs.NominalFlowRate, sizeof(app_regs.NominalFlowRate), Float},
+    {(uint8_t*)&app_regs.FlowRateTolerance, sizeof(app_regs.FlowRateTolerance), Float},
+    {(uint8_t*)&app_regs.ManualFlowMeterState, sizeof(app_regs.ManualFlowMeterState), U8}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -165,7 +169,65 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_leak_adc_channel, write_leak_adc_channel},
     {read_leak_threshold, write_leak_threshold},
     {read_leak_state, HarpCore::write_to_read_only_reg_error},
+
+    // Manual flow meter calibration handler functions
+    {read_manual_flow_meter, write_manual_flow_meter},
+    {read_nominal_flow_rate, write_nominal_flow_rate},
+    {read_flow_rate_tolerance, write_flow_rate_tolerance},
+    {read_manual_flow_meter_state, HarpCore::write_to_read_only_reg_error},
 };
+
+void read_manual_flow_meter_state(uint8_t reg_address)
+{
+    app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void read_flow_rate_tolerance(uint8_t reg_address)
+{
+    app_regs.FlowRateTolerance = flow_detection.get_flow_rate_tolerance();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_flow_rate_tolerance(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_flow_rate_tolerance(app_regs.FlowRateTolerance);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_nominal_flow_rate(uint8_t reg_address)
+{
+    app_regs.NominalFlowRate = flow_detection.get_nominal_flow_rate();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_nominal_flow_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_nominal_flow_rate(app_regs.NominalFlowRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_manual_flow_meter(uint8_t reg_address)
+{
+    app_regs.ManualFlowMeter = flow_detection.get_manual_flow_meter();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_manual_flow_meter(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_manual_flow_meter(app_regs.ManualFlowMeter);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_leak_state(uint8_t reg_address)
 {
@@ -633,6 +695,14 @@ void leak_state_alert()
         HarpCore::send_harp_reply(EVENT, LEAK_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
 
+void manual_flow_meter_alert()
+{
+    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 86; // FIXME: this is hardcoded.
+    app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state(); // Update manual flow meter state
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(EVENT, MANUAL_FLOW_METER_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+}
+
 void request_next_odor()
 {
     const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
@@ -825,13 +895,16 @@ void reset_app()
     // Reset flow detection and all related registers
     flow_detection.reset();
     flow_detection.leak_state_alert_callback_fn(leak_state_alert);
+    flow_detection.manual_flow_meter_alert_callback_fn(manual_flow_meter_alert);
     app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
     app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
     app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
     app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
     app_regs.LeakThreshold = flow_detection.get_leak_threshold();
     app_regs.LeakState = flow_detection.get_leak_state();
-    
+    app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state();
+    app_regs.NominalFlowRate = flow_detection.get_nominal_flow_rate();
+    app_regs.FlowRateTolerance = flow_detection.get_flow_rate_tolerance();
     // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
 
 }

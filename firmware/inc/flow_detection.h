@@ -72,6 +72,11 @@ public:
     void leak_monitor();
 
 /**
+ * \brief Detect and initiate events for manual flow meter
+ */
+    void manual_flow_meter_monitor();
+
+/**
  * \brief Configure the sampling rate in Hz.
  */
     void configure_sampling_rate_hz(float sampling_rate_hz);
@@ -100,6 +105,24 @@ public:
     inline void set_leak_adc(int8_t leak_adc)
     {
         leak_adc_ = leak_adc;
+    }
+
+/**
+ * \brief Manual flow meter monitoring
+ */    
+    inline void set_manual_flow_meter(int8_t manual_flow_meter)
+    {
+        manual_flow_meter_ = manual_flow_meter;
+    }
+
+    inline void set_nominal_flow_rate(float nominal_flow_rate)
+    {
+        nominal_flow_rate_ = nominal_flow_rate;
+    }
+
+    inline void set_flow_rate_tolerance(float flow_rate_tolerance)
+    {
+        flow_rate_tolerance_ = flow_rate_tolerance;
     }
 
 /**
@@ -177,6 +200,26 @@ public:
         return leak_state_;
     }
 
+    inline int8_t get_manual_flow_meter() const
+    {
+        return manual_flow_meter_;
+    }
+
+    inline float get_nominal_flow_rate() const
+    {
+        return nominal_flow_rate_;
+    }
+
+    inline float get_flow_rate_tolerance() const
+    {
+        return flow_rate_tolerance_;
+    }
+
+    inline uint8_t get_manual_flow_meter_state() const
+    {
+        return manual_flow_meter_state_;
+    }
+
     // Event Handlers
     inline void leak_state_alert_callback_fn( void (* fn)(void))
     {leak_state_alert_callback_fn_ = fn;}
@@ -187,6 +230,14 @@ public:
             leak_state_alert_callback_fn_();
     }
 
+    inline void manual_flow_meter_alert_callback_fn( void (* fn)(void))
+    {manual_flow_meter_alert_callback_fn_ = fn;}
+
+    inline void manual_flow_meter_alert()
+    {
+        if (manual_flow_meter_alert_callback_fn_ != nullptr)
+            manual_flow_meter_alert_callback_fn_();
+    }
 
 private:
 
@@ -202,7 +253,13 @@ private:
     bool dma_complete_;
     ADC_Samples latest_adc_sample_;
 
+    int8_t manual_flow_meter_;
+    float nominal_flow_rate_;
+    float flow_rate_tolerance_;
+    uint8_t manual_flow_meter_state_;
+
     void (*leak_state_alert_callback_fn_)(void);
+    void (*manual_flow_meter_alert_callback_fn_)(void);
     
     // DMA handler setup
     static FlowDetection* s_instance_;       // holds the active instance
@@ -211,7 +268,9 @@ private:
 
     // Declare Constants
     static inline constexpr float DEFAULT_SAMPLE_RATE = 100.0f; // Sample at 100 Hz
-    static inline constexpr float DEFAULT_LEAK_THRESHOLD = 0.0f; // 75% of max flow
+    static inline constexpr float DEFAULT_LEAK_THRESHOLD = 0.0f; // threshold for leaks
+    static inline constexpr float DEFAULT_FLOW_RATE = 1.85f; // nominal flow rate for flow meter calibration (tune as needed)
+    static inline constexpr float FLOW_RATE_TOLERANCE = 0.1f; // ! +-5mL/min tolerance for flow rate detection (tune as needed)
     // static inline constexpr float ADC_CLKDIV_SLOWDOWN = 2000.0f; // tune as needed for more/less settling time
     static inline constexpr float VREF_VOLTS = 3.3f; // ADC Vref ~3.3V.
     static inline constexpr int  SAMPLES_PER_CHANNEL = 2;; // 1 dummy + 1 kept conversion per channel
