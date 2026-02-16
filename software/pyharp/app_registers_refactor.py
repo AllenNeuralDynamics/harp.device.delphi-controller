@@ -54,7 +54,7 @@ class DelphiOnlyAppRegs(IntEnum):
     DutyCycle = 74
     EnableCamTrigger = 75
     EnableValveLeds = 76
-    LatestAdcSample = 77
+    LatestFlowRate = 77
     EnableAdcSampling = 78
     AdcSamplingRate = 79
     LeakAdcChannel = 80
@@ -64,6 +64,8 @@ class DelphiOnlyAppRegs(IntEnum):
     NominalFlowRate = 84
     FlowRateTolerance = 85
     ManualFlowMeterState = 86
+    CalibrateSlope = 87
+    CalibrateOffset = 88
 
 
 DelphiAppRegs = IntEnum(

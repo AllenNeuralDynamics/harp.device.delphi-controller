@@ -97,7 +97,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.DutyCycle, sizeof(app_regs.DutyCycle), Float},
     {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8},
     {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8},
-    {(uint8_t*)&app_regs.LatestAdcSample, sizeof(app_regs.LatestAdcSample), U8},
+    {(uint8_t*)&app_regs.LatestFlowRate, sizeof(app_regs.LatestFlowRate), U8},
     {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
     {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
     {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
@@ -106,7 +106,9 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.ManualFlowMeter, sizeof(app_regs.ManualFlowMeter), S8},
     {(uint8_t*)&app_regs.NominalFlowRate, sizeof(app_regs.NominalFlowRate), Float},
     {(uint8_t*)&app_regs.FlowRateTolerance, sizeof(app_regs.FlowRateTolerance), Float},
-    {(uint8_t*)&app_regs.ManualFlowMeterState, sizeof(app_regs.ManualFlowMeterState), U8}
+    {(uint8_t*)&app_regs.ManualFlowMeterState, sizeof(app_regs.ManualFlowMeterState), U8},
+    {(uint8_t*)&app_regs.CalibrateSlope, sizeof(app_regs.CalibrateSlope), Float},
+    {(uint8_t*)&app_regs.CalibrateOffset, sizeof(app_regs.CalibrateOffset), Float}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -175,7 +177,39 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_nominal_flow_rate, write_nominal_flow_rate},
     {read_flow_rate_tolerance, write_flow_rate_tolerance},
     {read_manual_flow_meter_state, HarpCore::write_to_read_only_reg_error},
+    {read_calibrate_slope, write_calibrate_slope},
+    {read_calibrate_offset, write_calibrate_offset}
 };
+
+void read_calibrate_slope(uint8_t reg_address)
+{
+    app_regs.CalibrateSlope = flow_detection.get_calibrate_slope();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void read_calibrate_offset(uint8_t reg_address)
+{
+    app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_calibrate_slope(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_calibrate_slope(app_regs.CalibrateSlope);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void write_calibrate_offset(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_calibrate_offset(app_regs.CalibrateOffset);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_manual_flow_meter_state(uint8_t reg_address)
 {
@@ -283,7 +317,7 @@ void write_adc_sampling_rate(msg_t& msg)
 
 void read_adc(uint8_t reg_address)
 {
-    app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
+    app_regs.LatestFlowRate = flow_detection.get_latest_adc_sample();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address, HarpCore::harp_time_us_64());
 }
@@ -896,7 +930,7 @@ void reset_app()
     flow_detection.reset();
     flow_detection.leak_state_alert_callback_fn(leak_state_alert);
     flow_detection.manual_flow_meter_alert_callback_fn(manual_flow_meter_alert);
-    app_regs.LatestAdcSample = flow_detection.get_latest_adc_sample();
+    app_regs.LatestFlowRate = flow_detection.get_latest_adc_sample();
     app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
     app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
     app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
@@ -905,6 +939,8 @@ void reset_app()
     app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state();
     app_regs.NominalFlowRate = flow_detection.get_nominal_flow_rate();
     app_regs.FlowRateTolerance = flow_detection.get_flow_rate_tolerance();
+    app_regs.CalibrateSlope = flow_detection.get_calibrate_slope();
+    app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
     // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
 
 }

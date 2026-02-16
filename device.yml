@@ -227,11 +227,11 @@ registers:
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."
-    LatestAdcSample:
+    LatestFlowRate:
         address: 77
         type: U8
         access: Read
-        description: "Latest volatage measurement sample from ADC0-3."
+        description: "Latest flow rate measurement sample from ADC0-3."
     EnableAdcSampling:
         address: 78
         type: U8
@@ -252,7 +252,7 @@ registers:
         address: 81
         type: Float
         access: Write
-        description: "Set the threshold for leak detection."
+        description: "Set the threshold for leak detection in mL/min."
     LeakState:
         address: 82
         type: U8
@@ -268,7 +268,7 @@ registers:
         address: 84
         type: Float
         access: Write
-        description: "Set the nominal flow rate for manual flow meter calibration."
+        description: "Set the nominal flow rate for manual flow meter calibration in mL/min."
     FlowRateTolerance:
         address: 85
         type: Float
@@ -279,6 +279,16 @@ registers:
         type: U8
         access: Event
         description: "Set the state for manual flow meter calibration."
+    CalibrateSlope:
+        address: 87
+        type: Float
+        access: Write
+        description: "Calibration for the volts to mL/min for flow meter."
+    CalibrateOffset:
+        address: 88
+        type: Float
+        access: Write
+        description: "Calibration for the voltage offset of the flow meter."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"

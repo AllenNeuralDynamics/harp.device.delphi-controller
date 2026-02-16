@@ -98,7 +98,7 @@ reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 1).fra
 
 print("Select Leak Threshold")
 reply = device.send(
-    HarpMessage.WriteFloat(DelphiOnlyAppRegs.LeakThreshold, 1.85).frame
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.LeakThreshold, 60.0).frame
 )  # ~75 mL/min flow rate
 
 print("Select Manual Flow Meter")
@@ -106,18 +106,29 @@ reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 0).fr
 
 print("Nominal Flow Rate")
 reply = device.send(
-    HarpMessage.WriteFloat(DelphiOnlyAppRegs.NominalFlowRate, 1.85).frame
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.NominalFlowRate, 75.0).frame
 )
 
 print("Flow Rate Tolerance")
 reply = device.send(
-    HarpMessage.WriteFloat(DelphiOnlyAppRegs.FlowRateTolerance, 0.1).frame
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.FlowRateTolerance, 5.0).frame
 )
 
 """Set Timings"""
 print("Min Poke Time")
 reply = device.send(
     HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 10000).frame
+)
+
+"""Set Calibrations"""
+print("Calibrate Slope")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateSlope, 0.02).frame
+)
+
+print("Calibrate Offset")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateOffset, 0.5).frame
 )
 
 print()
@@ -166,7 +177,7 @@ try:
 
         """Read ADC"""
         reply = device.send(
-            HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestAdcSample).frame
+            HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestFlowRate).frame
         )
         # print(f"Latest ADC Sample: {reply.payload}")
 

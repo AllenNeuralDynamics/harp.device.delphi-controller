@@ -5,7 +5,8 @@ adc_mask_{adc_mask}, num_adc_chs_{num_adc_chs}, dma_chan_{-1}, dma_complete_{fal
 adc_sample_rate_{DEFAULT_SAMPLE_RATE}, leak_threshold_{DEFAULT_LEAK_THRESHOLD}, 
 sampling_enabled_{false}, leak_adc_{-1}, leak_state_{0}, leak_state_alert_callback_fn_{nullptr},
 manual_flow_meter_{-1}, nominal_flow_rate_{DEFAULT_FLOW_RATE}, flow_rate_tolerance_{FLOW_RATE_TOLERANCE},
- manual_flow_meter_state_{0}, manual_flow_meter_alert_callback_fn_{nullptr}
+ manual_flow_meter_state_{0}, manual_flow_meter_alert_callback_fn_{nullptr}, 
+ conversion_slope_{VOLTS_FLOW_RATE_SLOPE}, conversion_offset_{VOLTS_FLOW_RATE_OFFSET}
 {
     reset();
 }
@@ -81,6 +82,8 @@ void FlowDetection::reset()
     setup_dma();
     leak_state_alert_callback_fn_ = nullptr;
     manual_flow_meter_alert_callback_fn_ = nullptr;
+    conversion_slope_ = VOLTS_FLOW_RATE_SLOPE;
+    conversion_offset_ = VOLTS_FLOW_RATE_OFFSET;
 }
 
 
@@ -141,7 +144,7 @@ void FlowDetection::process_adc_samples() {
     ADC_Samples s{};
     for (int ch = 0; ch < num_adc_chs_; ++ch) {
         uint16_t bits = dma_buf_[kept_base + ch]; // raw ADC value for this channel
-        s.v[ch] = bits_to_volts(bits); // convert to volts
+        s.v[ch] = convert_to_flowrate(bits); // convert to flow rate using conversion function
     }
         
     // // OPTIONAL: Push into ETL vector; drop oldest half if full (non-blocking policy)

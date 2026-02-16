@@ -17,7 +17,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 55;
+inline constexpr size_t APP_REG_COUNT = 57;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -108,7 +108,7 @@ struct app_regs_t
     uint8_t EnableValveLeds;
 
     // ADC registers
-    FlowDetection::ADC_Samples LatestAdcSample; //Read Only (timestamp + 4 float ADC voltages)
+    FlowDetection::ADC_Samples LatestFlowRate; //Read Only (4 float ADC flow rates)
     uint8_t EnableAdcSampling;
     float AdcSamplingRate;
     int8_t LeakAdcChannel;
@@ -120,6 +120,8 @@ struct app_regs_t
     float NominalFlowRate; // Nominal flow rate for manual flow meter calibration 
     float FlowRateTolerance; // Tolerance for flow rate detection (e.g., +-0.1 L/min)
     uint8_t ManualFlowMeterState; // State of manual flow meter (0 = normal, 1 = alert)
+    float CalibrateSlope; // Slope for converting ADC volts to flow rate
+    float CalibrateOffset; // Offset for converting ADC volts to flow rate
 };
 #pragma pack(pop)
 
@@ -222,6 +224,8 @@ void read_manual_flow_meter(uint8_t reg_address);
 void read_nominal_flow_rate(uint8_t reg_address);
 void read_flow_rate_tolerance(uint8_t reg_address);
 void read_manual_flow_meter_state(uint8_t reg_address);
+void read_calibrate_slope(uint8_t reg_address);
+void read_calibrate_offset(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -258,5 +262,7 @@ void write_leak_threshold(msg_t& msg);
 void write_manual_flow_meter(msg_t& msg);
 void write_nominal_flow_rate(msg_t& msg);
 void write_flow_rate_tolerance(msg_t& msg);
+void write_calibrate_slope(msg_t& msg);
+void write_calibrate_offset(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H

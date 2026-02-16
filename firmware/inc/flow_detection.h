@@ -125,6 +125,16 @@ public:
         flow_rate_tolerance_ = flow_rate_tolerance;
     }
 
+    inline void set_calibrate_slope(float calibrate_slope)
+    {
+        conversion_slope_ = calibrate_slope;
+    }
+
+    inline void set_calibrate_offset(float calibrate_offset)
+    {
+        conversion_offset_ = calibrate_offset;
+    }
+
 /**
  * \brief Set sampling enabled or disabled. When disabled, latest sample will be cleared and ADC will not be sampled.
  */
@@ -166,7 +176,7 @@ public:
      //  Struct to store ADC samples
     #pragma pack(push, 1)
     struct ADC_Samples {
-    float    v[NUM_ADC_PINS];   // volts for ADC0..3 (GPIO26..29)
+    float    v[NUM_ADC_PINS];   // flow rate for ADC0..3 (GPIO26..29)
     };
     #pragma pack(pop)
 
@@ -220,6 +230,16 @@ public:
         return manual_flow_meter_state_;
     }
 
+    inline float get_calibrate_slope() const
+    {
+        return conversion_slope_;
+    }
+
+    inline float get_calibrate_offset() const
+    {
+        return conversion_offset_;
+    }
+
     // Event Handlers
     inline void leak_state_alert_callback_fn( void (* fn)(void))
     {leak_state_alert_callback_fn_ = fn;}
@@ -257,6 +277,8 @@ private:
     float nominal_flow_rate_;
     float flow_rate_tolerance_;
     uint8_t manual_flow_meter_state_;
+    float conversion_slope_;
+    float conversion_offset_;
 
     void (*leak_state_alert_callback_fn_)(void);
     void (*manual_flow_meter_alert_callback_fn_)(void);
@@ -267,10 +289,12 @@ private:
     void dma_irq_handler();                  // r
 
     // Declare Constants
+    static inline constexpr float VOLTS_FLOW_RATE_SLOPE = 0.02f; // Conversion factor from volts to flow rate (tune as needed based on flow meter characteristics)
+    static inline constexpr float VOLTS_FLOW_RATE_OFFSET = 0.5f; // Conversion factor from flow rate to volts (tune as needed based on flow meter characteristics)
     static inline constexpr float DEFAULT_SAMPLE_RATE = 100.0f; // Sample at 100 Hz
-    static inline constexpr float DEFAULT_LEAK_THRESHOLD = 0.0f; // threshold for leaks
-    static inline constexpr float DEFAULT_FLOW_RATE = 1.85f; // nominal flow rate for flow meter calibration (tune as needed)
-    static inline constexpr float FLOW_RATE_TOLERANCE = 0.1f; // ! +-5mL/min tolerance for flow rate detection (tune as needed)
+    static inline constexpr float DEFAULT_LEAK_THRESHOLD = 50.0f; // threshold for leaks in mL/min
+    static inline constexpr float DEFAULT_FLOW_RATE = 75.0f; // nominal flow rate in mL/min (tune as needed)
+    static inline constexpr float FLOW_RATE_TOLERANCE = 5.0f; // ! +-5mL/min tolerance for flow rate detection (tune as needed)
     // static inline constexpr float ADC_CLKDIV_SLOWDOWN = 2000.0f; // tune as needed for more/less settling time
     static inline constexpr float VREF_VOLTS = 3.3f; // ADC Vref ~3.3V.
     static inline constexpr int  SAMPLES_PER_CHANNEL = 2;; // 1 dummy + 1 kept conversion per channel
@@ -285,8 +309,10 @@ private:
     // uint32_t sample_capacity_;
 
     // Convert Bits to Volts
-    inline float bits_to_volts(uint16_t bits) {
-        return (bits & 0x0FFF) * (VREF_VOLTS / 4096.0f);
+    inline float convert_to_flowrate(uint16_t bits) {
+        float bits_to_volts = (bits & 0x0FFF) * (VREF_VOLTS / 4096.0f);
+        float volts_to_flow_rate = (bits_to_volts - conversion_offset_) / conversion_slope_;
+        return volts_to_flow_rate;
     }
 };
 
