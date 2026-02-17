@@ -1008,8 +1008,10 @@ void reset_app()
     app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
 
     // GPIO interrupt for camera timestamping
+    cam0_driver.set_pio_pwm_pin(CAM0_TRIGGER_PIN);
+    cam1_driver.set_pio_pwm_pin(CAM1_TRIGGER_PIN);
     gpio_set_irq_enabled_with_callback(CAM0_TRIGGER_PIN, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
-    // gpio_set_irq_enabled(CAM1_TRIGGER_PIN, GPIO_IRQ_EDGE_RISE, true); // Enable IRQ for cam1 using the same handl
+    gpio_set_irq_enabled(CAM1_TRIGGER_PIN, GPIO_IRQ_EDGE_RISE, true); // Enable IRQ for cam1 using the same handl
 
 }
 

@@ -165,10 +165,10 @@ try:
             #     event_payload = msg.payload[0]
             #     print(f"Valves State: {event_payload}")
 
-            """TRIGGER STATE EVENT"""
-            if event_address == 71:
-                event_payload = msg.payload[0]
-                print(f"Trigger State: {event_payload}")
+            # """TRIGGER STATE EVENT"""
+            # if event_address == 71:
+            #     event_payload = msg.payload[0]
+            #     print(f"Trigger State: {event_payload}")
 
             """LEAK STATE EVENT"""
             if event_address == 85:
