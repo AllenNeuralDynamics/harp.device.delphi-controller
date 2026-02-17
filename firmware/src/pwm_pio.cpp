@@ -1,10 +1,9 @@
 #include <pwm_pio.h>
 
-CameraDriver::CameraDriver(uint8_t pwm_pio_pin)
+CameraDriver::CameraDriver(uint8_t pwm_pio_pin, PIO pio, uint sm)
 : pwm_pio_pin_{pwm_pio_pin}, pwm_freq_{DEFAULT_FREQ}, 
 pwm_duty_{DEFAULT_DUTY_CYCLE}, pin_is_initialized_{false},
-sm_{DEFAULT_PIO_SM}, pio_{pio0}, pwm_pin_state_{0}, 
-enable_state_{0} // request_pwm_rise_callback_fn_{nullptr}, request_pwm_fall_callback_fn_{nullptr}
+sm_{sm}, pio_{pio}, pwm_pin_state_{0}, enable_state_{0}
 {
     reset(); // set timing constants to defaults.
 }
@@ -19,9 +18,6 @@ CameraDriver::~CameraDriver() //destuctor
 // Functions to alter the FSM
 void CameraDriver::reset()
 {
-    // request_pwm_rise_callback_fn_ = nullptr; // FOR POOLING EVENTS
-    // request_pwm_fall_callback_fn_ = nullptr;
-    sm_ = DEFAULT_PIO_SM;
     uint offset = pio_add_program(pio_, &pwm_program);
     pwm_init(pio_, sm_, offset, pwm_pio_pin_, enable_state_); 
     pwm_freq_ = DEFAULT_FREQ;

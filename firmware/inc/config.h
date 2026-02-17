@@ -7,7 +7,8 @@
 #define ODOR_VALVE_INDEX_START (4)
 #define PROPORTIONAL_VALVE_INDEX_START (0)
 #define POKE_PIN (22)
-#define CAM_TRIGGER_PIN (23)
+#define CAM0_TRIGGER_PIN (23)
+#define CAM1_TRIGGER_PIN (24)
 #define ADC_PIN_START (26)
 #define ADC_MASK (0x0F)  // Assuming 4 ADC pins, mask is 0b00001111
 #define NUM_ADC_PINS (4)

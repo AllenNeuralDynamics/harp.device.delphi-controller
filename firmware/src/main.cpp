@@ -37,8 +37,11 @@ ValveDriver (&odor_valves)[] = *reinterpret_cast<ValveDriver(*)[]>(odor_valves_s
 // Pass valves into the poke manager constructor
 PokeManager poke_manager(final_valve, odor_valves, NUM_ODOR_VALVES);
 
-// Select Cam pin for the CAM DRIVER constuctor
-CameraDriver cam_driver(CAM_TRIGGER_PIN);
+// Select Cam pin for the CAM0  DRIVER constuctor
+CameraDriver cam0_driver(CAM0_TRIGGER_PIN, pio0, 0);
+
+// Select Cam pin for the CAM1  DRIVER constuctor
+CameraDriver cam1_driver(CAM1_TRIGGER_PIN, pio1, 0);
 
 // Construct Flow Detection Object
 FlowDetection flow_detection(ADC_MASK, NUM_ADC_PINS);

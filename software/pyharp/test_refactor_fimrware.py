@@ -77,14 +77,14 @@ print("Inverting poke pin.")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePinInverted, 1).frame)
 print("Enabling FSM")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame)
-print("Camera Pin")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.CamPin, 23).frame)
-print("FPS")
-reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 10).frame)
-print("Duty Cycle")
-reply = device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.DutyCycle, 0.5).frame)
-print("Enable")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 1).frame)
+print("Camera 0 FPS")
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam0FrameRate, 100).frame)
+print("Camera 0 Enabled")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 1).frame)
+print("Camera 1 FPS")
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam1FrameRate, 30).frame)
+print("Camera 1 Enabled")
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 1).frame)
 print("Enable Valve LEDS")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 print("Enable ADC Sampling")
@@ -165,13 +165,18 @@ try:
             #     event_payload = msg.payload[0]
             #     print(f"Valves State: {event_payload}")
 
+            """TRIGGER STATE EVENT"""
+            if event_address == 71:
+                event_payload = msg.payload[0]
+                print(f"Trigger State: {event_payload}")
+
             """LEAK STATE EVENT"""
-            if event_address == 82:
+            if event_address == 85:
                 event_payload = msg.payload[0]
                 print(f"Leak State: {event_payload}")
 
             """MANUAL FLOW METER STATE EVENT"""
-            if event_address == 86:
+            if event_address == 89:
                 event_payload = msg.payload[0]
                 print(f"Manual Flow Meter State: {event_payload}")
 
@@ -208,5 +213,11 @@ except KeyboardInterrupt:
     reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
     reply = device.send(
         HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame
+    )
+    reply = device.send(
+        HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 0).frame
+    )
+    reply = device.send(
+        HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame
     )
     device.disconnect()

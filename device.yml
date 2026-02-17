@@ -197,95 +197,110 @@ registers:
         type: U32
         access: Write
         description: "Minimum time (in microseconds) necessary for a mouse poke port beam to be broken before being interpretted as a poke."
-    CamPin:
+    Cam0PinState:
         address: 71
-        type: U8
-        access: Write
-        description: "The GPIO output pin used for camera triggering. Default pin is 26."
-    CamPinState:
-        address: 72
         type: U8
         access: Event
         description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
-    FrameRate:
-        address: 73
+    Cam0FrameRate:
+        address: 72
         type: U32
         access: Write
         description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
-    DutyCycle:
-        address: 74
+    Cam0DutyCycle:
+        address: 73
         type: Float
         access: Write
         description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
-    EnableCamTrigger:
+    EnableCam0Trigger:
+        address: 74
+        type: U8
+        access: Write
+        description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
+    Cam1PinState:
         address: 75
+        type: U8
+        access: Event
+        description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
+    Cam1FrameRate:
+        address: 76
+        type: U32
+        access: Write
+        description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
+    Cam1DutyCycle:
+        address: 77
+        type: Float
+        access: Write
+        description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
+    EnableCam1Trigger:
+        address: 78
         type: U8
         access: Write
         description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
     EnableValveLeds:
-        address: 76
+        address: 79
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."
     LatestFlowRate:
-        address: 77
+        address: 80
         type: U8
         access: Read
         description: "Latest flow rate measurement sample from ADC0-3."
     EnableAdcSampling:
-        address: 78
+        address: 81
         type: U8
         access: Write
         description: "Enable (1) and disable (0) ADC sampling."
     AdcSamplingRate:
-        address: 79
+        address: 82
         type: Float
         access: Write
         description: "Set the ADC sampling rate."
     LeakAdcChannel:
-        address: 80
+        address: 83
         type: S8
         maskType: AdcMask
         access: Write
         description: "Set the ADC channel for leak detection. Leak detection is off by Default (-1)."
     LeakThreshold:
-        address: 81
+        address: 84
         type: Float
         access: Write
         description: "Set the threshold for leak detection in mL/min."
     LeakState:
-        address: 82
+        address: 85
         type: U8
         access: Event
         description: "Set the state for leak detection."
     ManualFlowMeter:
-        address: 83
+        address: 86
         type: S8
         maskType: AdcMask
         access: Write
         description: "Set which ADC channel (if any) is being used for manual flow meter calibration. Set to -1 for no manual flow meter calibration."
     NominalFlowRate:
-        address: 84
+        address: 87
         type: Float
         access: Write
         description: "Set the nominal flow rate for manual flow meter calibration in mL/min."
     FlowRateTolerance:
-        address: 85
+        address: 88
         type: Float
         access: Write
         description: "Set the tolerance for flow rate detection (e.g., +-0.1 mL/min)."
     ManualFlowMeterState:
-        address: 86
+        address: 89
         type: U8
         access: Event
         description: "Set the state for manual flow meter calibration."
     CalibrateSlope:
-        address: 87
+        address: 90
         type: Float
         access: Write
         description: "Calibration for the volts to mL/min for flow meter."
     CalibrateOffset:
-        address: 88
+        address: 91
         type: Float
         access: Write
         description: "Calibration for the voltage offset of the flow meter."

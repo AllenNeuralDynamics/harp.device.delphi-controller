@@ -17,7 +17,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 57;
+inline constexpr size_t APP_REG_COUNT = 60;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -31,12 +31,14 @@ extern HarpCApp& app;
 
 extern ValveDriver valve_drivers[NUM_VALVES];
 extern PokeManager poke_manager;
-extern CameraDriver cam_driver;
+extern CameraDriver cam0_driver;
+extern CameraDriver cam1_driver;
 extern FlowDetection flow_detection;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
-static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 72;
+static inline constexpr uint8_t CAM0_PIN_STATE_INDEX_ADDRESS = 71;
+static inline constexpr uint8_t CAM1_PIN_STATE_INDEX_ADDRESS = 75;
 struct HarpEvent {
     uint8_t index;
     uint64_t timestamp;
@@ -99,12 +101,18 @@ struct app_regs_t
     uint32_t MaxOdorDeliveryTimeUS;
     uint32_t MinimumPokeTimeUS;
 
-    // Camera registers
-    uint8_t CamPin;
-    uint8_t CamPinState;
-    uint32_t FrameRate;
-    float DutyCycle;
-    uint8_t EnableCamTrigger;
+    // Camera 0 registers
+    uint8_t Cam0PinState;
+    uint32_t Cam0FrameRate;
+    float Cam0DutyCycle;
+    uint8_t EnableCam0Trigger;
+
+    // Camera 1 registers
+    uint8_t Cam1PinState;
+    uint32_t Cam1FrameRate;
+    float Cam1DutyCycle;
+    uint8_t EnableCam1Trigger;
+
     uint8_t EnableValveLeds;
 
     // ADC registers
@@ -207,11 +215,14 @@ void read_min_odor_delivery_time_us(uint8_t reg_address);
 void read_max_odor_delivery_time_us(uint8_t reg_address);
 void read_minimum_poke_time_us(uint8_t reg_address);
 
-void read_cam_pin(uint8_t reg_address);
-void read_cam_pin_state(uint8_t reg_address);
-void read_frame_rate(uint8_t reg_address);
-void read_duty_cycle(uint8_t reg_address);
-void read_enable_cam_trigger(uint8_t reg_address);
+void read_cam0_pin_state(uint8_t reg_address);
+void read_cam0_frame_rate(uint8_t reg_address);
+void read_cam0_duty_cycle(uint8_t reg_address);
+void read_enable_cam0_trigger(uint8_t reg_address);
+void read_cam1_pin_state(uint8_t reg_address);
+void read_cam1_frame_rate(uint8_t reg_address);
+void read_cam1_duty_cycle(uint8_t reg_address);
+void read_enable_cam1_trigger(uint8_t reg_address);
 void read_valve_leds(uint8_t reg_address);
 
 void read_adc(uint8_t reg_address);
@@ -248,10 +259,12 @@ void write_min_odor_delivery_time_us(msg_t& msg);
 void write_max_odor_delivery_time_us(msg_t& msg);
 void write_minimum_poke_time_us(msg_t& msg);
 
-void write_cam_pin(msg_t& msg);
-void write_frame_rate(msg_t& msg);
-void write_duty_cycle(msg_t& msg);
-void write_enable_cam_trigger(msg_t& msg);
+void write_cam0_frame_rate(msg_t& msg);
+void write_cam0_duty_cycle(msg_t& msg);
+void write_enable_cam0_trigger(msg_t& msg);
+void write_cam1_frame_rate(msg_t& msg);
+void write_cam1_duty_cycle(msg_t& msg);
+void write_enable_cam1_trigger(msg_t& msg);
 void write_valve_leds(msg_t& msg);
 
 void write_adc_enable(msg_t& msg);
