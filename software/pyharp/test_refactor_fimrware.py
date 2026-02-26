@@ -2,8 +2,8 @@
 import time
 import struct
 from pyharp.device import Device
-from pyharp.messages import HarpMessage
-from app_registers_refactor import DelphiOnlyAppRegs
+from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
+from app_registers_refactor import DelphiOnlyAppRegs, AppRegs
 from typing import Iterable, Tuple
 
 import logging
@@ -63,6 +63,31 @@ def read_float4_from_u8(
         raise ValueError(f"Expected 16 bytes for 4 floats, got {len(buf)}")
 
     return struct.unpack("<4f", buf)
+
+
+# Write to U8 Array
+def pack_valve_config(hit_output: float, hold_output: float, hit_duration_us: int):
+    """
+    Convert (float, float, uint32) into a 12-byte U8 array (list of ints).
+    Layout matches C struct: <float, float, uint32>.
+    """
+    payload = struct.pack("<ffI", hit_output, hold_output, hit_duration_us)
+    return payload  # convert bytes → list of uint8
+
+
+# Create payload
+duty_cycle = 1.0
+if duty_cycle > 1.0:
+    duty_cycle = 1.0
+elif duty_cycle < 0.0:
+    duty_cycle = 0.0
+u8_array = pack_valve_config(duty_cycle, duty_cycle, 0)
+
+# print("Energize valve 0 and set hit and hold duty cycle")
+msg = WriteHarpMessage(
+    PayloadType.U8, u8_array, AppRegs.ValveConfigs0, offset=len(u8_array) - 1
+)
+device.send(msg.frame)
 
 
 print()
@@ -130,6 +155,10 @@ print("Calibrate Offset")
 reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateOffset, 0.5).frame
 )
+
+print("Energize valve 0 and set hit and hold duty cycle")
+reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0001).frame)
+
 
 print()
 odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
@@ -220,4 +249,5 @@ except KeyboardInterrupt:
     reply = device.send(
         HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame
     )
+    reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesClear, 0x0001).frame)
     device.disconnect()
