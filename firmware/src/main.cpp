@@ -8,7 +8,6 @@
 #include <poke_manager.h>
 #include <valve_driver.h>
 #include <delphi_controller_app.h>
-#include <pwm_pio.h>
 #ifdef DEBUG
     #include <pico/stdlib.h> // for uart printing
     #include <cstdio> // for printf
@@ -45,6 +44,13 @@ CameraDriver cam1_driver(CAM1_TRIGGER_PIN, pio1, 0);
 
 // Construct Flow Detection Object
 FlowDetection flow_detection(ADC_MASK, NUM_ADC_PINS);
+
+// Construct Proportional Valve Controller
+ValveDriver& proportional_valve_0 = valve_drivers[PROPORTIONAL_VALVE_0_INDEX]; 
+ProportionalValveControl proportional_valve_0_controller (proportional_valve_0, PROPORTIONAL_VALVE_0_ADC_INDEX);
+
+ValveDriver& proportional_valve_1 = valve_drivers[PROPORTIONAL_VALVE_1_INDEX]; 
+ProportionalValveControl proportional_valve_1_controller (proportional_valve_1, PROPORTIONAL_VALVE_1_ADC_INDEX);
 
 // Core0 main.
 int main()

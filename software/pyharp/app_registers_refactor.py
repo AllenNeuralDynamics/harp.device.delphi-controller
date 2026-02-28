@@ -69,6 +69,16 @@ class DelphiOnlyAppRegs(IntEnum):
     ManualFlowMeterState = 89
     CalibrateSlope = 90
     CalibrateOffset = 91
+    PidUpdateFrequency = 92
+    PidGains = 93
+    ProportionalValve0Adc = 94
+    ProportionalValve0EnablePid = 95
+    ProportionalValve0DutyCycle = 96
+    ProportionalValve0TargetFlowRate = 97
+    ProportionalValve1Adc = 98
+    ProportionalValve1EnablePid = 99
+    ProportionalValve1DutyCycle = 100
+    ProportionalValve1TargetFlowRate = 101
 
 
 DelphiAppRegs = IntEnum(

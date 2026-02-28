@@ -304,6 +304,57 @@ registers:
         type: Float
         access: Write
         description: "Calibration for the voltage offset of the flow meter."
+    PidUpdateFrequency:
+        address: 92
+        type: Float
+        access: Write
+        description: "Set the update frequency for the PID controller."
+    PidGains:
+        address: 93
+        type: U8
+        length: 12
+        access: Write
+        description: "Set the PID Kp, Ki, and Kd gains for the controller."
+    ProportionalValve0Adc:
+        address: 94
+        type: U8
+        access: Write
+        description: "Set the ADC channel used for the control of proportional valve 0."
+    ProportionalValve0EnablePid:
+        address: 95
+        type: U8
+        access: Write
+        description: "Enable (1) or disable (0) PID control for proportional valve 0."
+    ProportionalValve0DutyCycle:
+        address: 96
+        type: Float
+        access: Write
+        description: "Set the duty cycle for proportional valve 0."
+    ProportionalValve0TargetFlowRate:
+        address: 97
+        type: Float
+        access: Write
+        description: "Set the target flow rate for proportional valve 0."
+    ProportionalValve1Adc:
+        address: 98
+        type: U8
+        access: Write
+        description: "Set the ADC channel used for the control of proportional valve 1."
+    ProportionalValve1EnablePid:
+        address: 99
+        type: U8
+        access: Write
+        description: "Enable (1) or disable (0) PID control for proportional valve 1."
+    ProportionalValve1DutyCycle:
+        address: 100
+        type: Float
+        access: Write
+        description: "Set the duty cycle for proportional valve 1."
+    ProportionalValve1TargetFlowRate:
+        address: 101
+        type: Float
+        access: Write
+        description: "Set the target flow rate for proportional valve 1."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"

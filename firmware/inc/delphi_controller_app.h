@@ -10,6 +10,7 @@
 #include <poke_manager.h>
 #include <pwm_pio.h>
 #include <flow_detection.h>
+#include <proportional_valve_control.h>
 #include <hardware/gpio.h>
 #ifdef DEBUG
     #include <stdio.h>
@@ -17,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 60;
+inline constexpr size_t APP_REG_COUNT = 70;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -34,6 +35,8 @@ extern PokeManager poke_manager;
 extern CameraDriver cam0_driver;
 extern CameraDriver cam1_driver;
 extern FlowDetection flow_detection;
+extern ProportionalValveControl proportional_valve_0_controller;
+extern ProportionalValveControl proportional_valve_1_controller;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
@@ -54,6 +57,16 @@ struct ValveConfig
     float hit_output;
     float hold_output;
     uint32_t hit_duration_us;
+};
+#pragma pack(pop)
+
+// PID Gains
+#pragma pack(push, 1)
+struct PidConfig
+{
+    float kp;
+    float ki;
+    float kd;
 };
 #pragma pack(pop)
 
@@ -130,6 +143,24 @@ struct app_regs_t
     uint8_t ManualFlowMeterState; // State of manual flow meter (0 = normal, 1 = alert)
     float CalibrateSlope; // Slope for converting ADC volts to flow rate
     float CalibrateOffset; // Offset for converting ADC volts to flow rate
+
+    // Proportional valve PID control
+    // General PID registers
+    float PidUpdateFrequency;
+    PidConfig PidGains;
+
+    //Proportional valve 0 registers
+    uint8_t ProportionalValve0Adc;
+    uint8_t ProportionalValve0EnablePid;
+    float ProportionalValve0DutyCycle;
+    float ProportionalValve0TargetFlowRate;
+
+    //Proportional valve 1 registers
+    uint8_t ProportionalValve1Adc;
+    uint8_t ProportionalValve1EnablePid;
+    float ProportionalValve1DutyCycle;
+    float ProportionalValve1TargetFlowRate;
+    
 };
 #pragma pack(pop)
 
@@ -238,6 +269,17 @@ void read_manual_flow_meter_state(uint8_t reg_address);
 void read_calibrate_slope(uint8_t reg_address);
 void read_calibrate_offset(uint8_t reg_address);
 
+void read_pid_update_frequency(uint8_t reg_address);
+void read_pid_gains(uint8_t reg_address);
+void read_proportional_valve_0_adc(uint8_t reg_address);
+void read_proportional_valve_0_enable_pid(uint8_t reg_address);
+void read_proportional_valve_0_duty_cycle(uint8_t reg_address);
+void read_proportional_valve_0_target_flow_rate(uint8_t reg_address);
+void read_proportional_valve_1_adc(uint8_t reg_address);
+void read_proportional_valve_1_enable_pid(uint8_t reg_address);
+void read_proportional_valve_1_duty_cycle(uint8_t reg_address);
+void read_proportional_valve_1_target_flow_rate(uint8_t reg_address);
+
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
 void write_valves_clear(msg_t& msg);
@@ -277,5 +319,16 @@ void write_nominal_flow_rate(msg_t& msg);
 void write_flow_rate_tolerance(msg_t& msg);
 void write_calibrate_slope(msg_t& msg);
 void write_calibrate_offset(msg_t& msg);
+
+void write_pid_update_frequency(msg_t& msg);
+void write_pid_gains(msg_t& msg);
+void write_proportional_valve_0_adc(msg_t& msg);
+void write_proportional_valve_0_enable_pid(msg_t& msg);
+void write_proportional_valve_0_duty_cycle(msg_t& msg);
+void write_proportional_valve_0_target_flow_rate(msg_t& msg);
+void write_proportional_valve_1_adc(msg_t& msg);
+void write_proportional_valve_1_enable_pid(msg_t& msg);
+void write_proportional_valve_1_duty_cycle(msg_t& msg);
+void write_proportional_valve_1_target_flow_rate(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H

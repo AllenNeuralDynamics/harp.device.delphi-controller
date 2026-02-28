@@ -3,10 +3,12 @@ import time
 import struct
 from pyharp.device import Device
 from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
-from app_registers_refactor import DelphiOnlyAppRegs, AppRegs
+from app_registers_refactor import DelphiOnlyAppRegs
 from typing import Iterable, Tuple
 
 import logging
+import matplotlib.pyplot as plt
+import numpy as np
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -84,8 +86,34 @@ elif duty_cycle < 0.0:
 u8_array = pack_valve_config(duty_cycle, duty_cycle, 0)
 
 # print("Energize valve 0 and set hit and hold duty cycle")
+# msg = WriteHarpMessage(
+#     PayloadType.U8, u8_array, AppRegs.ValveConfigs0, offset=len(u8_array) - 1
+# )
+# device.send(msg.frame)
+
+
+# Write PID gain values
+def pack_pid_config(kp: float, ki: float, kd: float):
+    """
+    Convert (float, float, float) into a 12-byte U8 array (list of ints).
+    Layout matches C struct: <float, float, float>.
+    """
+    payload = struct.pack("<fff", kp, ki, kd)
+    return payload  # convert bytes → list of uint8
+
+
+"""ADJUST GAINS HERE"""
+# pid_gain_array = pack_pid_config(1, 2, 0.1)
+# pid_gain_array = pack_pid_config(1.2, 0.6, 0.1)
+
+pid_gain_array = pack_pid_config(2, 0.75, 0.18)
+
+# print("Energize valve 0 and set hit and hold duty cycle")
 msg = WriteHarpMessage(
-    PayloadType.U8, u8_array, AppRegs.ValveConfigs0, offset=len(u8_array) - 1
+    PayloadType.U8,
+    pid_gain_array,
+    DelphiOnlyAppRegs.PidGains,
+    offset=len(pid_gain_array) - 1,
 )
 device.send(msg.frame)
 
@@ -116,10 +144,10 @@ print("Enable ADC Sampling")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 1).frame)
 print("ADC Sampling Rate")
 reply = device.send(
-    HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 10.0).frame
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 1000.0).frame
 )
 print("Select Leak ADC Channel")
-reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 1).frame)
+reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 3).frame)
 
 print("Select Leak Threshold")
 reply = device.send(
@@ -127,7 +155,7 @@ reply = device.send(
 )  # ~75 mL/min flow rate
 
 print("Select Manual Flow Meter")
-reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 0).frame)
+reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 2).frame)
 
 print("Nominal Flow Rate")
 reply = device.send(
@@ -156,15 +184,56 @@ reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateOffset, 0.5).frame
 )
 
-print("Energize valve 0 and set hit and hold duty cycle")
-reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0001).frame)
+# print("Energize valve 0 and set hit and hold duty cycle")
+# reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0001).frame)
 
+print("Enable PID for Valve 0")
+reply = device.send(
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 1).frame
+)
+
+print("Enable PID for Valve 1")
+reply = device.send(
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 0).frame
+)
+
+print("Set PID Update Frequency")
+reply = device.send(
+    HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).frame
+)
+
+print("Set Target Flow Rate for Valve 0")
+reply = device.send(
+    HarpMessage.WriteFloat(
+        DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 75.0
+    ).frame
+)
+
+print("Set Target Flow Rate for Valve 1")
+reply = device.send(
+    HarpMessage.WriteFloat(
+        DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, 75.0
+    ).frame
+)
+
+print("Set ADC for control of proportional valve 0")
+reply = device.send(
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0Adc, 0).frame
+)
+
+print("Set ADC for control of proportional valve 1")
+reply = device.send(
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1Adc, 1).frame
+)
 
 print()
 odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
 print(odor_masks)
 odor_i = -1
 last_print = 0.0
+t = []
+duty_cycle = []
+flow = []
 try:
     while True:
         for msg in device.get_events():
@@ -216,8 +285,18 @@ try:
         # print(f"Latest ADC Sample: {reply.payload}")
 
         now = time.monotonic()
-        if now - last_print >= 1.0:  # print and change the valve every 1 second
-            print(read_float4_from_u8(reply.payload))
+        if now - last_print >= 0.1:  # print and change the valve every 1 second
+            lastest_flow_rate = read_float4_from_u8(reply.payload)
+            reply = device.send(
+                HarpMessage.ReadFloat(
+                    DelphiOnlyAppRegs.ProportionalValve0DutyCycle
+                ).frame
+            )
+            # print(lastest_flow_rate)
+            print(f"{now}, {lastest_flow_rate[0]}, {reply.payload[0]}")
+            t.append(now)
+            flow.append(lastest_flow_rate[0])
+            duty_cycle.append(reply.payload[0])
             last_print = now
 
             # # Force Poke
@@ -249,5 +328,28 @@ except KeyboardInterrupt:
     reply = device.send(
         HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame
     )
-    reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesClear, 0x0001).frame)
+    # reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesClear, 0x0001).frame)
+    reply = device.send(
+        HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame
+    )
+    reply = device.send(
+        HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 0).frame
+    )
     device.disconnect()
+
+    # Create the primary plot
+    t = np.array(t)
+    fig, ax1 = plt.subplots()
+    ax1.set_xlabel("Time (s)")
+    ax1.set_ylabel("Flow Rate (mL/min)", color="red")
+    ax1.plot(t - t[0], flow, color="red")
+    ax1.tick_params(axis="y", labelcolor="red")
+
+    # Create the secondary y-axis
+    ax2 = ax1.twinx()
+    ax2.set_ylabel("Duty Cycle", color="blue")
+    ax2.plot(t - t[0], duty_cycle, color="blue")
+    ax2.tick_params(axis="y", labelcolor="blue")
+
+    # Show the plot
+    plt.show()

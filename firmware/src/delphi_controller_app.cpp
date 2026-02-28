@@ -116,7 +116,19 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.FlowRateTolerance, sizeof(app_regs.FlowRateTolerance), Float},
     {(uint8_t*)&app_regs.ManualFlowMeterState, sizeof(app_regs.ManualFlowMeterState), U8},
     {(uint8_t*)&app_regs.CalibrateSlope, sizeof(app_regs.CalibrateSlope), Float},
-    {(uint8_t*)&app_regs.CalibrateOffset, sizeof(app_regs.CalibrateOffset), Float}
+    {(uint8_t*)&app_regs.CalibrateOffset, sizeof(app_regs.CalibrateOffset), Float},
+
+    {(uint8_t*)&app_regs.PidUpdateFrequency, sizeof(app_regs.PidUpdateFrequency), Float},
+    {(uint8_t*)&app_regs.PidGains, sizeof(PidConfig), U8},
+
+    {(uint8_t*)&app_regs.ProportionalValve0Adc, sizeof(app_regs.ProportionalValve0Adc), U8},
+    {(uint8_t*)&app_regs.ProportionalValve0EnablePid, sizeof(app_regs.ProportionalValve0EnablePid), U8},
+    {(uint8_t*)&app_regs.ProportionalValve0DutyCycle, sizeof(app_regs.ProportionalValve0DutyCycle), Float},
+    {(uint8_t*)&app_regs.ProportionalValve0TargetFlowRate, sizeof(app_regs.ProportionalValve0TargetFlowRate), Float},
+    {(uint8_t*)&app_regs.ProportionalValve1Adc, sizeof(app_regs.ProportionalValve1Adc), U8},
+    {(uint8_t*)&app_regs.ProportionalValve1EnablePid, sizeof(app_regs.ProportionalValve1EnablePid), U8},
+    {(uint8_t*)&app_regs.ProportionalValve1DutyCycle, sizeof(app_regs.ProportionalValve1DutyCycle), Float},
+    {(uint8_t*)&app_regs.ProportionalValve1TargetFlowRate, sizeof(app_regs.ProportionalValve1TargetFlowRate), Float}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -189,8 +201,187 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_flow_rate_tolerance, write_flow_rate_tolerance},
     {read_manual_flow_meter_state, HarpCore::write_to_read_only_reg_error},
     {read_calibrate_slope, write_calibrate_slope},
-    {read_calibrate_offset, write_calibrate_offset}
+    {read_calibrate_offset, write_calibrate_offset},
+
+    // Proportional valve handler functions
+    {read_pid_update_frequency, write_pid_update_frequency},
+    {read_pid_gains, write_pid_gains},
+
+    {read_proportional_valve_0_adc, write_proportional_valve_0_adc},
+    {read_proportional_valve_0_enable_pid, write_proportional_valve_0_enable_pid},
+    {read_proportional_valve_0_duty_cycle, write_proportional_valve_0_duty_cycle},
+    {read_proportional_valve_0_target_flow_rate, write_proportional_valve_0_target_flow_rate},
+    {read_proportional_valve_1_adc, write_proportional_valve_1_adc},
+    {read_proportional_valve_1_enable_pid, write_proportional_valve_1_enable_pid},
+    {read_proportional_valve_1_duty_cycle, write_proportional_valve_1_duty_cycle},
+    {read_proportional_valve_1_target_flow_rate, write_proportional_valve_1_target_flow_rate}
 };
+
+void read_proportional_valve_0_target_flow_rate(uint8_t reg_address)
+{
+    app_regs.ProportionalValve0TargetFlowRate = proportional_valve_0_controller.get_target_flow_rate();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_0_target_flow_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_0_controller.set_target_flow_rate(app_regs.ProportionalValve0TargetFlowRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_1_target_flow_rate(uint8_t reg_address)
+{
+    app_regs.ProportionalValve1TargetFlowRate = proportional_valve_1_controller.get_target_flow_rate();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_1_target_flow_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_1_controller.set_target_flow_rate(app_regs.ProportionalValve1TargetFlowRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_0_duty_cycle(uint8_t reg_address)
+{
+    app_regs.ProportionalValve0DutyCycle = proportional_valve_0_controller.get_duty_cycle();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_0_duty_cycle(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_0_controller.set_duty_cycle(app_regs.ProportionalValve0DutyCycle);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_1_duty_cycle(uint8_t reg_address)
+{
+    app_regs.ProportionalValve1DutyCycle = proportional_valve_1_controller.get_duty_cycle();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_1_duty_cycle(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_1_controller.set_duty_cycle(app_regs.ProportionalValve1DutyCycle);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_0_enable_pid(uint8_t reg_address)
+{
+    app_regs.ProportionalValve0EnablePid = proportional_valve_0_controller.get_pid_enabled();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_0_enable_pid(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_0_controller.set_pid_enabled(app_regs.ProportionalValve0EnablePid);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_1_enable_pid(uint8_t reg_address)
+{
+    app_regs.ProportionalValve1EnablePid = proportional_valve_1_controller.get_pid_enabled();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_1_enable_pid(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_1_controller.set_pid_enabled(app_regs.ProportionalValve1EnablePid);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_0_adc(uint8_t reg_address)
+{
+    app_regs.ProportionalValve0Adc = proportional_valve_0_controller.get_flow_adc_index();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_0_adc(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_0_controller.set_flow_adc_index(app_regs.ProportionalValve0Adc);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_proportional_valve_1_adc(uint8_t reg_address)
+{
+    app_regs.ProportionalValve1Adc = proportional_valve_1_controller.get_flow_adc_index();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_proportional_valve_1_adc(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_1_controller.set_flow_adc_index(app_regs.ProportionalValve1Adc);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_pid_gains(uint8_t reg_address)
+{
+    PidConfig& pid_cfg = app_regs.PidGains;
+
+    // Update Harp App registers with ValveDriver class contents.
+    pid_cfg.kp = proportional_valve_0_controller.get_kp();
+    pid_cfg.ki = proportional_valve_0_controller.get_ki();
+    pid_cfg.kd = proportional_valve_0_controller.get_kd();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_pid_gains(msg_t& msg)
+{
+
+    HarpCore::copy_msg_payload_to_register(msg);
+    const PidConfig& pid_cfg = app_regs.PidGains;
+
+    // Apply the configuration.
+    proportional_valve_0_controller.set_kp(pid_cfg.kp);
+    proportional_valve_0_controller.set_ki(pid_cfg.ki);
+    proportional_valve_0_controller.set_kd(pid_cfg.kd);
+
+    proportional_valve_1_controller.set_kp(pid_cfg.kp);
+    proportional_valve_1_controller.set_ki(pid_cfg.ki);
+    proportional_valve_1_controller.set_kd(pid_cfg.kd);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_pid_update_frequency(uint8_t reg_address)
+{
+    app_regs.PidUpdateFrequency = proportional_valve_0_controller.get_pid_update_frequency();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_pid_update_frequency(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    proportional_valve_0_controller.set_pid_update_frequency(app_regs.PidUpdateFrequency);  // Both valves share the same PID update frequency.
+    proportional_valve_1_controller.set_pid_update_frequency(app_regs.PidUpdateFrequency);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_calibrate_slope(uint8_t reg_address)
 {
@@ -896,6 +1087,10 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update Flow Detection
     flow_detection.update();
 
+    // Update proportional valve controllers
+    proportional_valve_0_controller.update(flow_detection.get_latest_adc_sample().v[proportional_valve_0_controller.get_flow_adc_index()]);
+    proportional_valve_1_controller.update(flow_detection.get_latest_adc_sample().v[proportional_valve_1_controller.get_flow_adc_index()]);
+
     // Handle harp events
     HarpEvent evt;
     while (pop_event(evt)) {
@@ -1006,6 +1201,17 @@ void reset_app()
     app_regs.FlowRateTolerance = flow_detection.get_flow_rate_tolerance();
     app_regs.CalibrateSlope = flow_detection.get_calibrate_slope();
     app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
+
+    // Reset proportional valve controllers and all related registers
+    proportional_valve_0_controller.reset();
+    app_regs.PidUpdateFrequency = proportional_valve_0_controller.get_pid_update_frequency();
+    app_regs.ProportionalValve0EnablePid = proportional_valve_0_controller.get_pid_enabled();
+    app_regs.ProportionalValve0TargetFlowRate = proportional_valve_0_controller.get_target_flow_rate();
+    app_regs.ProportionalValve0DutyCycle = proportional_valve_0_controller.get_duty_cycle();
+    proportional_valve_1_controller.reset();
+    app_regs.ProportionalValve1EnablePid = proportional_valve_1_controller.get_pid_enabled();
+    app_regs.ProportionalValve1TargetFlowRate = proportional_valve_1_controller.get_target_flow_rate();
+    app_regs.ProportionalValve1DutyCycle = proportional_valve_1_controller.get_duty_cycle();
 
     // GPIO interrupt for camera timestamping
     cam0_driver.set_pio_pwm_pin(CAM0_TRIGGER_PIN);
