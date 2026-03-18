@@ -4,13 +4,14 @@ PokeManager::PokeManager(ValveDriver& final_valve, ValveDriver& vac_valve,
                          ValveDriver (&odor_valves)[], size_t num_odor_valves)
 : final_valve_{final_valve}, vac_valve_{vac_valve}, odor_valves_{odor_valves},
 num_odor_valves_{num_odor_valves},
-state_{RESET}, poke_count_{0}, poke_pin_{DEFAUT_POKE_PIN},
+state_{RESET}, poke_count_{0}, poke_pin_{DEFAULT_POKE_PIN},
 odor_valve_mask_{0}, disable_fsm_{false},
 poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
 request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
-poke_pin_is_initialized_{false}, valve_state_{false}, block_poke_detection_{false}
+poke_pin_is_initialized_{false}, valve_state_{false}, block_poke_detection_{false}, request_initiated_{false}, 
+odor_dwell_time_us_{DEFAULT_ODOR_DWELL_TIME_US}
 {
     reset(); // set timing constants to defaults.
 }
@@ -109,7 +110,10 @@ void PokeManager::reset()
     block_poke_detection_ = false;
     poke_initiated_once_ = false;
     valve_state_ = false;
+    request_initiated_ = false;
+    odor_dwell_time_us_ = DEFAULT_ODOR_DWELL_TIME_US;
     clear_poke_pin();
+    set_poke_pin(DEFAULT_POKE_PIN); // Clear and then set the poke pin to the default one.
     request_next_odor_callback_fn_ = nullptr;
     request_poke_state_callback_fn_ = nullptr;
     request_raw_poke_rise_callback_fn_ = nullptr;
@@ -120,6 +124,7 @@ void PokeManager::reset()
     set_odor_transition_time_us(DEFAULT_ODOR_TRANSITION_TIME_US);
     set_vacuum_setup_time_us(DEFAULT_VACUUM_SETUP_TIME_US);
     set_final_valve_energized_time_us(DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US);
+    set_odor_dwell_time_us(DEFAULT_ODOR_DWELL_TIME_US);
 }
 
 void PokeManager::set_enabled_state(bool enabled)
@@ -141,16 +146,36 @@ void PokeManager::set_enabled_state(bool enabled)
     }
 }
 
+//Check odor selection status
+void PokeManager::check_odor()
+{
+    if (odor_valve_mask_ != 0) return;
+    else if (odor_valve_mask_ == 0  && !request_initiated_ && state_ == ODOR_DISPENSING_TO_EXHAUST) //Only want to send one request for a new odor. 
+    {
+        request_next_odor(); //request
+        request_initiated_ = true; 
+        state_ = RESET; // Transition back to odor setup to wait for the next poke and odor delivery.
+    }   
+    else if (odor_valve_mask_ == 0 && state_ && !request_initiated_ && state_ == ODOR_PURGE) // For rule changes
+    {
+        request_next_odor(); //request
+        request_initiated_ = true; 
+    }        
+}
+
 void PokeManager::update()
 {
     //enabled by default, but if disabled, bail early
     if (disable_fsm_)
         return;
 
+    state_t next_state{state_}; // initialize next-state to current state.
+
     // check for poke
     update_poke_status();
 
-    state_t next_state{state_}; // initialize next-state to current state.
+    // check for odor flag request
+    check_odor();
 
     // Handling next-state logic.
     switch (state_)
@@ -164,14 +189,10 @@ void PokeManager::update()
             if (odor_valve_mask_ == 0){
                 // The odor should be primed before a poke
                 poke_detected_ = false;
-                poke_state_ = 0; 
-            }
-            
-            else if (odor_valve_mask_ > 0 && !valve_state_){
-                energize_odor_valve(); // Need to initiated the event that the odor was consumed before this
             }
             else if (state_duration_us() >= vacuum_close_time_us_  && odor_valve_mask_ != 0)
             {
+                energize_odor_valve();
                 next_state = ODOR_DISPENSING_TO_EXHAUST;
             }
             break;
@@ -183,6 +204,14 @@ void PokeManager::update()
             break;
         case ODOR_DELIVERY_TO_FINAL_VALVE:
             if ((state_duration_us() >= min_odor_delivery_time_us_ && !poke_initiated_once_) || state_duration_us() >= max_odor_delivery_time_us_) //adjust to determine if the beam is still broken after the poke (up to max)
+                next_state = ODOR_DWELL;
+            break;
+        case ODOR_DWELL:  // Wait for additional pokes or until dwell time has elapsed to transition to preclean
+            if (poke_detected_) // poke detected and an odor is primed
+            {
+                next_state = ODOR_DELIVERY_TO_FINAL_VALVE;
+            }
+            else if (state_duration_us() >= odor_dwell_time_us_)
                 next_state = ODOR_PRECLEAN;
             break;
         case ODOR_PRECLEAN:
@@ -222,22 +251,27 @@ void PokeManager::update()
         if (next_state == ODOR_DISPENSING_TO_EXHAUST)
         {
             block_poke_detection_ = false;
+            request_initiated_ = false; // Allow for a new request to be sent for the next odor.
         }
 
         if (next_state == ODOR_DELIVERY_TO_FINAL_VALVE)
         {
             final_valve_.energize();
             ++poke_count_;
+            block_poke_detection_ = true; 
             poke_detected_ = false;
-            block_poke_detection_ = true;
             poke_state_ = 0;
-#if(DEBUG)
-            printf("Number of pokes = %i\r\n", poke_count_);
-#endif
+        }
+
+        if (next_state == ODOR_DWELL)
+        {
+            final_valve_.deenergize();
+            block_poke_detection_ = false; 
         }
 
         if (next_state == ODOR_PRECLEAN)
         {
+            block_poke_detection_ = true;
             final_valve_.deenergize();
         }
 
@@ -250,10 +284,10 @@ void PokeManager::update()
         if (next_state == ODOR_PURGE)
         {
             // Energize the final valve
-            final_valve_.energize();
-            odor_valve_mask_ = 0; // Clear the mask
-            request_next_odor(); //request
-            
+            final_valve_.energize();  
+            // request_next_odor(); //request
+            odor_valve_mask_ = 0; // Clear the mask so that the next odor can be prepared in the queue.    
+            request_initiated_ = false; // Allow for a new request to be sent for the next odor.      
 #if(DEBUG)
             printf("Odor Valves: %i\r\n", odor_valve_mask_); //valve odor index
 #endif

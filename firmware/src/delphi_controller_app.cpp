@@ -94,6 +94,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.VacuumSetupTimeUS, sizeof(app_regs.VacuumSetupTimeUS), U32},
     {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
+    {(uint8_t*)&app_regs.OdorDwellTimeUS, sizeof(app_regs.OdorDwellTimeUS), U32},
     {(uint8_t*)&app_regs.CamPin, sizeof(app_regs.CamPin), U8},
     {(uint8_t*)&app_regs.CamPinState, sizeof(app_regs.CamPinState), U8},
     {(uint8_t*)&app_regs.FrameRate, sizeof(app_regs.FrameRate), U32},
@@ -151,6 +152,7 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_vacuum_setup_time_us, write_vacuum_setup_time_us},
     {read_final_valve_energized_time_us, write_final_valve_energized_time_us},
     {read_minimum_poke_time_us, write_minimum_poke_time_us},
+    {read_odor_dwell_time_us, write_odor_dwell_time_us},
     {read_cam_pin, write_cam_pin}, //Start here
     {read_cam_pin_state, HarpCore::write_to_read_only_reg_error},
     {read_frame_rate, write_frame_rate},
@@ -441,6 +443,20 @@ void write_minimum_poke_time_us(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
+void read_odor_dwell_time_us(uint8_t reg_address)
+{
+    app_regs.OdorDwellTimeUS = poke_manager.get_odor_dwell_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_odor_dwell_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_odor_dwell_time_us(app_regs.OdorDwellTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_valves_state(uint8_t reg_address)
 {
@@ -734,6 +750,7 @@ void reset_app()
     app_regs.VacuumSetupTimeUS = poke_manager.get_vacuum_setup_time_us();
     app_regs.FinalValveEnergizedTimeUS = poke_manager.get_final_valve_energized_time_us();
     app_regs.MinimumPokeTimeUS = poke_manager.get_min_poke_time_us();
+    app_regs.OdorDwellTimeUS = poke_manager.get_odor_dwell_time_us();
 
     //Reset cam driver and all related registers
     cam_driver.reset();
@@ -779,8 +796,5 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
-
-    // gpio_set_irq_enabled_with_callback(26, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
-
 }
 

@@ -20,6 +20,7 @@ public:
         ODOR_SETUP,
         ODOR_DISPENSING_TO_EXHAUST,
         ODOR_DELIVERY_TO_FINAL_VALVE,
+        ODOR_DWELL,
         ODOR_PRECLEAN,
         VAC_START,
         ODOR_PURGE,
@@ -144,6 +145,9 @@ public:
     inline void set_min_poke_time_us(uint32_t min_poke_time_us)
     {min_poke_time_us_ = min_poke_time_us;}
 
+     inline void set_odor_dwell_time_us(uint32_t odor_dwell_time_us)
+    {odor_dwell_time_us_ = odor_dwell_time_us;}
+
     inline void set_poke_pin(uint8_t pin)
     {
         clear_poke_pin();
@@ -162,7 +166,7 @@ public:
             return;
         set_poke_pin_override_state(GPIO_OVERRIDE_NORMAL);
         gpio_deinit(poke_pin_);
-        poke_pin_ = DEFAUT_POKE_PIN;
+        poke_pin_ = DEFAULT_POKE_PIN;
         poke_pin_is_initialized_ = false;
     }
 
@@ -233,6 +237,9 @@ public:
     inline uint32_t get_min_poke_time_us() const
     {return min_poke_time_us_;}
 
+    inline uint32_t get_odor_dwell_time_us() const
+    {return odor_dwell_time_us_;}
+
 private:
 
 /**
@@ -246,6 +253,10 @@ private:
     inline void poke()
     {poke_detected_ = true;}
 
+/**
+ * \brief check for odor flag (-1) so that a new odor is requested. 
+ */
+    void check_odor();
 
 /**
  * \brief time we've been in the current state.
@@ -272,6 +283,7 @@ private:
     bool beam_broken_; //keep track of beam state
     bool poke_initiated_once_; //Only trigger the FSM on 1 poke
     bool block_poke_detection_;
+    bool request_initiated_;
     ValveDriver& vac_valve_;
     ValveDriver& final_valve_;
 
@@ -285,6 +297,7 @@ private:
     uint32_t vac_setup_time_us_;
     uint32_t final_valve_energized_time_us_;
     uint32_t min_poke_time_us_;
+    uint32_t odor_dwell_time_us_;
 
     void (*request_next_odor_callback_fn_)(void);
     void (*request_poke_state_callback_fn_)(void);
@@ -300,8 +313,9 @@ private:
     static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3;
     static inline constexpr uint32_t DEFAULT_VACUUM_SETUP_TIME_US = 20e3;
     static inline constexpr uint32_t DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_DWELL_TIME_US = 150e3;
     static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
-    static inline constexpr uint8_t DEFAUT_POKE_PIN = GPIO_PIN_BASE;
+    static inline constexpr uint8_t DEFAULT_POKE_PIN = GPIO_PIN_BASE;
 };
 
 #endif // POKE_MANAGER_H

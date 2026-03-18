@@ -4,6 +4,7 @@ from pyharp.messages import HarpMessage
 from app_registers import AppRegs, DelphiOnlyAppRegs
 
 import logging
+import msvcrt
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -19,7 +20,7 @@ def print_poke_counts(
 
 
 # Open serial connection with the first Valve Controller.
-com_port = "COM5"  #'COM3' #None
+com_port = "COM20"  #'COM3' #None
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -40,7 +41,7 @@ print()
 print_poke_counts(device)
 print("Setting odor.")
 reply = device.send(
-    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame
+    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0010).frame
 )
 print("Assigning poke pin.")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
@@ -55,9 +56,9 @@ reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 100).frame
 print("Duty Cycle")
 reply = device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.DutyCycle, 0.5).frame)
 print("Enable")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 1).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 0).frame)
 print("Enable Valve LEDS")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 0).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 
 """Set Timings"""
 # print("Set Odor Delivery Time")
@@ -66,27 +67,32 @@ reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 0).fr
 # reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FinalValveEnergizedTimeUS, 20000).frame)
 print("Min Poke Time")
 reply = device.send(
-    HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 10000).frame
+    HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 50000).frame
+)
+
+print("Odor Dwell Time")
+reply = device.send(
+    HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 1000000).frame
+)
+
+print("Final Valve Energized Time")
+reply = device.send(
+    HarpMessage.WriteU32(DelphiOnlyAppRegs.FinalValveEnergizedTimeUS, 110000).frame
 )
 
 print()
-odor_masks = [0x0002, 0x0004, 0x0008, 0x0003, 0x000F]
+odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
 print(odor_masks)
 odor_i = -1
 try:
     while True:
         for msg in device.get_events():
-            # print(msg)
-            # print()
-            # print_poke_counts(device)
-            # print(f"event address: {msg.address}")
-            # print(f"event payload: {msg.payload[0]}")
-
             """EVENT BASED ODOR UPDATING"""
             event_address = msg.address
             if event_address == 66:
                 event_payload = msg.payload[0]
-                if event_payload == 0:  # -1 previously
+                print(f"Queued Odor Mask: {event_payload:016b}")
+                if event_payload == 0:
                     odor_i += 1
                     if odor_i > len(odor_masks) - 1:
                         odor_i = 0
@@ -101,6 +107,17 @@ try:
             if event_address == 32:
                 event_payload = msg.payload[0]
                 print(f"Valves State: {event_payload}")
+
+        """Key press based odor updating"""
+
+        if msvcrt.kbhit():  # A key was pressed
+            key = msvcrt.getwch()  # Read the key (unicode)
+            if key == "n":
+                print(f"Key press odor change: {0}")
+                reply = device.send(
+                    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0).frame
+                )
+
         # reply = device.send(HarpMessage.ReadU16(AppRegs.ValvesState).frame)
         # if reply.payload[0] != 0:
         # print(f"Valves State: {reply.payload[0]:16b}")

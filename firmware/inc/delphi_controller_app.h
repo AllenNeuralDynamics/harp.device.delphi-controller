@@ -16,7 +16,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 48;
+inline constexpr size_t APP_REG_COUNT = 49;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -35,7 +35,7 @@ extern CameraDriver cam_driver;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
-static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 75;
+static inline constexpr uint8_t CAM_PIN_STATE_INDEX_ADDRESS = 76;
 struct HarpEvent {
     uint8_t index;
     uint64_t timestamp;
@@ -100,6 +100,7 @@ struct app_regs_t
     uint32_t VacuumSetupTimeUS;
     uint32_t FinalValveEnergizedTimeUS;
     uint32_t MinimumPokeTimeUS;
+    uint32_t OdorDwellTimeUS;
     uint8_t CamPin;
     uint8_t CamPinState;
     uint32_t FrameRate;
@@ -184,7 +185,7 @@ void read_odor_transition_time_us(uint8_t reg_address);
 void read_vacuum_setup_time_us(uint8_t reg_address);
 void read_final_valve_energized_time_us(uint8_t reg_address);
 void read_minimum_poke_time_us(uint8_t reg_address);
-
+void read_odor_dwell_time_us(uint8_t reg_address);
 void read_cam_pin(uint8_t reg_address);
 void read_cam_pin_state(uint8_t reg_address);
 void read_frame_rate(uint8_t reg_address);
@@ -215,7 +216,7 @@ void write_odor_transition_time_us(msg_t& msg);
 void write_vacuum_setup_time_us(msg_t& msg);
 void write_final_valve_energized_time_us(msg_t& msg);
 void write_minimum_poke_time_us(msg_t& msg);
-
+void write_odor_dwell_time_us(msg_t& msg);
 void write_cam_pin(msg_t& msg);
 void write_frame_rate(msg_t& msg);
 void write_duty_cycle(msg_t& msg);
