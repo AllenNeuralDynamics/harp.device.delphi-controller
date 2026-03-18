@@ -19,7 +19,7 @@ def print_poke_counts(
 
 
 # Open serial connection with the first Valve Controller.
-com_port = "COM5"  #'COM3' #None
+com_port = "COM20"  #'COM3' #None
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -55,9 +55,9 @@ reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.FrameRate, 100).frame
 print("Duty Cycle")
 reply = device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.DutyCycle, 0.5).frame)
 print("Enable")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 1).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCamTrigger, 0).frame)
 print("Enable Valve LEDS")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 0).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 
 """Set Timings"""
 # print("Set Odor Delivery Time")
