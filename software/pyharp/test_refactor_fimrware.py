@@ -7,8 +7,6 @@ from app_registers_refactor import DelphiOnlyAppRegs
 from typing import Iterable, Tuple
 
 import logging
-import matplotlib.pyplot as plt
-import numpy as np
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -24,7 +22,7 @@ def print_poke_counts(
 
 
 # Open serial connection with the first Valve Controller.
-com_port = "COM8"  #'COM3' #None
+com_port = "COM20"  #'COM3' #None
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -124,8 +122,8 @@ print("Setting odor.")
 reply = device.send(
     HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0100).frame
 )
-print("Assigning poke pin.")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
+# print("Assigning poke pin.")
+# reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
 print("Inverting poke pin.")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePinInverted, 1).frame)
 print("Enabling FSM")
@@ -133,11 +131,11 @@ reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).fr
 print("Camera 0 FPS")
 reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam0FrameRate, 100).frame)
 print("Camera 0 Enabled")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 1).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 0).frame)
 print("Camera 1 FPS")
 reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam1FrameRate, 30).frame)
 print("Camera 1 Enabled")
-reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 1).frame)
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame)
 print("Enable Valve LEDS")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 print("Enable ADC Sampling")
@@ -189,7 +187,7 @@ reply = device.send(
 
 print("Enable PID for Valve 0")
 reply = device.send(
-    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 1).frame
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame
 )
 
 print("Enable PID for Valve 1")
@@ -223,7 +221,12 @@ reply = device.send(
 
 print("Set ADC for control of proportional valve 1")
 reply = device.send(
-    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1Adc, 1).frame
+    HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1Adc, 0).frame
+)
+
+print("Set Odor Dwell Time")
+reply = device.send(
+    HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 500000).frame
 )
 
 print()
@@ -293,11 +296,11 @@ try:
                 ).frame
             )
             # print(lastest_flow_rate)
-            print(f"{now}, {lastest_flow_rate[0]}, {reply.payload[0]}")
-            t.append(now)
-            flow.append(lastest_flow_rate[0])
-            duty_cycle.append(reply.payload[0])
-            last_print = now
+            # print(f"{now}, {lastest_flow_rate[0]}, {reply.payload[0]}")
+            # t.append(now)
+            # flow.append(lastest_flow_rate[0])
+            # duty_cycle.append(reply.payload[0])
+            # last_print = now
 
             # # Force Poke
             # print("Forcing poke event.")
@@ -338,18 +341,18 @@ except KeyboardInterrupt:
     device.disconnect()
 
     # Create the primary plot
-    t = np.array(t)
-    fig, ax1 = plt.subplots()
-    ax1.set_xlabel("Time (s)")
-    ax1.set_ylabel("Flow Rate (mL/min)", color="red")
-    ax1.plot(t - t[0], flow, color="red")
-    ax1.tick_params(axis="y", labelcolor="red")
+    # t = np.array(t)
+    # fig, ax1 = plt.subplots()
+    # ax1.set_xlabel("Time (s)")
+    # ax1.set_ylabel("Flow Rate (mL/min)", color="red")
+    # ax1.plot(t - t[0], flow, color="red")
+    # ax1.tick_params(axis="y", labelcolor="red")
 
-    # Create the secondary y-axis
-    ax2 = ax1.twinx()
-    ax2.set_ylabel("Duty Cycle", color="blue")
-    ax2.plot(t - t[0], duty_cycle, color="blue")
-    ax2.tick_params(axis="y", labelcolor="blue")
+    # # Create the secondary y-axis
+    # ax2 = ax1.twinx()
+    # ax2.set_ylabel("Duty Cycle", color="blue")
+    # ax2.plot(t - t[0], duty_cycle, color="blue")
+    # ax2.tick_params(axis="y", labelcolor="blue")
 
-    # Show the plot
-    plt.show()
+    # # Show the plot
+    # plt.show()

@@ -91,6 +91,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.MinOdorDeliveryTimeUS, sizeof(app_regs.MinOdorDeliveryTimeUS), U32},
     {(uint8_t*)&app_regs.MaxOdorDeliveryTimeUS, sizeof(app_regs.MaxOdorDeliveryTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
+    {(uint8_t*)&app_regs.OdorDwellTimeUS, sizeof(app_regs.OdorDwellTimeUS), U32},
 
     // Camera 0 specs
     {(uint8_t*)&app_regs.Cam0PinState, sizeof(app_regs.Cam0PinState), U8},
@@ -177,6 +178,7 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_min_odor_delivery_time_us, write_min_odor_delivery_time_us},
     {read_max_odor_delivery_time_us, write_max_odor_delivery_time_us},
     {read_minimum_poke_time_us, write_minimum_poke_time_us},
+    {read_odor_dwell_time_us, write_odor_dwell_time_us},
     {read_cam0_pin_state, HarpCore::write_to_read_only_reg_error},
     {read_cam0_frame_rate, write_cam0_frame_rate},
     {read_cam0_duty_cycle, write_cam0_duty_cycle},
@@ -782,6 +784,21 @@ void write_min_odor_delivery_time_us(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
+void read_odor_dwell_time_us(uint8_t reg_address)
+{
+    app_regs.OdorDwellTimeUS = poke_manager.get_odor_dwell_time_us();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_odor_dwell_time_us(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.set_odor_dwell_time_us(app_regs.OdorDwellTimeUS);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
 void read_max_odor_delivery_time_us(uint8_t reg_address)
 {
     app_regs.MaxOdorDeliveryTimeUS = poke_manager.get_max_odor_delivery_time_us();
@@ -962,7 +979,7 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void leak_state_alert()
 {
-    const uint8_t LEAK_STATE_INDEX_ADDRESS = 85; // FIXME: this is hardcoded.
+    const uint8_t LEAK_STATE_INDEX_ADDRESS = 86; // FIXME: this is hardcoded.
     app_regs.LeakState = flow_detection.get_leak_state(); // Update leak state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, LEAK_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -970,7 +987,7 @@ void leak_state_alert()
 
 void manual_flow_meter_alert()
 {
-    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 89; // FIXME: this is hardcoded.
+    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 90; // FIXME: this is hardcoded.
     app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state(); // Update manual flow meter state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, MANUAL_FLOW_METER_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -1140,6 +1157,7 @@ void reset_app()
     app_regs.MinOdorDeliveryTimeUS = poke_manager.get_min_odor_delivery_time_us();
     app_regs.MaxOdorDeliveryTimeUS = poke_manager.get_max_odor_delivery_time_us();
     app_regs.MinimumPokeTimeUS = poke_manager.get_min_poke_time_us();
+    app_regs.OdorDwellTimeUS = poke_manager.get_odor_dwell_time_us();
 
     //Reset cam driver and all related registers
     cam0_driver.reset();
