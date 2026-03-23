@@ -114,63 +114,6 @@ void ProportionalValveControl::pid_controller()
 }
 
 
-// void ProportionalValveControl::pid_controller()
-// {
-//     const float dt = (1.0f / update_rate_hz_);
-
-//     // --- existing PID body (as we last wrote) ---
-//     const float error = target_flow_rate_ - current_flow_rate_;
-//     const float d_raw = (dt > 1e-6f) ? (error - previous_error_) / dt : 0.0f;
-
-//     float u_unclamped = kp_ * error + ki_ * integral_error_ + kd_ * d_raw;
-
-//     float u_sat = u_unclamped;
-//     if (u_sat < 0.0f) u_sat = 0.0f;
-//     if (u_sat > 1.0f) u_sat = 1.0f;
-
-//     const bool sat_high = (u_unclamped > 1.0f);
-//     const bool sat_low  = (u_unclamped < 0.0f);
-//     const bool allow_i =
-//         (!sat_high && !sat_low) ||
-//         (sat_high && (error < 0.0f)) ||
-//         (sat_low  && (error > 0.0f));
-
-//     if (allow_i) {
-//         integral_error_ += error * dt;
-//         // Clamp |Ki * I| <= 0.5 of output span
-//         if (ki_ > 0.0f) {
-//             const float Iabs_max = 0.5f / ki_;
-//             if (integral_error_ >  Iabs_max) integral_error_ =  Iabs_max;
-//             if (integral_error_ < -Iabs_max) integral_error_ = -Iabs_max;
-//         }
-//     }
-
-//     // Recompute and clamp in [0,1]
-//     float u_cmd = kp_ * error + ki_ * integral_error_ + kd_ * d_raw;
-//     if (u_cmd < 0.0f) u_cmd = 0.0f;
-//     if (u_cmd > 1.0f) u_cmd = 1.0f;
-
-//     // --- NEW: Slew-rate limiter in controller space ---
-//     static float u_prev = 0.0f;            // if you prefer, make this a member (u_prev_)
-//     const float du_max_per_s = 0.6f;       // tune: 0.3–1.0 (full-scale per second)
-//     const float du_step = du_max_per_s * dt;
-//     float du = u_cmd - u_prev;
-//     if (du >  du_step) u_cmd = u_prev + du_step;
-//     if (du < -du_step) u_cmd = u_prev - du_step;
-//     if (u_cmd < 0.0f) u_cmd = 0.0f;
-//     if (u_cmd > 1.0f) u_cmd = 1.0f;
-//     u_prev = u_cmd;
-
-//     duty_cycle_ = u_cmd;
-
-//     // IMPORTANT: Deadband linearization should be applied OUTSIDE the PID.
-//     // For now we leave your direct hold write as-is, but ideally map:
-//     // duty_hold = D_MIN + duty_cycle_ * (D_MAX - D_MIN)
-//     proportional_valve_.set_normalized_hold_output(duty_cycle_);
-
-//     previous_error_ = error;
-// }
-
 void ProportionalValveControl::update(float current_flow_rate)
 {
     // Check the valve state and energize/deenergize the valve or exit the loop needed before running PID controller
