@@ -12,18 +12,11 @@
 
 #include "config.h"
 
-#define NUM_ADC_CHS (__builtin_popcount(ADC_MASK))
 
 class FlowDetection
 {
 public:
-    #pragma pack(push, 1)
-    struct ADC_Samples {
-        float v[NUM_ADC_CHS];
-    };
-    #pragma pack(pop)
-
-    FlowDetection(uint8_t adc_mask);
+    FlowDetection(uint8_t max_adc_chs);
     ~FlowDetection();
 
     void reset();
@@ -32,6 +25,7 @@ public:
     void prepare_adc_pins();
     void sample_adc();
     void clear_latest_sample();
+    void configure_adc_mask(uint8_t adc_mask);
 
     void setup_dma();
     void leak_monitor();
@@ -42,6 +36,12 @@ public:
     {
         adc_sample_rate_ = adc_sampling_rate;
     }
+
+    inline void set_adc_mask(uint8_t adc_mask)
+    {
+        configure_adc_mask(adc_mask);
+    }
+
 
     inline void set_leak_threshold(float leak_threshold)
     {
@@ -79,9 +79,25 @@ public:
     }
 
     // Register reads
-    inline ADC_Samples get_latest_adc_sample() const
+    #pragma pack(push, 1)
+    struct ADC_Samples {
+        float v[MAX_ADC_CHS];
+    };
+    #pragma pack(pop)
+    
+    inline int8_t get_adc_mask() const
+    {
+        return adc_mask_;
+    }
+
+    inline const ADC_Samples& get_latest_adc_sample() const
     {
         return latest_adc_sample_;
+    }
+
+    inline const ADC_Samples& get_latest_raw_adc_sample() const
+    {
+        return latest_raw_adc_sample_;
     }
 
     inline bool get_adc_enabled_status() const
@@ -210,7 +226,9 @@ public:
 
 private:
     uint8_t adc_mask_;
-    uint8_t num_adc_chs_;
+    uint8_t active_adc_count_;
+    uint8_t active_adc_channels_[MAX_ADC_CHS];
+    uint8_t max_adc_chs_;
 
     float adc_sample_rate_;
     bool sampling_enabled_;
@@ -236,7 +254,7 @@ private:
     volatile uint8_t current_channel_;
 
     ADC_Samples latest_adc_sample_;
-    ADC_Samples latest_flow_measurements_;
+    ADC_Samples latest_raw_adc_sample_;
 
     void (*leak_state_alert_callback_fn_)(void);
     void (*manual_flow_meter_alert_callback_fn_)(void);
@@ -246,6 +264,7 @@ private:
     void dma_irq_handler();
 
     static inline spi_inst_t* SPI_PORT = spi1;
+    static inline constexpr uint8_t DEFAULT_ADC_MASK = 0x1F;
     static inline constexpr float ADC_BITS = 1023.0f;
     static inline constexpr float VREF_VOLTS = 3.3f;
     static inline constexpr float DEFAULT_SAMPLE_RATE = 100.0f;
@@ -253,7 +272,7 @@ private:
     static inline constexpr float DEFAULT_FLOW_RATE = 75.0f;
     static inline constexpr float FLOW_RATE_TOLERANCE = 5.0f; // ! +-5mL/min tolerance for flow rate detection (tune as needed)
 
-    static inline constexpr float VOLTS_FLOW_RATE_SLOPE = 0.02f;
+    static inline constexpr float VOLTS_FLOW_RATE_SLOPE = 0.02f;  // delete these
     static inline constexpr float VOLTS_FLOW_RATE_OFFSET = 0.5f;
 
     inline float convert_to_flowrate(uint16_t bits) const

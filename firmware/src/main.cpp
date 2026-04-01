@@ -43,7 +43,7 @@ CameraDriver cam0_driver(CAM0_TRIGGER_PIN, pio0, 0);
 CameraDriver cam1_driver(CAM1_TRIGGER_PIN, pio1, 0);
 
 // Construct Flow Detection Object
-FlowDetection flow_detection(ADC_MASK);
+FlowDetection flow_detection(MAX_ADC_CHS);
 
 // Construct Proportional Valve Controller
 ValveDriver& proportional_valve_0 = valve_drivers[PROPORTIONAL_VALVE_0_INDEX]; 

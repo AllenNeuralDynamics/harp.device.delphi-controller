@@ -12,7 +12,7 @@
 #define POKE_PIN (22)
 #define CAM0_TRIGGER_PIN (23)
 #define CAM1_TRIGGER_PIN (24)
-#define ADC_MASK (0x1F)  // Assuming 5 ADC pins, mask is 0b00011111
+#define MAX_ADC_CHS (8)  // Number of ADCs that can be sampled
 #define LED_ENABLE_PIN (4)
 
 #define PIN_SCK   (26)  // SPI wiring to GPIOs

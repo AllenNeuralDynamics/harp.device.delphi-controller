@@ -2,11 +2,11 @@
 
 FlowDetection* FlowDetection::s_instance_ = nullptr;
 
-FlowDetection::FlowDetection(uint8_t adc_mask)
-    : adc_mask_(adc_mask),
-      num_adc_chs_{NUM_ADC_CHS},
+FlowDetection::FlowDetection(uint8_t max_adc_chs)
+    : max_adc_chs_{max_adc_chs},
+      adc_mask_{DEFAULT_ADC_MASK},
       adc_sample_rate_(DEFAULT_SAMPLE_RATE),
-      sampling_enabled_(true),
+      sampling_enabled_(false),
       leak_adc_(-1),
       leak_threshold_(DEFAULT_LEAK_THRESHOLD),
       leak_state_(0),
@@ -27,9 +27,12 @@ FlowDetection::FlowDetection(uint8_t adc_mask)
 FlowDetection::~FlowDetection()
 {
     sampling_enabled_ = false;
-    dma_channel_abort(dma_tx_chan_);
-    dma_channel_abort(dma_rx_chan_);
     s_instance_ = nullptr;
+    if (dma_tx_chan_ >= 0)
+        dma_channel_abort(dma_tx_chan_);
+    if (dma_rx_chan_ >= 0)
+        dma_channel_abort(dma_rx_chan_);
+
 }
 
 // ================= FSM Control =================
@@ -52,6 +55,7 @@ void FlowDetection::reset()
 
     conversion_slope_ = VOLTS_FLOW_RATE_SLOPE;
     conversion_offset_ = VOLTS_FLOW_RATE_OFFSET;
+    configure_adc_mask(adc_mask_);
 }
 
 // ================= SPI / GPIO =================
@@ -120,11 +124,15 @@ void FlowDetection::dma_irq_handler()
         ((rx_buf_[1] & 0x03) << 8) |
          rx_buf_[2];
 
-    latest_adc_sample_.v[current_channel_] =
+    uint8_t phys_ch = active_adc_channels_[current_channel_];
+
+    latest_adc_sample_.v[phys_ch] =
         convert_to_flowrate(raw);
 
+    latest_raw_adc_sample_.v[phys_ch] = raw;
+
     current_channel_ =
-        (current_channel_ + 1) % num_adc_chs_;
+        (current_channel_ + 1) % active_adc_count_;
 
     dma_complete_ = true;
 }
@@ -132,8 +140,13 @@ void FlowDetection::dma_irq_handler()
 // ================= Sampling =================
 void FlowDetection::sample_adc()
 {
+    if (!sampling_enabled_ || active_adc_count_ == 0)
+        return;
+
+    uint8_t phys_ch = active_adc_channels_[current_channel_];
+
     tx_buf_[0] = 0x01;
-    tx_buf_[1] = 0x80 | (current_channel_ << 4);
+    tx_buf_[1] = 0x80 | (phys_ch << 4);
     tx_buf_[2] = 0x00;
 
     gpio_put(PIN_CS, 0);
@@ -149,14 +162,38 @@ void FlowDetection::sample_adc()
 
 void FlowDetection::clear_latest_sample()
 {
-    for (uint8_t i = 0; i < num_adc_chs_; i++)
+    for (uint8_t i = 0; i < max_adc_chs_; i++) {
         latest_adc_sample_.v[i] = 0.0f;
+        latest_raw_adc_sample_.v[i] = 0.0f;
+    }
+}
+
+void FlowDetection::configure_adc_mask(uint8_t mask)
+{
+    sampling_enabled_ = false;
+    adc_mask_ = adc_mask_ = mask & ((1u << max_adc_chs_) - 1);
+    active_adc_count_ = 0;
+
+    for (uint8_t ch = 0; ch < max_adc_chs_; ++ch) {
+        if (mask & (1u << ch)) {
+            active_adc_channels_[active_adc_count_++] = ch;
+        }
+    }
+
+    current_channel_ = 0;
+    dma_complete_ = false;
+    clear_latest_sample();
+
+    sampling_enabled_ = (active_adc_count_ > 0);
 }
 
 // ================= Monitoring =================
 void FlowDetection::leak_monitor()
 {
-    if (leak_adc_ < 0 || leak_adc_ >= num_adc_chs_) {
+
+    if (leak_adc_ < 0 ||
+        leak_adc_ >= max_adc_chs_ ||
+        !(adc_mask_ & (1u << leak_adc_))) {
         leak_state_ = 0;
         return;
     }
@@ -180,7 +217,7 @@ void FlowDetection::leak_monitor()
 void FlowDetection::manual_flow_meter_monitor()
 {
     if (manual_flow_meter_ < 0 ||
-        manual_flow_meter_ >= num_adc_chs_) {
+        manual_flow_meter_ >= max_adc_chs_) {
         manual_flow_meter_state_ = 0;
         return;
     }

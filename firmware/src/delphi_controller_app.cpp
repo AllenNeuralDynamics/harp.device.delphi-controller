@@ -106,7 +106,11 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.EnableCam1Trigger, sizeof(app_regs.EnableCam1Trigger), U8},
 
     {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8},
+
+    // ADC specs
+    {(uint8_t*)&app_regs.AdcMask, sizeof(app_regs.AdcMask), U8},
     {(uint8_t*)&app_regs.LatestFlowRate, sizeof(app_regs.LatestFlowRate), U8},
+    {(uint8_t*)&app_regs.LatestRawAdcSample, sizeof(app_regs.LatestRawAdcSample), U8},
     {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
     {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
     {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
@@ -190,7 +194,9 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_valve_leds, write_valve_leds},
 
     // ADC handler functions
+    {read_adc_mask, write_adc_mask},
     {read_adc, HarpCore::write_to_read_only_reg_error},
+    {read_raw_adc, HarpCore::write_to_read_only_reg_error},
     {read_adc_enable, write_adc_enable},
     {read_adc_sampling_rate, write_adc_sampling_rate},
     {read_leak_adc_channel, write_leak_adc_channel},
@@ -218,6 +224,28 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_proportional_valve_1_duty_cycle, write_proportional_valve_1_duty_cycle},
     {read_proportional_valve_1_target_flow_rate, write_proportional_valve_1_target_flow_rate}
 };
+
+void read_raw_adc(uint8_t reg_address)
+{
+    app_regs.LatestRawAdcSample = flow_detection.get_latest_raw_adc_sample();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void read_adc_mask(uint8_t reg_address)
+{
+    app_regs.AdcMask = flow_detection.get_adc_mask();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_adc_mask(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    flow_detection.set_adc_mask(app_regs.AdcMask);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_proportional_valve_0_target_flow_rate(uint8_t reg_address)
 {
