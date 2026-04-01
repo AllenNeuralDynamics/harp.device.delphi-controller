@@ -12,10 +12,13 @@
 #define POKE_PIN (22)
 #define CAM0_TRIGGER_PIN (23)
 #define CAM1_TRIGGER_PIN (24)
-#define ADC_PIN_START (26)
-#define ADC_MASK (0x0F)  // Assuming 4 ADC pins, mask is 0b00001111
-#define NUM_ADC_PINS (4)
+#define ADC_MASK (0x1F)  // Assuming 5 ADC pins, mask is 0b00011111
 #define LED_ENABLE_PIN (4)
+
+#define PIN_SCK   (26)  // SPI wiring to GPIOs
+#define PIN_MOSI  (27)
+#define PIN_MISO  (28)
+#define PIN_CS    (29)
 
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)

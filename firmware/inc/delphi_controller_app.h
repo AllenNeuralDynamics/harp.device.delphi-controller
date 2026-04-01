@@ -130,7 +130,7 @@ struct app_regs_t
     uint8_t EnableValveLeds;
 
     // ADC registers
-    FlowDetection::ADC_Samples LatestFlowRate; //Read Only (4 float ADC flow rates)
+    FlowDetection::ADC_Samples LatestFlowRate; //Read Only (5 float ADC flow rates)
     uint8_t EnableAdcSampling;
     float AdcSamplingRate;
     int8_t LeakAdcChannel;

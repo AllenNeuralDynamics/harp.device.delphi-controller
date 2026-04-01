@@ -59,10 +59,10 @@ def read_float4_from_u8(
     else:
         buf = bytes(bytearray(u8_array))
 
-    if len(buf) != 16:
+    if len(buf) != 20:
         raise ValueError(f"Expected 16 bytes for 4 floats, got {len(buf)}")
 
-    return struct.unpack("<4f", buf)
+    return struct.unpack("<5f", buf)
 
 
 # Write to U8 Array
@@ -288,19 +288,19 @@ try:
         # print(f"Latest ADC Sample: {reply.payload}")
 
         now = time.monotonic()
-        if now - last_print >= 0.1:  # print and change the valve every 1 second
+        if now - last_print >= 0.5:  # print and change the valve every 1 second
             lastest_flow_rate = read_float4_from_u8(reply.payload)
             reply = device.send(
                 HarpMessage.ReadFloat(
                     DelphiOnlyAppRegs.ProportionalValve0DutyCycle
                 ).frame
             )
-            # print(lastest_flow_rate)
+            print(lastest_flow_rate)
             # print(f"{now}, {lastest_flow_rate[0]}, {reply.payload[0]}")
             # t.append(now)
             # flow.append(lastest_flow_rate[0])
             # duty_cycle.append(reply.payload[0])
-            # last_print = now
+            last_print = now
 
             # # Force Poke
             # print("Forcing poke event.")
