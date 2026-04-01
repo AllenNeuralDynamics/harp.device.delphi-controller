@@ -120,7 +120,7 @@ print()
 print_poke_counts(device)
 print("Setting odor.")
 reply = device.send(
-    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0100).frame
+    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame
 )
 # print("Assigning poke pin.")
 # reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
@@ -230,7 +230,7 @@ reply = device.send(
 )
 
 print()
-odor_masks = [0x0001, 0x0002, 0x0004, 0x0008]
+odor_masks = [0x0001, 0x0002] #[0x0001, 0x0002, 0x0004, 0x0008]
 print(odor_masks)
 odor_i = -1
 last_print = 0.0
