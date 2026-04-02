@@ -112,7 +112,6 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.LatestFlowRate, sizeof(app_regs.LatestFlowRate), U8},
     {(uint8_t*)&app_regs.LatestRawAdcSample, sizeof(app_regs.LatestRawAdcSample), U8},
     {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
-    {(uint8_t*)&app_regs.AdcSamplingRate, sizeof(app_regs.AdcSamplingRate), Float},
     {(uint8_t*)&app_regs.LeakAdcChannel, sizeof(app_regs.LeakAdcChannel), S8},
     {(uint8_t*)&app_regs.LeakThreshold, sizeof(app_regs.LeakThreshold), Float},
     {(uint8_t*)&app_regs.LeakState, sizeof(app_regs.LeakState), U8},
@@ -198,7 +197,6 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_adc, HarpCore::write_to_read_only_reg_error},
     {read_raw_adc, HarpCore::write_to_read_only_reg_error},
     {read_adc_enable, write_adc_enable},
-    {read_adc_sampling_rate, write_adc_sampling_rate},
     {read_leak_adc_channel, write_leak_adc_channel},
     {read_leak_threshold, write_leak_threshold},
     {read_leak_state, HarpCore::write_to_read_only_reg_error},
@@ -528,21 +526,6 @@ void write_leak_adc_channel(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
     flow_detection.set_leak_adc(app_regs.LeakAdcChannel);
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);
-}
-
-void read_adc_sampling_rate(uint8_t reg_address)
-{
-    app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);
-}
-
-void write_adc_sampling_rate(msg_t& msg)
-{
-    HarpCore::copy_msg_payload_to_register(msg);
-    flow_detection.set_sampling_rate_hz(app_regs.AdcSamplingRate);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -1236,9 +1219,10 @@ void reset_app()
     flow_detection.reset();
     flow_detection.leak_state_alert_callback_fn(leak_state_alert);
     flow_detection.manual_flow_meter_alert_callback_fn(manual_flow_meter_alert);
+    app_regs.AdcMask = flow_detection.get_adc_mask();
     app_regs.LatestFlowRate = flow_detection.get_latest_adc_sample();
+    app_regs.LatestRawAdcSample = flow_detection.get_latest_raw_adc_sample();
     app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
-    app_regs.AdcSamplingRate = flow_detection.get_adc_sampling_rate();
     app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
     app_regs.LeakThreshold = flow_detection.get_leak_threshold();
     app_regs.LeakState = flow_detection.get_leak_state();

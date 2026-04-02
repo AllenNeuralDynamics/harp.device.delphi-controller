@@ -18,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 73;
+inline constexpr size_t APP_REG_COUNT = 72;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -134,7 +134,6 @@ struct app_regs_t
     FlowDetection::ADC_Samples LatestFlowRate; //Read Only (5 float ADC flow rates)
     FlowDetection::ADC_Samples LatestRawAdcSample; //Read Only (5 float ADC raw samples)
     uint8_t EnableAdcSampling;
-    float AdcSamplingRate;
     int8_t LeakAdcChannel;
     float LeakThreshold;
     uint8_t LeakState;
@@ -264,7 +263,6 @@ void read_adc_mask(uint8_t reg_address);
 void read_adc(uint8_t reg_address);
 void read_raw_adc(uint8_t reg_address);
 void read_adc_enable(uint8_t reg_address);
-void read_adc_sampling_rate(uint8_t reg_address);
 void read_leak_adc_channel(uint8_t reg_address);
 void read_leak_threshold(uint8_t reg_address);
 void read_leak_state(uint8_t reg_address);
@@ -317,7 +315,6 @@ void write_valve_leds(msg_t& msg);
 
 void write_adc_mask(msg_t& msg);
 void write_adc_enable(msg_t& msg);
-void write_adc_sampling_rate(msg_t& msg);
 void write_leak_adc_channel(msg_t& msg);
 void write_leak_threshold(msg_t& msg);
 

@@ -31,12 +31,6 @@ public:
     void leak_monitor();
     void manual_flow_meter_monitor();
 
-    // Delete this
-    inline void set_sampling_rate_hz(float adc_sampling_rate)
-    {
-        adc_sample_rate_ = adc_sampling_rate;
-    }
-
     inline void set_adc_mask(uint8_t adc_mask)
     {
         configure_adc_mask(adc_mask);
@@ -103,11 +97,6 @@ public:
     inline bool get_adc_enabled_status() const
     {
         return sampling_enabled_;
-    }
-
-    inline float get_adc_sampling_rate() const
-    {
-        return adc_sample_rate_;
     }
 
     inline int8_t get_leak_adc() const
@@ -230,7 +219,6 @@ private:
     uint8_t active_adc_channels_[MAX_ADC_CHS];
     uint8_t max_adc_chs_;
 
-    float adc_sample_rate_;
     bool sampling_enabled_;
 
     int8_t leak_adc_;
@@ -267,7 +255,6 @@ private:
     static inline constexpr uint8_t DEFAULT_ADC_MASK = 0x1F;
     static inline constexpr float ADC_BITS = 1023.0f;
     static inline constexpr float VREF_VOLTS = 3.3f;
-    static inline constexpr float DEFAULT_SAMPLE_RATE = 100.0f;
     static inline constexpr float DEFAULT_LEAK_THRESHOLD = 50.0f;
     static inline constexpr float DEFAULT_FLOW_RATE = 75.0f;
     static inline constexpr float FLOW_RATE_TOLERANCE = 5.0f; // ! +-5mL/min tolerance for flow rate detection (tune as needed)

@@ -5,7 +5,6 @@ FlowDetection* FlowDetection::s_instance_ = nullptr;
 FlowDetection::FlowDetection(uint8_t max_adc_chs)
     : max_adc_chs_{max_adc_chs},
       adc_mask_{DEFAULT_ADC_MASK},
-      adc_sample_rate_(DEFAULT_SAMPLE_RATE),
       sampling_enabled_(false),
       leak_adc_(-1),
       leak_threshold_(DEFAULT_LEAK_THRESHOLD),
@@ -38,7 +37,6 @@ FlowDetection::~FlowDetection()
 // ================= FSM Control =================
 void FlowDetection::reset()
 {
-    adc_sample_rate_ = DEFAULT_SAMPLE_RATE;
     dma_complete_ = false;
     sampling_enabled_ = false;
     leak_adc_ = -1;
