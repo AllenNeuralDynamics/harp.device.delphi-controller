@@ -18,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 71;
+inline constexpr size_t APP_REG_COUNT = 75;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -37,6 +37,7 @@ extern CameraDriver cam1_driver;
 extern FlowDetection flow_detection;
 extern ProportionalValveControl proportional_valve_0_controller;
 extern ProportionalValveControl proportional_valve_1_controller;
+extern ProportionalValveControl proportional_valve_2_controller;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
@@ -162,7 +163,12 @@ struct app_regs_t
     uint8_t ProportionalValve1EnablePid;
     float ProportionalValve1DutyCycle;
     float ProportionalValve1TargetFlowRate;
-    
+
+    //Proportional valve 2 registers
+    uint8_t ProportionalValve2Adc;
+    uint8_t ProportionalValve2EnablePid;
+    float ProportionalValve2DutyCycle;
+    float ProportionalValve2TargetFlowRate;
 };
 #pragma pack(pop)
 
@@ -282,6 +288,11 @@ void read_proportional_valve_1_adc(uint8_t reg_address);
 void read_proportional_valve_1_enable_pid(uint8_t reg_address);
 void read_proportional_valve_1_duty_cycle(uint8_t reg_address);
 void read_proportional_valve_1_target_flow_rate(uint8_t reg_address);
+void read_proportional_valve_2_adc(uint8_t reg_address);
+void read_proportional_valve_2_enable_pid(uint8_t reg_address);
+void read_proportional_valve_2_duty_cycle(uint8_t reg_address);
+void read_proportional_valve_2_target_flow_rate(uint8_t reg_address);
+
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);
@@ -332,5 +343,11 @@ void write_proportional_valve_1_adc(msg_t& msg);
 void write_proportional_valve_1_enable_pid(msg_t& msg);
 void write_proportional_valve_1_duty_cycle(msg_t& msg);
 void write_proportional_valve_1_target_flow_rate(msg_t& msg);
+
+void write_proportional_valve_2_adc(msg_t& msg);
+void write_proportional_valve_2_enable_pid(msg_t& msg);
+void write_proportional_valve_2_duty_cycle(msg_t& msg);
+void write_proportional_valve_2_target_flow_rate(msg_t& msg);
+
 
 #endif // DELPHI_CONTROLLER_APP_H
