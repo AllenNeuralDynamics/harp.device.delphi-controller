@@ -13,8 +13,6 @@ FlowDetection::FlowDetection(uint8_t max_adc_chs)
       nominal_flow_rate_(DEFAULT_FLOW_RATE),
       flow_rate_tolerance_(FLOW_RATE_TOLERANCE),
       manual_flow_meter_state_(0),
-      conversion_slope_(0.02f),
-      conversion_offset_(0.5f),
       dma_complete_(false),
       current_channel_(0),
       leak_state_alert_callback_fn_(nullptr),
@@ -37,6 +35,15 @@ FlowDetection::~FlowDetection()
 // ================= FSM Control =================
 void FlowDetection::reset()
 {
+    // initialize flow meter coefficients assuming all linear meters
+    for (uint8_t i = 0; i < NUM_FLOW_METERS; i++)
+    {
+        flow_regs_.meter[i].q[0] = DEFAULT_A0;  // a0
+        flow_regs_.meter[i].q[1] = DEFAULT_A1;  // a1
+        flow_regs_.meter[i].q[2] = DEFAULT_A2;  // a2
+        flow_regs_.meter[i].q[3] = DEFAULT_A3;  // a3
+    }
+    
     dma_complete_ = false;
     sampling_enabled_ = false;
     leak_adc_ = -1;
@@ -50,9 +57,6 @@ void FlowDetection::reset()
 
     leak_state_alert_callback_fn_ = nullptr;
     manual_flow_meter_alert_callback_fn_ = nullptr;
-
-    conversion_slope_ = VOLTS_FLOW_RATE_SLOPE;
-    conversion_offset_ = VOLTS_FLOW_RATE_OFFSET;
     configure_adc_mask(adc_mask_);
 }
 
@@ -124,8 +128,9 @@ void FlowDetection::dma_irq_handler()
 
     uint8_t phys_ch = active_adc_channels_[current_channel_];
 
+    float volts = raw * (VREF_VOLTS / ADC_BITS);
     latest_adc_sample_.v[phys_ch] =
-        convert_to_flowrate(raw);
+        eval_cubic(flow_regs_.meter[phys_ch].q, volts);
 
     latest_raw_adc_sample_.v[phys_ch] = raw;
 

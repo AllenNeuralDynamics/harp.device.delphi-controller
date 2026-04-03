@@ -119,8 +119,7 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.NominalFlowRate, sizeof(app_regs.NominalFlowRate), Float},
     {(uint8_t*)&app_regs.FlowRateTolerance, sizeof(app_regs.FlowRateTolerance), Float},
     {(uint8_t*)&app_regs.ManualFlowMeterState, sizeof(app_regs.ManualFlowMeterState), U8},
-    {(uint8_t*)&app_regs.CalibrateSlope, sizeof(app_regs.CalibrateSlope), Float},
-    {(uint8_t*)&app_regs.CalibrateOffset, sizeof(app_regs.CalibrateOffset), Float},
+    {(uint8_t*)&app_regs.FlowMeterCalibrations, sizeof(app_regs.FlowMeterCalibrations), U8},
 
     {(uint8_t*)&app_regs.PidUpdateFrequency, sizeof(app_regs.PidUpdateFrequency), Float},
     {(uint8_t*)&app_regs.PidGains, sizeof(PidConfig), U8},
@@ -206,8 +205,7 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_nominal_flow_rate, write_nominal_flow_rate},
     {read_flow_rate_tolerance, write_flow_rate_tolerance},
     {read_manual_flow_meter_state, HarpCore::write_to_read_only_reg_error},
-    {read_calibrate_slope, write_calibrate_slope},
-    {read_calibrate_offset, write_calibrate_offset},
+    {read_flow_meter_calibrations, write_flow_meter_calibrations},
 
     // Proportional valve handler functions
     {read_pid_update_frequency, write_pid_update_frequency},
@@ -411,32 +409,20 @@ void write_pid_update_frequency(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_calibrate_slope(uint8_t reg_address)
+
+
+void read_flow_meter_calibrations(uint8_t reg_address)
 {
-    app_regs.CalibrateSlope = flow_detection.get_calibrate_slope();
+    app_regs.FlowMeterCalibrations = flow_detection.get_flow_meter_calibrations();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void read_calibrate_offset(uint8_t reg_address)
-{
-    app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);
-}
 
-void write_calibrate_slope(msg_t& msg)
+void write_flow_meter_calibrations(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    flow_detection.set_calibrate_slope(app_regs.CalibrateSlope);
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);
-}
-
-void write_calibrate_offset(msg_t& msg)
-{
-    HarpCore::copy_msg_payload_to_register(msg);
-    flow_detection.set_calibrate_offset(app_regs.CalibrateOffset);
+    flow_detection.set_flow_meter_calibrations(app_regs.FlowMeterCalibrations);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -1226,11 +1212,11 @@ void reset_app()
     app_regs.LeakAdcChannel = flow_detection.get_leak_adc();
     app_regs.LeakThreshold = flow_detection.get_leak_threshold();
     app_regs.LeakState = flow_detection.get_leak_state();
-    app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state();
+    
     app_regs.NominalFlowRate = flow_detection.get_nominal_flow_rate();
     app_regs.FlowRateTolerance = flow_detection.get_flow_rate_tolerance();
-    app_regs.CalibrateSlope = flow_detection.get_calibrate_slope();
-    app_regs.CalibrateOffset = flow_detection.get_calibrate_offset();
+    app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state();
+    app_regs.FlowMeterCalibrations = flow_detection.get_flow_meter_calibrations();
 
     // Reset proportional valve controllers and all related registers
     proportional_valve_0_controller.reset();
