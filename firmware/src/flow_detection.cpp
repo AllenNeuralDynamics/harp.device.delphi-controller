@@ -123,7 +123,7 @@ void FlowDetection::dma_irq_handler()
     gpio_put(PIN_CS, 1);
 
     uint16_t raw =
-        ((rx_buf_[1] & 0x03) << 8) |
+        ((rx_buf_[1] & 0x0F) << 8) |
          rx_buf_[2];
 
     uint8_t phys_ch = active_adc_channels_[current_channel_];

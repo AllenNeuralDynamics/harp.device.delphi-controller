@@ -268,7 +268,7 @@ private:
 
     static inline spi_inst_t* SPI_PORT = spi1;
     static inline constexpr uint8_t DEFAULT_ADC_MASK = 0x1F;
-    static inline constexpr float ADC_BITS = 1023.0f;
+    static inline constexpr float ADC_BITS = 4095.0f;
     static inline constexpr float VREF_VOLTS = 3.3f;
     static inline constexpr float DEFAULT_LEAK_THRESHOLD = 50.0f;
     static inline constexpr float DEFAULT_FLOW_RATE = 75.0f;
