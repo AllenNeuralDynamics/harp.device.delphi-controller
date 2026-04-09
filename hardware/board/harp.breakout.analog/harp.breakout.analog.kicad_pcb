@@ -7570,6 +7570,19 @@
 			(justify right bottom)
 		)
 	)
+	(gr_text "+5V"
+		(at 131.1 52.7 0)
+		(layer "B.SilkS")
+		(uuid "0442c789-2804-4701-b590-abc237f42d83")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
 	(gr_text "----- GND -----"
 		(at 153 38 -0)
 		(layer "B.SilkS")
@@ -7607,6 +7620,19 @@
 			(justify right bottom mirror)
 		)
 	)
+	(gr_text "SIG (0-3.3V)"
+		(at 131.1 50.2 0)
+		(layer "B.SilkS")
+		(uuid "24a1e471-b0b4-44c6-9fe2-8651eb23e8b6")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
 	(gr_text "GPIO25"
 		(at 137.392 48.2 90)
 		(layer "B.SilkS")
@@ -7617,6 +7643,45 @@
 				(thickness 0.125)
 			)
 			(justify right bottom mirror)
+		)
+	)
+	(gr_text "GND"
+		(at 131.1 55.2 0)
+		(layer "B.SilkS")
+		(uuid "32c449f1-1387-48c0-9843-14a3c0875197")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
+	(gr_text "+5V"
+		(at 148.8 63.3 180)
+		(layer "B.SilkS")
+		(uuid "35524e52-ce58-47e2-bf72-a5ce55c0c812")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
+	(gr_text "+5V"
+		(at 148.5 96.4 180)
+		(layer "B.SilkS")
+		(uuid "3908840a-2af2-49f0-9e3e-7fb517e668a4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
 		)
 	)
 	(gr_text "5V logic input/output\nconnected devices using pullups, >50KOhm\ncompatible: 3M Mini Clamp Socket Series\n  37103-2165-000 FL 100\n  37103-3101-000 FL 100"
@@ -7644,6 +7709,19 @@
 			(justify right bottom mirror)
 		)
 	)
+	(gr_text "GND"
+		(at 148.8 60.8 180)
+		(layer "B.SilkS")
+		(uuid "486ea0d1-896c-46e0-9b8c-95a57bcf9297")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
 	(gr_text "GPIO27"
 		(at 142.492 48.2 90)
 		(layer "B.SilkS")
@@ -7666,6 +7744,19 @@
 				(thickness 0.125)
 			)
 			(justify right bottom mirror)
+		)
+	)
+	(gr_text "SIG (0-3.3V)"
+		(at 148.5 98.9 180)
+		(layer "B.SilkS")
+		(uuid "5b10dda7-6636-4108-aab1-e4ebb0fa2e73")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
 		)
 	)
 	(gr_text "GPIO29"
@@ -7704,6 +7795,19 @@
 			(justify right bottom mirror)
 		)
 	)
+	(gr_text "GND"
+		(at 148.5 93.9 180)
+		(layer "B.SilkS")
+		(uuid "b40f13be-2092-4b1a-b5c1-19b50b90e1fb")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
+		)
+	)
 	(gr_text "GPIO24"
 		(at 134.892 48.2 90)
 		(layer "B.SilkS")
@@ -7727,6 +7831,19 @@
 				(bold yes)
 			)
 			(justify left bottom mirror)
+		)
+	)
+	(gr_text "SIG (0-3.3V)"
+		(at 148.8 65.8 180)
+		(layer "B.SilkS")
+		(uuid "fa387bcd-be55-4ac0-949d-cffb5edea214")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.2)
+				(bold yes)
+			)
+			(justify left mirror)
 		)
 	)
 	(segment
@@ -7794,12 +7911,12 @@
 		(uuid "581e0714-6b51-4669-b89a-f8303096804a")
 	)
 	(segment
-		(start 148.5 83.625)
-		(end 148.5 83.654193)
+		(start 149.75 84.5)
+		(end 149.35 84.1)
 		(width 0.381)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "5cdc6481-5905-420c-820e-2aa11c0012b2")
+		(uuid "6186c4c1-08ac-48c8-a6f6-bd27a1de6dae")
 	)
 	(segment
 		(start 146.814593 52.3396)
@@ -7824,14 +7941,6 @@
 		(layer "F.Cu")
 		(net 1)
 		(uuid "75522353-6067-4396-a328-aaeda109372c")
-	)
-	(segment
-		(start 148.5 83.654193)
-		(end 146.814593 85.3396)
-		(width 0.381)
-		(layer "F.Cu")
-		(net 1)
-		(uuid "8063bb58-7f37-4d18-999f-5565399cb63c")
 	)
 	(segment
 		(start 151.5 90)
@@ -7874,20 +7983,20 @@
 		(uuid "b4459762-2014-463d-a02b-7853002ba4ff")
 	)
 	(segment
+		(start 148.054193 84.1)
+		(end 146.814593 85.3396)
+		(width 0.381)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "ba79d7b9-4112-45ad-9d3d-331b5f68a12e")
+	)
+	(segment
 		(start 148.8396 63.3396)
 		(end 149 63.5)
 		(width 0.381)
 		(layer "F.Cu")
 		(net 1)
 		(uuid "bbd287a1-b880-406d-b323-40c7fb32cc6c")
-	)
-	(segment
-		(start 148.875 83.625)
-		(end 148.5 83.625)
-		(width 0.381)
-		(layer "F.Cu")
-		(net 1)
-		(uuid "ceb898ed-ba9d-4806-bb47-8dc7531000c8")
 	)
 	(segment
 		(start 146.814593 63.3396)
@@ -7898,12 +8007,12 @@
 		(uuid "dc8896fe-1ecf-44da-a381-f130017ab7aa")
 	)
 	(segment
-		(start 149.75 84.5)
-		(end 148.875 83.625)
+		(start 149.35 84.1)
+		(end 148.054193 84.1)
 		(width 0.381)
 		(layer "F.Cu")
 		(net 1)
-		(uuid "eb665ffd-ce73-4c96-891a-a49518362346")
+		(uuid "f291b7ad-7568-4b78-8c09-6ea3abc88d0c")
 	)
 	(via
 		(at 122.5 45.5)
