@@ -130,7 +130,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Analog_ADC:MCP3008"
+		(symbol "Analog_ADC:MCP3208"
 			(pin_names
 				(offset 1.016)
 			)
@@ -146,7 +146,7 @@
 					(justify right)
 				)
 			)
-			(property "Value" "MCP3008"
+			(property "Value" "MCP3208"
 				(at -5.08 11.43 0)
 				(effects
 					(font
@@ -164,7 +164,7 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21295d.pdf"
+			(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf"
 				(at 2.54 2.54 0)
 				(effects
 					(font
@@ -173,7 +173,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "A/D Converter, 10-Bit, 8-Channel, SPI Interface , 2.7V-5.5V"
+			(property "Description" "A/D Converter, 12-Bit, 8-Channel, SPI Interface , 2.7V-5.5V"
 				(at 0 0 0)
 				(effects
 					(font
@@ -182,7 +182,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "12bit ADC Reference Single Supply SPI 8CH"
+			(property "ki_keywords" "12bit ADC Reference Single Supply SPI 8ch"
 				(at 0 0 0)
 				(effects
 					(font
@@ -200,7 +200,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "MCP3008_0_0"
+			(symbol "MCP3208_0_0"
 				(text "MUX"
 					(at -6.35 -1.27 900)
 					(effects
@@ -227,7 +227,7 @@
 					)
 				)
 			)
-			(symbol "MCP3008_0_1"
+			(symbol "MCP3208_0_1"
 				(polyline
 					(pts
 						(xy -7.62 8.89) (xy -7.62 -11.43) (xy -5.08 -10.16) (xy -5.08 7.62) (xy -7.62 8.89)
@@ -311,7 +311,7 @@
 					)
 				)
 			)
-			(symbol "MCP3008_1_1"
+			(symbol "MCP3208_1_1"
 				(pin input line
 					(at -15.24 7.62 0)
 					(length 2.54)
@@ -3943,9 +3943,20 @@
 			(embedded_fonts no)
 		)
 	)
+	(text "3.3V supply to simplify communication with RP2040. \nPart is 5V compatible. "
+		(exclude_from_sim no)
+		(at 136.398 114.046 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "00dd6356-508a-4100-bf51-c49204e6ed01")
+	)
 	(text "Camera Triggers"
 		(exclude_from_sim no)
-		(at 134.874 97.028 0)
+		(at 134.874 88.138 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3955,7 +3966,7 @@
 	)
 	(text "Low pass filter to assert\nOE after VCC_{A} is stable."
 		(exclude_from_sim no)
-		(at 118.11 72.39 0)
+		(at 118.11 63.5 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3966,7 +3977,7 @@
 	)
 	(text "Poke"
 		(exclude_from_sim no)
-		(at 139.446 84.328 0)
+		(at 139.446 75.438 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3974,7 +3985,7 @@
 		)
 		(uuid "8e6df470-f5b9-4977-bae7-a694416e9eb6")
 	)
-	(text "TXBO108DQSR is a 5-V-tolerant (Port B only) bidirectional\nlogic level converter with direction sensing."
+	(text "TXBO104 is a 5-V-tolerant (Port B only) bidirectional\nlogic level converter with direction sensing."
 		(exclude_from_sim no)
 		(at 118.11 52.07 0)
 		(effects
@@ -3987,7 +3998,7 @@
 	)
 	(text "Extra"
 		(exclude_from_sim no)
-		(at 139.446 89.408 0)
+		(at 139.446 80.518 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4008,22 +4019,34 @@
 		(uuid "27169435-5c06-4722-950a-06b96c3dada2")
 	)
 	(junction
-		(at 144.78 80.01)
+		(at 144.78 71.12)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "281bf324-616e-435a-b5c4-31f0edc9df90")
 	)
 	(junction
-		(at 154.94 73.66)
+		(at 154.94 64.77)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "2a2a3fac-923b-4087-bcd1-a3940eb1efc0")
+	)
+	(junction
+		(at 82.55 138.43)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4b40e91a-75c8-436c-be6d-39522410374f")
 	)
 	(junction
 		(at 62.23 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "67e69573-1f4d-4a3b-8b26-bc932b53e18c")
+	)
+	(junction
+		(at 137.16 124.46)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7dc0952b-6834-432b-b608-3a4952150c81")
 	)
 	(junction
 		(at 62.23 90.17)
@@ -4042,6 +4065,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a7fe579a-4bdb-4213-9e70-dd13cd6a6a18")
+	)
+	(junction
+		(at 63.5 134.62)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "adbc1ab0-bc80-4b05-880e-b1f7361f2ffd")
 	)
 	(junction
 		(at 62.23 92.71)
@@ -4076,6 +4105,16 @@
 	(no_connect
 		(at 78.74 140.97)
 		(uuid "b9223fe9-9c85-43b8-be23-a1cdc6f112db")
+	)
+	(wire
+		(pts
+			(xy 149.86 124.46) (xy 153.67 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "00fc3d83-8bdd-48b2-b500-8b80b6155210")
 	)
 	(wire
 		(pts
@@ -4159,6 +4198,16 @@
 	)
 	(wire
 		(pts
+			(xy 137.16 124.46) (xy 142.24 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ba3a61e-2ba0-486a-92d4-a628827eb3f2")
+	)
+	(wire
+		(pts
 			(xy 219.71 120.65) (xy 226.06 120.65)
 		)
 		(stroke
@@ -4189,7 +4238,7 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 73.66) (xy 144.78 73.66)
+			(xy 146.05 64.77) (xy 144.78 64.77)
 		)
 		(stroke
 			(width 0)
@@ -4239,6 +4288,16 @@
 	)
 	(wire
 		(pts
+			(xy 137.16 124.46) (xy 137.16 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "25e7b96d-645f-42f5-8cbf-2cd530096412")
+	)
+	(wire
+		(pts
 			(xy 223.52 114.3) (xy 226.06 114.3)
 		)
 		(stroke
@@ -4266,6 +4325,16 @@
 			(type default)
 		)
 		(uuid "2a573e15-f535-4a3b-ba63-fecc7014ef13")
+	)
+	(wire
+		(pts
+			(xy 57.15 138.43) (xy 57.15 134.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2b03c71a-a14b-420f-a501-6b2991f89b17")
 	)
 	(wire
 		(pts
@@ -4309,7 +4378,7 @@
 	)
 	(wire
 		(pts
-			(xy 78.74 138.43) (xy 80.01 138.43)
+			(xy 78.74 138.43) (xy 82.55 138.43)
 		)
 		(stroke
 			(width 0)
@@ -4349,7 +4418,7 @@
 	)
 	(wire
 		(pts
-			(xy 160.02 72.39) (xy 160.02 74.93)
+			(xy 160.02 63.5) (xy 160.02 66.04)
 		)
 		(stroke
 			(width 0)
@@ -4399,7 +4468,7 @@
 	)
 	(wire
 		(pts
-			(xy 137.16 123.19) (xy 137.16 125.73)
+			(xy 137.16 123.19) (xy 137.16 124.46)
 		)
 		(stroke
 			(width 0)
@@ -4419,7 +4488,7 @@
 	)
 	(wire
 		(pts
-			(xy 63.5 129.54) (xy 63.5 138.43)
+			(xy 63.5 129.54) (xy 63.5 134.62)
 		)
 		(stroke
 			(width 0)
@@ -4479,7 +4548,7 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 73.66) (xy 144.78 80.01)
+			(xy 144.78 64.77) (xy 144.78 71.12)
 		)
 		(stroke
 			(width 0)
@@ -4519,6 +4588,16 @@
 	)
 	(wire
 		(pts
+			(xy 82.55 138.43) (xy 85.09 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5f9c9744-b129-4984-a52d-4e4a1a253643")
+	)
+	(wire
+		(pts
 			(xy 27.94 180.34) (xy 27.94 181.61)
 		)
 		(stroke
@@ -4529,7 +4608,7 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 72.39) (xy 154.94 73.66)
+			(xy 154.94 63.5) (xy 154.94 64.77)
 		)
 		(stroke
 			(width 0)
@@ -4579,7 +4658,7 @@
 	)
 	(wire
 		(pts
-			(xy 144.78 80.01) (xy 147.32 80.01)
+			(xy 144.78 71.12) (xy 147.32 71.12)
 		)
 		(stroke
 			(width 0)
@@ -4599,7 +4678,7 @@
 	)
 	(wire
 		(pts
-			(xy 157.48 110.49) (xy 157.48 111.76)
+			(xy 157.48 101.6) (xy 157.48 102.87)
 		)
 		(stroke
 			(width 0)
@@ -4639,7 +4718,7 @@
 	)
 	(wire
 		(pts
-			(xy 154.94 73.66) (xy 154.94 74.93)
+			(xy 154.94 64.77) (xy 154.94 66.04)
 		)
 		(stroke
 			(width 0)
@@ -4769,7 +4848,7 @@
 	)
 	(wire
 		(pts
-			(xy 153.67 73.66) (xy 154.94 73.66)
+			(xy 153.67 64.77) (xy 154.94 64.77)
 		)
 		(stroke
 			(width 0)
@@ -4859,6 +4938,16 @@
 	)
 	(wire
 		(pts
+			(xy 63.5 134.62) (xy 63.5 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ac3157b7-680f-4f99-8632-3521c62afeab")
+	)
+	(wire
+		(pts
 			(xy 219.71 91.44) (xy 226.06 91.44)
 		)
 		(stroke
@@ -4909,7 +4998,17 @@
 	)
 	(wire
 		(pts
-			(xy 140.97 80.01) (xy 144.78 80.01)
+			(xy 57.15 134.62) (xy 63.5 134.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c3d5ec96-061a-4dc5-946e-b77ca1ef42b2")
+	)
+	(wire
+		(pts
+			(xy 140.97 71.12) (xy 144.78 71.12)
 		)
 		(stroke
 			(width 0)
@@ -4969,7 +5068,7 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 80.01) (xy 130.81 80.01)
+			(xy 133.35 71.12) (xy 130.81 71.12)
 		)
 		(stroke
 			(width 0)
@@ -5149,6 +5248,16 @@
 	)
 	(wire
 		(pts
+			(xy 153.67 124.46) (xy 153.67 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fcacda50-6f10-4f44-a9c9-6f787a52cc8b")
+	)
+	(wire
+		(pts
 			(xy 147.32 138.43) (xy 149.86 138.43)
 		)
 		(stroke
@@ -5168,7 +5277,7 @@
 		(uuid "02d24c98-5dc7-43db-95d0-830fd58dce6c")
 	)
 	(label "OUT0_5V"
-		(at 167.64 95.25 0)
+		(at 167.64 86.36 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5178,7 +5287,7 @@
 		(uuid "0c94ec85-b2b3-4b05-afde-98a97fc6041c")
 	)
 	(label "OUT1"
-		(at 147.32 100.33 180)
+		(at 147.32 91.44 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5268,7 +5377,7 @@
 		(uuid "39281f61-dcb1-4750-a009-49e1eaa270c8")
 	)
 	(label "OUT0"
-		(at 147.32 95.25 180)
+		(at 147.32 86.36 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5288,7 +5397,7 @@
 		(uuid "485772d5-8167-4750-937b-fecc873c7939")
 	)
 	(label "IN0"
-		(at 147.32 85.09 180)
+		(at 147.32 76.2 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5308,7 +5417,7 @@
 		(uuid "4af896f7-9039-45c3-a9ff-64e6c33fbf6f")
 	)
 	(label "IN0_5V"
-		(at 167.64 85.09 0)
+		(at 167.64 76.2 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5368,7 +5477,7 @@
 		(uuid "7256cda5-ed99-4abd-83e2-d5db654f67d7")
 	)
 	(label "OUT1_5V"
-		(at 167.64 100.33 0)
+		(at 167.64 91.44 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5438,7 +5547,7 @@
 		(uuid "becf5a26-e995-45c1-8293-528e42d3748e")
 	)
 	(label "IN1"
-		(at 147.32 90.17 180)
+		(at 147.32 81.28 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5508,7 +5617,7 @@
 		(uuid "e2971c67-31ba-439c-b218-627f4285d987")
 	)
 	(label "3.3VRef"
-		(at 80.01 138.43 0)
+		(at 85.09 138.43 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5528,7 +5637,7 @@
 		(uuid "e8615484-d0fc-43aa-8744-534e20148ba7")
 	)
 	(label "IN1_5V"
-		(at 167.64 90.17 0)
+		(at 167.64 81.28 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5925,6 +6034,73 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:C")
+		(at 146.05 124.46 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "06185a0d-9cf5-417e-b81c-729ca077abe7")
+		(property "Reference" "C6"
+			(at 146.05 118.364 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "1uF"
+			(at 146.304 120.65 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
+			(at 149.86 123.4948 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 146.05 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 146.05 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a16d357c-e305-4ef9-b874-d4d9f944babc")
+		)
+		(pin "2"
+			(uuid "0caba9e7-4f4a-49b3-82a4-00f8006193f6")
+		)
+		(instances
+			(project ""
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "C6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_name "+5V_2")
 		(lib_id "power:+5V")
 		(at 77.47 100.33 270)
@@ -6123,8 +6299,104 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:C")
+		(at 57.15 142.24 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "0e85874e-c9b5-4d8c-80fb-9fab7bb830a1")
+		(property "Reference" "C7"
+			(at 60.198 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 59.944 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
+			(at 58.1152 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM155R71H104KE14-01.pdf"
+			(at 57.15 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 57.15 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/murata-electronics/GRM155R71H104KE14D/4906220"
+			(at 57.15 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Murata Electronics"
+			(at 57.15 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "GRM155R71H104KE14D"
+			(at 57.15 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "a33ae252-60bb-496c-b8ff-7636aeada52a")
+		)
+		(pin "1"
+			(uuid "689e2143-2f37-4a9d-a1dd-7333ac416221")
+		)
+		(instances
+			(project ""
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "C7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
-		(at 157.48 111.76 0)
+		(at 157.48 102.87 0)
 		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
@@ -6133,7 +6405,7 @@
 		(dnp no)
 		(uuid "14d085bd-32ca-4a06-b76c-dc22148ca312")
 		(property "Reference" "#PWR030"
-			(at 157.48 118.11 0)
+			(at 157.48 109.22 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6142,7 +6414,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 157.48 115.57 0)
+			(at 157.48 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6150,7 +6422,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 157.48 111.76 0)
+			(at 157.48 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6159,7 +6431,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 157.48 111.76 0)
+			(at 157.48 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6168,7 +6440,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 157.48 111.76 0)
+			(at 157.48 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6357,7 +6629,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 120.65 0)
 			(effects
 				(font
@@ -6367,6 +6639,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 120.65 0)
 			(effects
 				(font
@@ -7065,7 +7364,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 137.16 80.01 270)
+		(at 137.16 71.12 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7073,7 +7372,7 @@
 		(dnp no)
 		(uuid "4bd58cab-8142-4aa4-8490-855f46fab453")
 		(property "Reference" "C5"
-			(at 138.43 78.74 90)
+			(at 138.43 69.85 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7082,7 +7381,7 @@
 			)
 		)
 		(property "Value" "1uF"
-			(at 132.08 78.74 90)
+			(at 132.08 69.85 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7091,7 +7390,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
-			(at 133.35 80.9752 0)
+			(at 133.35 72.0852 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7100,7 +7399,7 @@
 			)
 		)
 		(property "Datasheet" "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM155R6YA105KE11-01.pdf"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7109,7 +7408,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7118,7 +7417,7 @@
 			)
 		)
 		(property "Notes" "must not be polarized"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7127,7 +7426,7 @@
 			)
 		)
 		(property "Link" "https://www.digikey.com/en/products/detail/murata-electronics/GRM155R6YA105KE11J/4905163"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7136,7 +7435,7 @@
 			)
 		)
 		(property "Manufacturer Number" "GRM155R6YA105KE11J"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7145,7 +7444,7 @@
 			)
 		)
 		(property "Manufacturer" "Murata Electronics"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7154,7 +7453,7 @@
 			)
 		)
 		(property "Rated Voltage" "35V"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7163,7 +7462,7 @@
 			)
 		)
 		(property "Temperature Coefficient" "X5R"
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7172,7 +7471,7 @@
 			)
 		)
 		(property "PCBWay Link" ""
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7181,7 +7480,7 @@
 			)
 		)
 		(property "LCSC" ""
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7190,7 +7489,7 @@
 			)
 		)
 		(property "MFG" ""
-			(at 137.16 80.01 0)
+			(at 137.16 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7466,7 +7765,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 111.76 0)
 			(effects
 				(font
@@ -7476,6 +7775,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 111.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 111.76 0)
 			(effects
 				(font
@@ -7504,7 +7830,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 154.94 72.39 0)
+		(at 154.94 63.5 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7512,7 +7838,7 @@
 		(dnp no)
 		(uuid "5daf290e-5ca0-4f72-9129-f4adc88e41bb")
 		(property "Reference" "#PWR032"
-			(at 154.94 76.2 0)
+			(at 154.94 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7521,7 +7847,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 151.13 68.58 0)
+			(at 151.13 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7530,7 +7856,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 154.94 72.39 0)
+			(at 154.94 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7539,7 +7865,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 154.94 72.39 0)
+			(at 154.94 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7548,7 +7874,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 154.94 72.39 0)
+			(at 154.94 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7634,17 +7960,16 @@
 		)
 	)
 	(symbol
-		(lib_id "Analog_ADC:MCP3008")
+		(lib_id "Analog_ADC:MCP3208")
 		(at 132.08 138.43 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "5feb599c-12a7-4676-9a59-66a76b54f7f2")
 		(property "Reference" "U1"
-			(at 139.3033 123.19 0)
+			(at 120.904 123.444 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7652,8 +7977,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MCP3008"
-			(at 139.3033 125.73 0)
+		(property "Value" "MCP3208"
+			(at 117.348 126.238 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7670,7 +7995,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21295d.pdf"
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf"
 			(at 134.62 135.89 0)
 			(effects
 				(font
@@ -7679,7 +8004,34 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "A/D Converter, 10-Bit, 8-Channel, SPI Interface , 2.7V-5.5V"
+		(property "Description" "A/D Converter, 12-Bit, 8-Channel, SPI Interface , 2.7V-5.5V"
+			(at 132.08 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/microchip-technology/MCP3208-CI-P/305928"
+			(at 132.08 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Microchip Technology"
+			(at 132.08 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "MCP3208-CI/P"
 			(at 132.08 138.43 0)
 			(effects
 				(font
@@ -8012,7 +8364,7 @@
 	)
 	(symbol
 		(lib_id "Logic_LevelTranslator:TXB0104D")
-		(at 157.48 92.71 0)
+		(at 157.48 83.82 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8021,7 +8373,7 @@
 		(fields_autoplaced yes)
 		(uuid "82968bf0-e4d5-43e4-873c-8361e676ee6d")
 		(property "Reference" "U3"
-			(at 159.6233 110.49 0)
+			(at 159.6233 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8030,7 +8382,7 @@
 			)
 		)
 		(property "Value" "TXB0104D"
-			(at 159.6233 113.03 0)
+			(at 159.6233 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8039,7 +8391,7 @@
 			)
 		)
 		(property "Footprint" "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm"
-			(at 157.48 111.76 0)
+			(at 157.48 102.87 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8048,7 +8400,7 @@
 			)
 		)
 		(property "Datasheet" "http://www.ti.com/lit/ds/symlink/txb0104.pdf"
-			(at 160.274 90.297 0)
+			(at 160.274 81.407 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8057,7 +8409,34 @@
 			)
 		)
 		(property "Description" "4-Bit Bidirectional Voltage-Level Translator, Auto Direction Sensing and ±15-kV ESD Protection, 1.2 - 3.6V APort, 1.65 - 5.5V BPort, SOIC-14"
-			(at 157.48 92.71 0)
+			(at 157.48 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/texas-instruments/TXB0104DR/1629101?s=N4IgTCBcDa4JwDYC0YCMcwA4mqQOQBEQBdAXyA"
+			(at 157.48 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "TI"
+			(at 157.48 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "TXB0104DR"
+			(at 157.48 83.82 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8465,7 +8844,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 149.86 73.66 90)
+		(at 149.86 64.77 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8473,7 +8852,7 @@
 		(dnp no)
 		(uuid "a30ef52a-ad27-46dd-98d5-2fd63ed4feb1")
 		(property "Reference" "R1"
-			(at 151.13 71.12 90)
+			(at 151.13 62.23 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8482,7 +8861,7 @@
 			)
 		)
 		(property "Value" "10K"
-			(at 151.765 73.66 90)
+			(at 151.765 64.77 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8491,7 +8870,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder"
-			(at 149.86 75.438 90)
+			(at 149.86 66.548 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8500,7 +8879,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.koaspeer.com/pdfs/SG73P.pdf"
-			(at 149.86 73.66 0)
+			(at 149.86 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8509,7 +8888,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 149.86 73.66 0)
+			(at 149.86 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8518,7 +8897,7 @@
 			)
 		)
 		(property "Link" "https://www.digikey.com/en/products/detail/koa-speer-electronics-inc/SG73P1EWTTP1002F/14316756"
-			(at 149.86 73.66 90)
+			(at 149.86 64.77 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8527,7 +8906,7 @@
 			)
 		)
 		(property "Manufacturer" "KOA Speer Electronics, Inc."
-			(at 149.86 73.66 0)
+			(at 149.86 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8536,7 +8915,7 @@
 			)
 		)
 		(property "Manufacturer Number" "SG73P1EWTTP1002F"
-			(at 149.86 73.66 0)
+			(at 149.86 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8545,7 +8924,7 @@
 			)
 		)
 		(property "Notes" ""
-			(at 149.86 73.66 0)
+			(at 149.86 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8635,6 +9014,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 82.55 146.05 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a8873021-42d2-48f4-a67c-abe5ef4400a8")
+		(property "Reference" "#PWR047"
+			(at 82.55 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 82.55 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 82.55 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 82.55 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 82.55 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1346e66b-90cc-4ff0-b3fb-7733d145bde0")
+		)
+		(instances
+			(project "harp.breakout.analog"
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "#PWR047")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x06_Pin")
 		(at 231.14 146.05 0)
 		(mirror y)
@@ -8689,6 +9134,24 @@
 				(hide yes)
 			)
 		)
+		(property "Manufacturer" "DNP"
+			(at 231.14 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "DNP"
+			(at 231.14 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "3"
 			(uuid "df3c8dd0-de96-4dc0-9ec8-1d2be9a01a64")
 		)
@@ -8711,6 +9174,102 @@
 			(project ""
 				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
 					(reference "J9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 82.55 142.24 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b3d735d0-ca56-460f-bc65-ca12cb613ce6")
+		(property "Reference" "C8"
+			(at 85.598 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100nF"
+			(at 85.344 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric_Pad0.74x0.62mm_HandSolder"
+			(at 83.5152 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://search.murata.co.jp/Ceramy/image/img/A01X/G101/ENG/GRM155R71H104KE14-01.pdf"
+			(at 82.55 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 82.55 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/murata-electronics/GRM155R71H104KE14D/4906220"
+			(at 82.55 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Murata Electronics"
+			(at 82.55 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "GRM155R71H104KE14D"
+			(at 82.55 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "ee33b697-1be1-4f13-a151-21a7d8775cd8")
+		)
+		(pin "1"
+			(uuid "a2c7f6f2-71d1-4b24-8777-a2973c446b92")
+		)
+		(instances
+			(project "harp.breakout.analog"
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "C8")
 					(unit 1)
 				)
 			)
@@ -8971,7 +9530,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 93.98 0)
 			(effects
 				(font
@@ -8981,6 +9540,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 93.98 0)
 			(effects
 				(font
@@ -9009,15 +9595,16 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 130.81 80.01 270)
+		(at 153.67 125.73 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ce5806fc-62fb-491d-a72c-169edd867594")
-		(property "Reference" "#PWR033"
-			(at 124.46 80.01 0)
+		(fields_autoplaced yes)
+		(uuid "cdbd1e75-d4ea-43e9-b88e-bcaad100677e")
+		(property "Reference" "#PWR045"
+			(at 153.67 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9026,16 +9613,15 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 123.19 80.01 90)
+			(at 153.67 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
 		(property "Footprint" ""
-			(at 130.81 80.01 0)
+			(at 153.67 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9044,7 +9630,73 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 130.81 80.01 0)
+			(at 153.67 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 153.67 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ac30075d-1891-4056-8d8c-db6a70e4518d")
+		)
+		(instances
+			(project ""
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "#PWR045")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 130.81 71.12 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ce5806fc-62fb-491d-a72c-169edd867594")
+		(property "Reference" "#PWR033"
+			(at 124.46 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 123.19 71.12 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 130.81 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 130.81 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9053,7 +9705,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 130.81 80.01 0)
+			(at 130.81 71.12 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9110,7 +9762,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 85.09 0)
 			(effects
 				(font
@@ -9120,6 +9772,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 85.09 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 85.09 0)
 			(effects
 				(font
@@ -9447,7 +10126,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 102.87 0)
 			(effects
 				(font
@@ -9457,6 +10136,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 102.87 0)
 			(effects
 				(font
@@ -9552,7 +10258,7 @@
 	(symbol
 		(lib_name "+5V_2")
 		(lib_id "power:+5V")
-		(at 160.02 72.39 0)
+		(at 160.02 63.5 0)
 		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
@@ -9561,7 +10267,7 @@
 		(dnp no)
 		(uuid "e3dfc7d9-b0e8-472e-baee-e919753b2027")
 		(property "Reference" "#PWR01"
-			(at 160.02 76.2 0)
+			(at 160.02 67.31 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9570,7 +10276,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 160.02 68.58 0)
+			(at 160.02 59.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9578,7 +10284,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 160.02 72.39 0)
+			(at 160.02 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9587,7 +10293,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 160.02 72.39 0)
+			(at 160.02 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9596,7 +10302,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 160.02 72.39 0)
+			(at 160.02 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9925,6 +10631,33 @@
 			)
 		)
 		(property "Description" "3.3V Low-Drift, Low-Power, Dual-Output, VREF and VREF / 2 Voltage Reference, SOT-23-5"
+			(at 71.12 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/texas-instruments/REF2033QDDCRQ1/15926650?s=N4IgTCBcDa4JwDYC0AlAogMTABgMy4EUARIgYRQIEZSAVJAOSJAF0BfIA"
+			(at 71.12 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "TI"
+			(at 71.12 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "REF2033QDDCRQ1"
 			(at 71.12 138.43 0)
 			(effects
 				(font
@@ -10287,6 +11020,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 57.15 146.05 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fa7822fb-c17b-4a2c-8aac-786cb6141289")
+		(property "Reference" "#PWR046"
+			(at 57.15 152.4 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 57.15 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 57.15 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 57.15 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 57.15 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6e76ef69-7521-490d-8114-a18234311689")
+		)
+		(instances
+			(project "harp.breakout.analog"
+				(path "/ae2d5d38-e5e4-49fd-ba76-20c690478739"
+					(reference "#PWR046")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x03_Pin")
 		(at 231.14 129.54 180)
 		(unit 1)
@@ -10323,7 +11122,7 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "~"
+		(property "Datasheet" "https://www.molex.com/content/dam/molex/molex-dot-com/products/automated/en-us/salesdrawingpdf/705/70553/705530002_sd.pdf?inline"
 			(at 231.14 129.54 0)
 			(effects
 				(font
@@ -10333,6 +11132,33 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated"
+			(at 231.14 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Link" "https://www.digikey.com/en/products/detail/molex/0705530002/114955?s=N4IgTCBcDaIOoFkAsBOADARgLQDkAiIAugL5A"
+			(at 231.14 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 231.14 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer Number" "0705530002"
 			(at 231.14 129.54 0)
 			(effects
 				(font
