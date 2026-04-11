@@ -1,0 +1,11 @@
+[project]
+name = "delphi-controller"
+version = "0.1.0"
+description = "GUI for testing and operating the Delphi Harp hardware device"
+requires-python = ">=3.11"
+dependencies = [
+    "customtkinter>=5.2",
+    "matplotlib>=3.8",
+    "pyserial>=3.5",
+]
+

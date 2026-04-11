@@ -1,0 +1,40 @@
+{
+  "dashboard_valve_indices": [0, 1, 2, 3],
+  "dashboard_flow_plot_indices": [0, 1],
+
+  "type_defaults": {
+    "analog":           { "slope": 1.0,   "offset": 0.0 },
+    "flow_meter_100mL": { "slope": 0.01,  "offset": 0.0 },
+    "flow_meter_1L":    { "slope": 0.1,   "offset": 0.0 }
+  },
+
+  "valve_channels": [
+    { "index": 0,  "name": "Valve 0",  "type": "on_off", "dashboard": true  },
+    { "index": 1,  "name": "Valve 1",  "type": "on_off", "dashboard": true  },
+    { "index": 2,  "name": "Valve 2",  "type": "on_off", "dashboard": true  },
+    { "index": 3,  "name": "Valve 3",  "type": "on_off", "dashboard": true  },
+    { "index": 4,  "name": "Valve 4",  "type": "on_off", "dashboard": false },
+    { "index": 5,  "name": "Valve 5",  "type": "on_off", "dashboard": false },
+    { "index": 6,  "name": "Valve 6",  "type": "on_off", "dashboard": false },
+    { "index": 7,  "name": "Valve 7",  "type": "on_off", "dashboard": false },
+    { "index": 8,  "name": "Valve 8",  "type": "on_off", "dashboard": false },
+    { "index": 9,  "name": "Valve 9",  "type": "on_off", "dashboard": false },
+    { "index": 10, "name": "Valve 10", "type": "on_off", "dashboard": false },
+    { "index": 11, "name": "Valve 11", "type": "on_off", "dashboard": false },
+    { "index": 12, "name": "Valve 12", "type": "on_off", "dashboard": false },
+    { "index": 13, "name": "Valve 13", "type": "on_off", "dashboard": false },
+    { "index": 14, "name": "Valve 14", "type": "on_off", "dashboard": false },
+    { "index": 15, "name": "Valve 15", "type": "on_off", "dashboard": false }
+  ],
+
+  "flow_adc_channels": [
+    { "index": 0, "name": "Odor",      "type": "flow_meter_100mL", "conversion": { "slope": 0.01, "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": true  },
+    { "index": 1, "name": "Exhaust",   "type": "flow_meter_100mL", "conversion": { "slope": 0.01, "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": true  },
+    { "index": 2, "name": "Channel A", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false },
+    { "index": 3, "name": "Channel B", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false },
+    { "index": 4, "name": "Channel 4", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false },
+    { "index": 5, "name": "Channel 5", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false },
+    { "index": 6, "name": "Channel 6", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false },
+    { "index": 7, "name": "Channel 7", "type": "analog",           "conversion": { "slope": 1.0,  "offset": 0.0 }, "leak_detection": { "enabled": false, "min": 0.0, "max": 100.0 }, "dashboard_plot": false }
+  ]
+}
