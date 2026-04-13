@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from device_manager import DeviceManager
 from tabs.dashboard import DashboardTab
 from tabs.valves import ValvesTab
 from tabs.flow_adc import FlowAdcTab
@@ -12,8 +13,11 @@ class App(ctk.CTk):
         self.geometry("1280x800")
         self.minsize(1000, 640)
 
+        self.dm = DeviceManager()
+
         self._build_header()
         self._build_tabs()
+        self._drain_queue()
 
     def _build_header(self):
         header = ctk.CTkFrame(self, height=44, corner_radius=0, fg_color=("gray85", "gray17"))
@@ -45,16 +49,21 @@ class App(ctk.CTk):
             tab.grid_columnconfigure(0, weight=1)
             tab.grid_rowconfigure(0, weight=1)
 
-        self.dashboard_tab = DashboardTab(self.tabview.tab("Dashboard"))
+        self.dashboard_tab = DashboardTab(self.tabview.tab("Dashboard"), device_manager=self.dm)
         self.dashboard_tab.grid(row=0, column=0, sticky="nsew")
 
-        self.valves_tab = ValvesTab(self.tabview.tab("Valves"))
+        self.valves_tab = ValvesTab(self.tabview.tab("Valves"), device_manager=self.dm)
         self.valves_tab.grid(row=0, column=0, sticky="nsew")
 
         self.flow_adc_tab = FlowAdcTab(self.tabview.tab("Flow / ADC"))
         self.flow_adc_tab.grid(row=0, column=0, sticky="nsew")
 
-        self.config_tab = ConfigTab(self.tabview.tab("Config"))
+        self.config_tab = ConfigTab(
+            self.tabview.tab("Config"),
+            device_manager=self.dm,
+            on_connect=lambda: self.set_connection_status(True),
+            on_disconnect=lambda: self.set_connection_status(False),
+        )
         self.config_tab.grid(row=0, column=0, sticky="nsew")
 
         # Wire Flow/ADC tab → Dashboard plots
@@ -64,6 +73,19 @@ class App(ctk.CTk):
         # Wire Valves tab → Dashboard valve controls
         self.valves_tab.on_change = lambda configs: self.dashboard_tab.sync_valves(configs)
         self.dashboard_tab.sync_valves(self.valves_tab.get_valve_configs())
+
+    def _drain_queue(self):
+        """Pull all pending poll results off the DeviceManager queue and fan
+        out updates to tabs.  Reschedules itself every 200 ms on the GUI thread."""
+        try:
+            while True:
+                data = self.dm.queue.get_nowait()
+                self.dashboard_tab.push_live_data(data["flow_rates"])
+                self.dashboard_tab.update_valve_states(data["valves_state"])
+                self.valves_tab.update_duty_cycles(data.get("duty_cycles", []))
+        except Exception:
+            pass
+        self.after(200, self._drain_queue)
 
     def set_connection_status(self, connected: bool):
         if connected:

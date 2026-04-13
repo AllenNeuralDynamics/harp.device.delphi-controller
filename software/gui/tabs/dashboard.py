@@ -1,13 +1,19 @@
+import logging
 import math
 import random
 import customtkinter as ctk
+from pyharp.messages import HarpMessage
+from app_registers_refactor import AppRegs
 from widgets.tile import Tile
 from widgets.live_plot import LivePlot
 
+logger = logging.getLogger(__name__)
+
 
 class DashboardTab(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, device_manager=None, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
+        self._dm = device_manager
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
@@ -19,6 +25,7 @@ class DashboardTab(ctk.CTkFrame):
         self._build_valve_controls_card()
         self._build_plot_cards()
         self._build_leak_banner()
+        self._demo_active = True
         self._demo_t = 0.0
         self._demo_tick_count = 0
         self._tick_demo()
@@ -30,6 +37,7 @@ class DashboardTab(ctk.CTkFrame):
         tile.grid(row=0, column=0, sticky="nsew", padx=(0, 4), pady=(0, 6))
         self._flow_rates_content = tile.content
         self._flow_labels: list[ctk.CTkLabel] = []
+        self._label_channels: list[int] = []
 
     # ── Valve Controls ─────────────────────────────────────────────────────────
 
@@ -81,8 +89,18 @@ class DashboardTab(ctk.CTkFrame):
             self._valve_switches.append((c["index"], sw))
 
     def _on_valve_toggle(self, valve_index: int):
-        # TODO: send ValvesSet / ValvesClear harp message
-        pass
+        if self._dm is None or not self._dm.is_connected:
+            return
+        state = next((sw.get() for idx, sw in self._valve_switches if idx == valve_index), None)
+        if state is None:
+            return
+        try:
+            if state:
+                self._dm.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 1 << valve_index))
+            else:
+                self._dm.send(HarpMessage.WriteU16(AppRegs.ValvesClear, 1 << valve_index))
+        except Exception as exc:
+            logger.warning("Valve toggle error (valve %d): %s", valve_index, exc)
 
     # ── Flow Plots ─────────────────────────────────────────────────────────────
 
@@ -91,9 +109,10 @@ class DashboardTab(ctk.CTkFrame):
         self._plot_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(0, 6))
         self._plot_pool: list[LivePlot] = []  # all ever-created plots (never destroyed)
         self._plots: list[LivePlot] = []      # currently visible subset
+        self._plot_channels: list[int] = []   # hardware channel index for each visible plot slot
 
     def sync_plots(self, configs: list[dict]):
-        """Show/hide plots from the pool based on channel configs ({name, plot_enabled}).
+        """Show/hide plots from the pool based on channel configs ({index, name, plot_enabled}).
 
         Plots are never destroyed — only hidden — to avoid crashing on pending
         Tkinter after_idle callbacks that matplotlib schedules via draw_idle().
@@ -111,6 +130,7 @@ class DashboardTab(ctk.CTkFrame):
             self._plot_pool.append(p)
 
         self._plots = self._plot_pool[: len(enabled)]
+        self._plot_channels = [c["index"] for c in enabled]
 
         if not enabled:
             self._rebuild_flow_rate_labels([])
@@ -138,19 +158,21 @@ class DashboardTab(ctk.CTkFrame):
                 pady=(0, 4 if row_idx < rows - 1 else 0),
             )
 
-        self._rebuild_flow_rate_labels([c["name"] for c in enabled])
+        self._rebuild_flow_rate_labels(enabled)
 
-    def _rebuild_flow_rate_labels(self, names: list[str]):
+    def _rebuild_flow_rate_labels(self, enabled: list[dict]):
         for widget in self._flow_rates_content.winfo_children():
             widget.destroy()
         self._flow_labels.clear()
-        for name in names:
+        self._label_channels: list[int] = []
+        for c in enabled:
             row = ctk.CTkFrame(self._flow_rates_content, fg_color="transparent")
             row.pack(fill="x", pady=2)
-            ctk.CTkLabel(row, text=name, anchor="w", width=100).pack(side="left")
+            ctk.CTkLabel(row, text=c["name"], anchor="w", width=100).pack(side="left")
             val = ctk.CTkLabel(row, text="-- mL/min", anchor="e", text_color=("gray40", "gray60"))
             val.pack(side="right")
             self._flow_labels.append(val)
+            self._label_channels.append(c["index"])
 
     # ── Leak Banner ────────────────────────────────────────────────────────────
 
@@ -179,9 +201,11 @@ class DashboardTab(ctk.CTkFrame):
             self._leak_banner.grid_remove()
             self._leak_visible = False
 
-    # ── Demo data (remove when hardware is connected) ──────────────────────────
+    # ── Demo data (runs until first real hardware data arrives) ───────────────
 
     def _tick_demo(self):
+        if not self._demo_active:
+            return
         self._demo_t += 0.2
         self._demo_tick_count += 1
         flow_values = []
@@ -193,14 +217,28 @@ class DashboardTab(ctk.CTkFrame):
             plot.push(val)
             flow_values.append(val)
         if self._demo_tick_count % 5 == 0:
-            self.update_flow_rates(flow_values)
+            for label, val in zip(self._flow_labels, flow_values):
+                label.configure(text=f"{val:.2f} mL/min")
         self.after(200, self._tick_demo)
 
-    # ── Public update API (called by App on poll drain) ────────────────────────
+    # ── Public update API (called by App._drain_queue on each poll) ───────────
 
-    def update_flow_rates(self, values: list[float]):
-        for label, val in zip(self._flow_labels, values):
-            label.configure(text=f"{val:.2f} mL/min")
+    def push_live_data(self, flow_rates: list[float]):
+        """Push one poll tick of real hardware data to plots and labels.
+
+        flow_rates: values from LatestFlowRate (reg 82), index = hardware channel.
+        Stops the demo ticker on first call.
+        """
+        if self._demo_active:
+            self._demo_active = False
+
+        for ch, plot in zip(self._plot_channels, self._plots):
+            if ch < len(flow_rates):
+                plot.push(flow_rates[ch])
+
+        for ch, label in zip(self._label_channels, self._flow_labels):
+            if ch < len(flow_rates):
+                label.configure(text=f"{flow_rates[ch]:.2f} mL/min")
 
     def update_valve_states(self, bitmask: int):
         for valve_index, sw in self._valve_switches:

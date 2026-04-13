@@ -7,3 +7,6 @@
 [submodule "firmware/lib/etl"]
 	path = firmware/lib/etl
 	url = https://github.com/ETLCPP/etl.git
+[submodule "software/pyharp"]
+	path = software/pyharp
+	url = git@github.com:AllenNeuralDynamics/pyharp.git

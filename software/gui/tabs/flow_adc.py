@@ -185,6 +185,6 @@ class FlowAdcTab(ctk.CTkFrame):
     def get_channel_configs(self) -> list[dict]:
         """Return current config for all 8 channels."""
         return [
-            {"name": row["name_var"].get(), "plot_enabled": row["plot_var"].get()}
-            for row in self._channel_rows
+            {"index": i, "name": row["name_var"].get(), "plot_enabled": row["plot_var"].get()}
+            for i, row in enumerate(self._channel_rows)
         ]

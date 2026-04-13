@@ -1,12 +1,21 @@
+import logging
+import struct
 import customtkinter as ctk
 import serial.tools.list_ports
+from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
+from app_registers_refactor import DelphiOnlyAppRegs
 from widgets.tile import Tile
 from utils import bind_scroll_wheel
 
+logger = logging.getLogger(__name__)
+
 
 class ConfigTab(ctk.CTkFrame):
-    def __init__(self, master, **kwargs):
+    def __init__(self, master, device_manager=None, on_connect=None, on_disconnect=None, **kwargs):
         super().__init__(master, fg_color="transparent", **kwargs)
+        self._dm = device_manager
+        self._on_connect_cb = on_connect
+        self._on_disconnect_cb = on_disconnect
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -86,20 +95,36 @@ class ConfigTab(ctk.CTkFrame):
 
     def _on_connect(self):
         if self._is_connected:
-            # TODO: device_manager.disconnect()
+            if self._dm is not None:
+                self._dm.disconnect()
             self._is_connected = False
             self._connect_btn.configure(text="Connect")
             self._status_label.configure(text="● Disconnected", text_color="#e05555")
-        else:
-            port = self._port_var.get()
-            # TODO: device_manager.connect(port)
-            self._is_connected = True
-            self._connect_btn.configure(text="Disconnect")
-            self._status_label.configure(text="● Connected", text_color="#55cc77")
             self._device_info.configure(state="normal")
             self._device_info.delete("1.0", "end")
-            self._device_info.insert("1.0", f"Connected to {port}\n[device info will appear here]")
             self._device_info.configure(state="disabled")
+            if self._on_disconnect_cb is not None:
+                self._on_disconnect_cb()
+        else:
+            port = self._port_var.get()
+            try:
+                if self._dm is not None:
+                    self._dm.connect(port)
+                self._is_connected = True
+                self._connect_btn.configure(text="Disconnect")
+                self._status_label.configure(text="● Connected", text_color="#55cc77")
+                self._device_info.configure(state="normal")
+                self._device_info.delete("1.0", "end")
+                self._device_info.insert("1.0", f"Connected to {port}")
+                self._device_info.configure(state="disabled")
+                if self._on_connect_cb is not None:
+                    self._on_connect_cb()
+            except Exception as exc:
+                self._status_label.configure(text=f"● Error: {exc}", text_color="#e08833")
+                self._device_info.configure(state="normal")
+                self._device_info.delete("1.0", "end")
+                self._device_info.insert("1.0", str(exc))
+                self._device_info.configure(state="disabled")
 
     def _on_log_toggle(self):
         if self._is_logging:
@@ -152,24 +177,55 @@ class ConfigTab(ctk.CTkFrame):
         tile = Tile(parent, title="PID Gains")
         tile.pack(fill="x", pady=(0, 8))
 
-        for label_text, placeholder in (
+        fields = (
             ("Update Rate (Hz)", "100.0"),
             ("Kp", "1.000"),
             ("Ki", "0.100"),
             ("Kd", "0.010"),
-        ):
+        )
+        self._pid_vars: dict[str, ctk.StringVar] = {}
+        keys = ("rate", "kp", "ki", "kd")
+        for (label_text, placeholder), key in zip(fields, keys):
+            var = ctk.StringVar(value=placeholder)
+            self._pid_vars[key] = var
             row = ctk.CTkFrame(tile.content, fg_color="transparent")
             row.pack(fill="x", pady=3)
             ctk.CTkLabel(row, text=label_text, anchor="w", width=180).pack(side="left")
-            ctk.CTkEntry(row, placeholder_text=placeholder, width=120).pack(side="left", padx=(8, 0))
+            ctk.CTkEntry(row, textvariable=var, width=120).pack(side="left", padx=(8, 0))
+
+        self._pid_status = ctk.CTkLabel(tile.content, text="", text_color=("gray40", "gray60"),
+                                         font=ctk.CTkFont(size=11))
+        self._pid_status.pack(anchor="w", pady=(4, 0))
 
         ctk.CTkButton(tile.content, text="Write Gains", width=120, command=self._on_write_pid).pack(
-            anchor="w", pady=(8, 0)
+            anchor="w", pady=(4, 0)
         )
 
     def _on_write_pid(self):
-        # TODO: pack_pid_config(kp, ki, kd) → WriteHarpMessage
-        pass
+        if self._dm is None or not self._dm.is_connected:
+            self._pid_status.configure(text="Not connected", text_color="#e05555")
+            return
+        try:
+            rate = float(self._pid_vars["rate"].get())
+            kp   = float(self._pid_vars["kp"].get())
+            ki   = float(self._pid_vars["ki"].get())
+            kd   = float(self._pid_vars["kd"].get())
+        except ValueError:
+            self._pid_status.configure(text="Invalid value", text_color="#e05555")
+            return
+        try:
+            self._dm.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, rate))
+            gains_bytes = struct.pack("<fff", kp, ki, kd)
+            self._dm.send(WriteHarpMessage(
+                PayloadType.U8,
+                gains_bytes,
+                DelphiOnlyAppRegs.PidGains,
+                offset=len(gains_bytes) - 1,
+            ))
+            self._pid_status.configure(text="Written", text_color="#55cc77")
+        except Exception as exc:
+            logger.warning("PID write error: %s", exc)
+            self._pid_status.configure(text=f"Error: {exc}", text_color="#e05555")
 
     # ── Poke Port ──────────────────────────────────────────────────────────────
 
