@@ -18,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 75;
+inline constexpr size_t APP_REG_COUNT = 74;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -131,9 +131,8 @@ struct app_regs_t
     uint8_t EnableValveLeds;
 
     // ADC registers
-    uint8_t AdcMask; // Mask of ADC channels being used for flow detection
     FlowDetection::ADC_Samples LatestFlowRate; //Read Only (5 float ADC flow rates)
-    FlowDetection::ADC_Samples LatestRawAdcSample; //Read Only (5 float ADC raw samples)
+    FlowDetection::ADC_Samples_Raw LatestRawAdcSample; //Read Only (5 float ADC raw samples)
     uint8_t EnableAdcSampling;
     int8_t LeakAdcChannel;
     float LeakThreshold;
@@ -153,19 +152,19 @@ struct app_regs_t
     PidConfig PidGains;
 
     //Proportional valve 0 registers
-    uint8_t ProportionalValve0Adc;
+    int8_t ProportionalValve0Adc;
     uint8_t ProportionalValve0EnablePid;
     float ProportionalValve0DutyCycle;
     float ProportionalValve0TargetFlowRate;
 
     //Proportional valve 1 registers
-    uint8_t ProportionalValve1Adc;
+    int8_t ProportionalValve1Adc;
     uint8_t ProportionalValve1EnablePid;
     float ProportionalValve1DutyCycle;
     float ProportionalValve1TargetFlowRate;
 
     //Proportional valve 2 registers
-    uint8_t ProportionalValve2Adc;
+    int8_t ProportionalValve2Adc;
     uint8_t ProportionalValve2EnablePid;
     float ProportionalValve2DutyCycle;
     float ProportionalValve2TargetFlowRate;
@@ -265,7 +264,6 @@ void read_cam1_duty_cycle(uint8_t reg_address);
 void read_enable_cam1_trigger(uint8_t reg_address);
 void read_valve_leds(uint8_t reg_address);
 
-void read_adc_mask(uint8_t reg_address);
 void read_adc(uint8_t reg_address);
 void read_raw_adc(uint8_t reg_address);
 void read_adc_enable(uint8_t reg_address);
@@ -323,7 +321,6 @@ void write_cam1_duty_cycle(msg_t& msg);
 void write_enable_cam1_trigger(msg_t& msg);
 void write_valve_leds(msg_t& msg);
 
-void write_adc_mask(msg_t& msg);
 void write_adc_enable(msg_t& msg);
 void write_leak_adc_channel(msg_t& msg);
 void write_leak_threshold(msg_t& msg);
@@ -343,7 +340,6 @@ void write_proportional_valve_1_adc(msg_t& msg);
 void write_proportional_valve_1_enable_pid(msg_t& msg);
 void write_proportional_valve_1_duty_cycle(msg_t& msg);
 void write_proportional_valve_1_target_flow_rate(msg_t& msg);
-
 void write_proportional_valve_2_adc(msg_t& msg);
 void write_proportional_valve_2_enable_pid(msg_t& msg);
 void write_proportional_valve_2_duty_cycle(msg_t& msg);
