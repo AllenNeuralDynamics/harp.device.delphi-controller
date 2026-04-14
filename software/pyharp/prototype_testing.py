@@ -24,8 +24,8 @@ def print_poke_counts(
 
 
 # # Open serial connection of Delphi controller
-com_port = "COM20"
-# com_port = "COM4"
+# com_port = "COM20"
+com_port = "COM4"
 device = Device(com_port)
 device.info()  # Display device's info on screen
 

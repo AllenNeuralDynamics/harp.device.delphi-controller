@@ -37,6 +37,8 @@ void FlowDetection::reset()
         flow_regs_.meter[i].q[1] = DEFAULT_A1;
         flow_regs_.meter[i].q[2] = DEFAULT_A2;
         flow_regs_.meter[i].q[3] = DEFAULT_A3;
+        flow_regs_.meter[i].q[4] = DEFAULT_A4;
+        flow_regs_.meter[i].q[5] = DEFAULT_A5;
     }
 
     current_channel_ = 0;
@@ -137,7 +139,7 @@ void FlowDetection::process_latest_sample()
     latest_raw_adc_sample_.z[ch] = raw;
 
     float volts = raw * (VREF_VOLTS / ADC_BITS);
-    latest_adc_sample_.v[ch] = eval_cubic(flow_regs_.meter[ch].q, volts);
+    latest_adc_sample_.v[ch] = eval_polynominal(flow_regs_.meter[ch].q, volts);
 
     current_channel_ = (current_channel_ + 1) % max_adc_chs_;
 }

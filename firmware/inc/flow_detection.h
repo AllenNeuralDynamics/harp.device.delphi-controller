@@ -33,7 +33,7 @@ public:
 
     // flow meter configuration
     static inline constexpr uint8_t NUM_FLOW_METERS = MAX_ADC_CHS;
-    static inline constexpr uint8_t NUMBER_OF_COEFFICIENTS = 4;
+    static inline constexpr uint8_t NUMBER_OF_COEFFICIENTS = 6;
 
     struct FlowMeterConfig {
         float q[NUMBER_OF_COEFFICIENTS];
@@ -217,13 +217,16 @@ private:
     static inline constexpr float DEFAULT_FLOW_RATE = 75.0f;
     static inline constexpr float FLOW_RATE_TOLERANCE = 5.0f;
 
-    static inline constexpr float DEFAULT_A0 = -25.0f;
-    static inline constexpr float DEFAULT_A1 = 50.0f;
-    static inline constexpr float DEFAULT_A2 = 0.0f;
-    static inline constexpr float DEFAULT_A3 = 0.0f;
+    static inline constexpr float DEFAULT_A0 = -24.864f; // -0.269996
+    static inline constexpr float DEFAULT_A1 = 49.944f; // 1.060657
+    static inline constexpr float DEFAULT_A2 = 0.0f; // -1.601495
+    static inline constexpr float DEFAULT_A3 = 0.0f; // 1.374705
+    static inline constexpr float DEFAULT_A4 = 0.0f; //-0.564312
+    static inline constexpr float DEFAULT_A5 = 0.0f; // 0.094003
 
-    static inline float eval_cubic(const float q[4], float x)
+
+    static inline float eval_polynominal(const float q[6], float x)
     {
-        return ((q[3] * x + q[2]) * x + q[1]) * x + q[0];
+        return ((((q[5] * x + q[4]) * x + q[3]) * x + q[2]) * x + q[1]) * x + q[0];
     }
 };
