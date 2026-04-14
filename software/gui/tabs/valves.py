@@ -1,6 +1,7 @@
 import logging
+import struct
 import customtkinter as ctk
-from pyharp.messages import HarpMessage
+from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
 from app_registers_refactor import AppRegs, DelphiOnlyAppRegs
 from widgets.tile import Tile
 from utils import bind_scroll_wheel
@@ -124,9 +125,38 @@ class ValvesTab(ctk.CTkFrame):
 
         # ── On/Off detail ──
         self._onoff_frame = ctk.CTkFrame(self._detail_tile.content, fg_color="transparent")
+
         self._onoff_switch = ctk.CTkSwitch(self._onoff_frame, text="Active",
                                             command=self._on_onoff_toggle)
-        self._onoff_switch.pack(anchor="w", pady=4)
+        self._onoff_switch.pack(anchor="w", pady=(4, 2))
+
+        self._onoff_status = ctk.CTkLabel(
+            self._onoff_frame, text="", font=ctk.CTkFont(size=11),
+            text_color=("gray40", "gray60"),
+        )
+        self._onoff_status.pack(anchor="w", pady=(0, 8))
+
+        sep = ctk.CTkFrame(self._onoff_frame, height=1, corner_radius=0,
+                           fg_color=("gray70", "gray35"))
+        sep.pack(fill="x", pady=(0, 8))
+
+        ctk.CTkLabel(self._onoff_frame, text="Valve Config (ValveConfigs register)",
+                     font=ctk.CTkFont(weight="bold"), anchor="w").pack(fill="x", pady=(0, 4))
+
+        for label, attr, default in (
+            ("Hit Output (0–1)", "_onoff_hit_var", "1.00"),
+            ("Hold Output (0–1)", "_onoff_hold_var", "1.00"),
+            ("Hit Duration (µs, 0=hold)", "_onoff_dur_var", "0"),
+        ):
+            row = ctk.CTkFrame(self._onoff_frame, fg_color="transparent")
+            row.pack(fill="x", pady=3)
+            ctk.CTkLabel(row, text=label, anchor="w", width=200).pack(side="left")
+            var = ctk.StringVar(value=default)
+            setattr(self, attr, var)
+            ctk.CTkEntry(row, textvariable=var, width=100).pack(side="left", padx=(8, 0))
+
+        ctk.CTkButton(self._onoff_frame, text="Write Config", width=120,
+                      command=self._on_write_valve_config).pack(anchor="w", pady=(8, 0))
 
         # ── Proportional detail ──
         self._prop_frame = ctk.CTkFrame(self._detail_tile.content, fg_color="transparent")
@@ -200,7 +230,7 @@ class ValvesTab(ctk.CTkFrame):
             self._prop_frame.pack(fill="both", expand=True)
 
     def _populate_onoff(self, index: int):
-        """Init the on/off switch from hardware state if connected."""
+        """Init the on/off switch and config fields from hardware state if connected."""
         if self._dm is None or not self._dm.is_connected:
             return
         try:
@@ -212,6 +242,17 @@ class ValvesTab(ctk.CTkFrame):
                 self._onoff_switch.deselect()
         except Exception as exc:
             logger.warning("Could not read ValvesState: %s", exc)
+        try:
+            cfg_reg = AppRegs.ValveConfigs0 + index
+            reply = self._dm.send(HarpMessage.ReadU8(cfg_reg))
+            raw = bytes(bytearray(reply.payload))
+            if len(raw) >= 12:
+                hit, hold, dur = struct.unpack_from("<ffI", raw)
+                self._onoff_hit_var.set(f"{hit:.2f}")
+                self._onoff_hold_var.set(f"{hold:.2f}")
+                self._onoff_dur_var.set(str(dur))
+        except Exception as exc:
+            logger.warning("Could not read ValveConfigs%d: %s", index, exc)
 
     def _populate_prop(self, index: int):
         """Populate proportional detail widgets from hardware registers."""
@@ -249,6 +290,10 @@ class ValvesTab(ctk.CTkFrame):
 
     def _on_onoff_toggle(self):
         if self._selected_index is None or self._dm is None or not self._dm.is_connected:
+            self._onoff_status.configure(
+                text="Not connected" if (self._dm is None or not self._dm.is_connected) else "",
+                text_color="#e05555",
+            )
             return
         state = self._onoff_switch.get()
         try:
@@ -256,8 +301,37 @@ class ValvesTab(ctk.CTkFrame):
                 self._dm.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 1 << self._selected_index))
             else:
                 self._dm.send(HarpMessage.WriteU16(AppRegs.ValvesClear, 1 << self._selected_index))
+            self._onoff_status.configure(
+                text=f"Sent {'Set' if state else 'Clear'} bit {self._selected_index}",
+                text_color="#55cc77",
+            )
         except Exception as exc:
             logger.warning("On/Off toggle error (valve %d): %s", self._selected_index, exc)
+            self._onoff_status.configure(text=f"Error: {exc}", text_color="#e05555")
+
+    def _on_write_valve_config(self):
+        if self._selected_index is None or self._dm is None or not self._dm.is_connected:
+            self._onoff_status.configure(text="Not connected", text_color="#e05555")
+            return
+        try:
+            hit = float(self._onoff_hit_var.get())
+            hold = float(self._onoff_hold_var.get())
+            dur = int(self._onoff_dur_var.get())
+        except ValueError as exc:
+            self._onoff_status.configure(text=f"Invalid value: {exc}", text_color="#e05555")
+            return
+        try:
+            payload = struct.pack("<ffI", hit, hold, dur)
+            cfg_reg = AppRegs.ValveConfigs0 + self._selected_index
+            msg = WriteHarpMessage(PayloadType.U8, payload, cfg_reg, offset=len(payload) - 1)
+            self._dm.send(msg)
+            self._onoff_status.configure(
+                text=f"Config written (hit={hit:.2f}, hold={hold:.2f}, dur={dur}µs)",
+                text_color="#55cc77",
+            )
+        except Exception as exc:
+            logger.warning("ValveConfig write error (valve %d): %s", self._selected_index, exc)
+            self._onoff_status.configure(text=f"Error: {exc}", text_color="#e05555")
 
     def _on_prop_adc_change(self):
         if self._selected_index is None or self._selected_index > 2:

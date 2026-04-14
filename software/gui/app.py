@@ -66,6 +66,9 @@ class App(ctk.CTk):
         )
         self.config_tab.grid(row=0, column=0, sticky="nsew")
 
+        # Route all DeviceManager sends to the Config tab log
+        self.dm.log_callback = lambda line: self.after(0, self.config_tab.append_log, line)
+
         # Wire Flow/ADC tab → Dashboard plots
         self.flow_adc_tab.on_change = lambda configs: self.dashboard_tab.sync_plots(configs)
         self.dashboard_tab.sync_plots(self.flow_adc_tab.get_channel_configs())

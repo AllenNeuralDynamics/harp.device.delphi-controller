@@ -6,20 +6,25 @@ GUI for testing and operating the Delphi Harp hardware device. Replaces ad-hoc C
 
 | Feature | Status |
 |---|---|
-| Project scaffold (main.py, app.py, device_manager.py) | Layout complete — no hardware wired |
-| Config tab — connection card | Layout complete — no hardware wired |
-| Config tab — register cards (cameras, PID, poke, odor) | Layout complete — no hardware wired |
-| Valves tab | Layout complete — no hardware wired |
-| Flow/ADC tab | Layout complete — no hardware wired |
+| Project scaffold (main.py, app.py, device_manager.py) | Complete |
+| Config tab — connection card | Complete |
+| Config tab — register cards (cameras, PID, poke, odor) | Layout complete — PID write wired; cameras/poke/odor not wired |
+| Config tab — message log | Complete — all `DeviceManager.send()` calls logged with register name, value, reply; ValveConfigs replies decoded as hit/hold/dur |
+| Valves tab — on/off toggle | Complete — ValvesSet/ValvesClear wired; ValveConfigs (hit/hold/dur) read and write wired per channel |
+| Valves tab — proportional | Layout complete — ADC, PID enable, target flow rate wired; duty cycle readout wired to poll |
+| Flow/ADC tab | Layout complete — not wired |
 | Dashboard tab | Layout complete — demo data running; plots and flow rate labels wired to Flow/ADC tab |
-| DeviceManager polling thread | Not started |
-| Harp message sends (valves, PID, cameras, etc.) | Not started |
+| DeviceManager polling thread | Complete — polls flow rates, ADC, leak state, valve state, duty cycles at 5 Hz |
+| Harp message sends (valves) | Complete — tested on hardware |
+| Harp message sends (PID, cameras, etc.) | Partially wired — untested |
 | Data logging (CSV) | Not started |
 | Flow meter calibration | Future |
 
 ## Known Issues
 
 - **Mouse wheel scroll on CTkScrollableFrame does not work on macOS.** Multiple approaches attempted (enter/leave bind, recursive child binding, `bind_all` with bounds check) — none reliably captured scroll events delivered to child widgets inside the scrollable frame. Workaround: click and drag the scrollbar. Revisit when upgrading CustomTkinter or switching to a different scroll approach.
+
+- **ValveConfigs hit/hold/dur semantics:** `hit_duration_us=0` means skip the hit phase and apply hold duty immediately. With `hold=0.0` (firmware default for valves 0–2), the valve will not open even when set via ValvesSet. Set `hold > 0` (e.g. 1.0) via Write Config before toggling. `dur > 0` enables a brief high-current hit phase before dropping to hold — useful for overcoming static friction.
 
 ---
 

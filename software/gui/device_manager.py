@@ -10,12 +10,31 @@ import struct
 import threading
 import time
 import logging
+from datetime import datetime
+from itertools import chain
 
 from pyharp.device import Device
 from pyharp.messages import HarpMessage
 from app_registers_refactor import AppRegs, DelphiOnlyAppRegs
 
 logger = logging.getLogger(__name__)
+
+# Register address → name lookup for message logging
+_REG_NAMES: dict[int, str] = {r.value: r.name for r in chain(AppRegs, DelphiOnlyAppRegs)}
+
+# ValveConfigs register address range for decoded display
+_VALVE_CONFIGS_RANGE = range(AppRegs.ValveConfigs0, AppRegs.ValveConfigs0 + 16)
+
+
+def _decode_valve_config(payload_bytes: list[int]) -> str:
+    """Decode a ValveConfigs payload bytes list into a readable string."""
+    try:
+        if len(payload_bytes) >= 12:
+            hit, hold, dur = struct.unpack_from("<ffI", bytes(payload_bytes[:12]))
+            return f"hit={hit:.2f}, hold={hold:.2f}, dur={dur}µs"
+    except Exception:
+        pass
+    return ""
 
 POLL_RATE_HZ = 5
 
@@ -36,6 +55,7 @@ class DeviceManager:
         self._stop_event = threading.Event()
         self.queue: queue.Queue[dict] = queue.Queue()
         self._connected = False
+        self.log_callback: callable | None = None  # called with a log line string
 
     # ── Connection lifecycle ───────────────────────────────────────────────────
 
@@ -76,7 +96,42 @@ class DeviceManager:
         """Send a HarpMessage and return the reply.  Raises if not connected."""
         if not self._connected or self._device is None:
             raise RuntimeError("DeviceManager is not connected")
-        return self._device.send(harp_message.frame)
+        reply = self._device.send(harp_message.frame)
+        if self.log_callback is not None:
+            try:
+                ts = datetime.now().strftime("%H:%M:%S.%f")[:-3]
+                addr = harp_message.address
+                reg_name = _REG_NAMES.get(addr, f"reg{addr}")
+                msg_type = harp_message.message_type.name
+                # Include payload for write messages — try .payload first (typed subclasses),
+                # fall back to raw frame bytes for WriteHarpMessage
+                try:
+                    val = harp_message.payload
+                    sent_str = f"{msg_type} {reg_name} ({addr}) = {val}"
+                except Exception:
+                    try:
+                        raw = list(harp_message.frame[5:-1])
+                        sent_str = f"{msg_type} {reg_name} ({addr}) = {raw}"
+                        if addr in _VALVE_CONFIGS_RANGE:
+                            decoded = _decode_valve_config(raw)
+                            if decoded:
+                                sent_str += f"  [{decoded}]"
+                    except Exception:
+                        sent_str = f"{msg_type} {reg_name} ({addr})"
+                # Include reply payload, with decoded hint for ValveConfigs
+                try:
+                    reply_val = list(reply.payload)
+                    reply_str = f"→ reply: {reply_val}"
+                    if addr in _VALVE_CONFIGS_RANGE:
+                        decoded = _decode_valve_config(reply_val)
+                        if decoded:
+                            reply_str += f"  [{decoded}]"
+                except Exception:
+                    reply_str = ""
+                self.log_callback(f"[{ts}] {sent_str} {reply_str}".rstrip())
+            except Exception:
+                pass  # never let logging break the send
+        return reply
 
     # ── Background polling ─────────────────────────────────────────────────────
 

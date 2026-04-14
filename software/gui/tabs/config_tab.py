@@ -29,6 +29,7 @@ class ConfigTab(ctk.CTkFrame):
         self._build_pid_card(scroll)
         self._build_poke_card(scroll)
         self._build_odor_card(scroll)
+        self._build_message_log_card(scroll)
 
         bind_scroll_wheel(scroll)  # must be called after all cards are added
 
@@ -300,3 +301,29 @@ class ConfigTab(ctk.CTkFrame):
     def _on_write_odor_mask(self):
         # TODO: compute bitmask, WriteU16(QueuedOdorMask, mask)
         pass
+
+    # ── Message Log ────────────────────────────────────────────────────────────
+
+    def _build_message_log_card(self, parent):
+        tile = Tile(parent, title="Message Log")
+        tile.pack(fill="x", pady=(0, 8))
+
+        btn_row = ctk.CTkFrame(tile.content, fg_color="transparent")
+        btn_row.pack(fill="x", pady=(0, 6))
+        ctk.CTkButton(btn_row, text="Clear", width=80, command=self._clear_message_log).pack(side="left")
+
+        self._msg_log = ctk.CTkTextbox(tile.content, height=200, state="disabled",
+                                        font=ctk.CTkFont(family="Courier", size=11))
+        self._msg_log.pack(fill="x")
+
+    def _clear_message_log(self):
+        self._msg_log.configure(state="normal")
+        self._msg_log.delete("1.0", "end")
+        self._msg_log.configure(state="disabled")
+
+    def append_log(self, line: str):
+        """Append a line to the message log.  Safe to call from any thread via after()."""
+        self._msg_log.configure(state="normal")
+        self._msg_log.insert("end", line + "\n")
+        self._msg_log.see("end")
+        self._msg_log.configure(state="disabled")
