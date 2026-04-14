@@ -47,13 +47,13 @@ FlowDetection flow_detection(MAX_ADC_CHS);
 
 // Construct Proportional Valve Controller
 ValveDriver& proportional_valve_0 = valve_drivers[PROPORTIONAL_VALVE_0_INDEX]; 
-ProportionalValveControl proportional_valve_0_controller (proportional_valve_0, PROPORTIONAL_VALVE_0_ADC_INDEX);
+ProportionalValveControl proportional_valve_0_controller (proportional_valve_0);
 
 ValveDriver& proportional_valve_1 = valve_drivers[PROPORTIONAL_VALVE_1_INDEX]; 
-ProportionalValveControl proportional_valve_1_controller (proportional_valve_1, PROPORTIONAL_VALVE_1_ADC_INDEX);
+ProportionalValveControl proportional_valve_1_controller (proportional_valve_1);
 
 ValveDriver& proportional_valve_2 = valve_drivers[PROPORTIONAL_VALVE_2_INDEX]; 
-ProportionalValveControl proportional_valve_2_controller (proportional_valve_2, PROPORTIONAL_VALVE_2_ADC_INDEX);
+ProportionalValveControl proportional_valve_2_controller (proportional_valve_2);
 
 // Core0 main.
 int main()

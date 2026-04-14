@@ -108,7 +108,6 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8},
 
     // ADC specs
-    {(uint8_t*)&app_regs.AdcMask, sizeof(app_regs.AdcMask), U8},
     {(uint8_t*)&app_regs.LatestFlowRate, sizeof(app_regs.LatestFlowRate), U8},
     {(uint8_t*)&app_regs.LatestRawAdcSample, sizeof(app_regs.LatestRawAdcSample), U8},
     {(uint8_t*)&app_regs.EnableAdcSampling, sizeof(app_regs.EnableAdcSampling), U8},
@@ -124,15 +123,15 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.PidUpdateFrequency, sizeof(app_regs.PidUpdateFrequency), Float},
     {(uint8_t*)&app_regs.PidGains, sizeof(PidConfig), U8},
 
-    {(uint8_t*)&app_regs.ProportionalValve0Adc, sizeof(app_regs.ProportionalValve0Adc), U8},
+    {(uint8_t*)&app_regs.ProportionalValve0Adc, sizeof(app_regs.ProportionalValve0Adc), S8},
     {(uint8_t*)&app_regs.ProportionalValve0EnablePid, sizeof(app_regs.ProportionalValve0EnablePid), U8},
     {(uint8_t*)&app_regs.ProportionalValve0DutyCycle, sizeof(app_regs.ProportionalValve0DutyCycle), Float},
     {(uint8_t*)&app_regs.ProportionalValve0TargetFlowRate, sizeof(app_regs.ProportionalValve0TargetFlowRate), Float},
-    {(uint8_t*)&app_regs.ProportionalValve1Adc, sizeof(app_regs.ProportionalValve1Adc), U8},
+    {(uint8_t*)&app_regs.ProportionalValve1Adc, sizeof(app_regs.ProportionalValve1Adc), S8},
     {(uint8_t*)&app_regs.ProportionalValve1EnablePid, sizeof(app_regs.ProportionalValve1EnablePid), U8},
     {(uint8_t*)&app_regs.ProportionalValve1DutyCycle, sizeof(app_regs.ProportionalValve1DutyCycle), Float},
     {(uint8_t*)&app_regs.ProportionalValve1TargetFlowRate, sizeof(app_regs.ProportionalValve1TargetFlowRate), Float},
-    {(uint8_t*)&app_regs.ProportionalValve2Adc, sizeof(app_regs.ProportionalValve2Adc), U8},
+    {(uint8_t*)&app_regs.ProportionalValve2Adc, sizeof(app_regs.ProportionalValve2Adc), S8},
     {(uint8_t*)&app_regs.ProportionalValve2EnablePid, sizeof(app_regs.ProportionalValve2EnablePid), U8},
     {(uint8_t*)&app_regs.ProportionalValve2DutyCycle, sizeof(app_regs.ProportionalValve2DutyCycle), Float},
     {(uint8_t*)&app_regs.ProportionalValve2TargetFlowRate, sizeof(app_regs.ProportionalValve2TargetFlowRate), Float}
@@ -196,7 +195,6 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_valve_leds, write_valve_leds},
 
     // ADC handler functions
-    {read_adc_mask, write_adc_mask},
     {read_adc, HarpCore::write_to_read_only_reg_error},
     {read_raw_adc, HarpCore::write_to_read_only_reg_error},
     {read_adc_enable, write_adc_enable},
@@ -234,21 +232,6 @@ void read_raw_adc(uint8_t reg_address)
     app_regs.LatestRawAdcSample = flow_detection.get_latest_raw_adc_sample();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
-}
-
-void read_adc_mask(uint8_t reg_address)
-{
-    app_regs.AdcMask = flow_detection.get_adc_mask();
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(READ, reg_address);
-}
-
-void write_adc_mask(msg_t& msg)
-{
-    HarpCore::copy_msg_payload_to_register(msg);
-    flow_detection.set_adc_mask(app_regs.AdcMask);
-    if (!HarpCore::is_muted())
-        HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
 void read_proportional_valve_0_target_flow_rate(uint8_t reg_address)
@@ -1049,7 +1032,7 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void leak_state_alert()
 {
-    const uint8_t LEAK_STATE_INDEX_ADDRESS = 88; // FIXME: this is hardcoded.
+    const uint8_t LEAK_STATE_INDEX_ADDRESS = 86; // FIXME: this is hardcoded.
     app_regs.LeakState = flow_detection.get_leak_state(); // Update leak state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, LEAK_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -1057,7 +1040,7 @@ void leak_state_alert()
 
 void manual_flow_meter_alert()
 {
-    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 92; // FIXME: this is hardcoded.
+    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 90; // FIXME: this is hardcoded.
     app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state(); // Update manual flow meter state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, MANUAL_FLOW_METER_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -1174,10 +1157,27 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update Flow Detection
     flow_detection.update();
 
-    // Update proportional valve controllers
-    proportional_valve_0_controller.update(flow_detection.get_latest_adc_sample().v[proportional_valve_0_controller.get_flow_adc_index()]);
-    proportional_valve_1_controller.update(flow_detection.get_latest_adc_sample().v[proportional_valve_1_controller.get_flow_adc_index()]);
-    proportional_valve_2_controller.update(flow_detection.get_latest_adc_sample().v[proportional_valve_2_controller.get_flow_adc_index()]);
+    // Update PID controllers with latest flow meter readings.
+    auto& adc_samples = flow_detection.get_latest_adc_sample();
+    if (app_regs.ProportionalValve0Adc >= 0 ) {
+        int ch0 = proportional_valve_0_controller.get_flow_adc_index();
+        assert(ch0 >= -1 && ch0 < MAX_ADC_CHS);
+        // proportional_valve_0_controller.update(adc_samples.v[ch0]);
+        proportional_valve_0_controller.update(adc_samples.v[0]);
+    }
+    if (app_regs.ProportionalValve1Adc >= 0 ) {
+        int ch1 = proportional_valve_1_controller.get_flow_adc_index();
+        // assert(ch1 >= -1 && ch1 < MAX_ADC_CHS);
+        // proportional_valve_1_controller.update(adc_samples.v[ch1]);
+        proportional_valve_1_controller.update(adc_samples.v[1]);
+    }
+    if (app_regs.ProportionalValve2Adc >= 0 ) {
+        int ch2 = proportional_valve_2_controller.get_flow_adc_index();
+        // assert(ch2 >= -1 && ch2 < MAX_ADC_CHS);
+        // proportional_valve_2_controller.update(adc_samples.v[ch2]);
+        proportional_valve_2_controller.update(adc_samples.v[2]);
+    }
+
 
     // Handle harp events
     HarpEvent evt;
@@ -1279,7 +1279,6 @@ void reset_app()
     flow_detection.reset();
     flow_detection.leak_state_alert_callback_fn(leak_state_alert);
     flow_detection.manual_flow_meter_alert_callback_fn(manual_flow_meter_alert);
-    app_regs.AdcMask = flow_detection.get_adc_mask();
     app_regs.LatestFlowRate = flow_detection.get_latest_adc_sample();
     app_regs.LatestRawAdcSample = flow_detection.get_latest_raw_adc_sample();
     app_regs.EnableAdcSampling = flow_detection.get_adc_enabled_status();
@@ -1294,15 +1293,23 @@ void reset_app()
 
     // Reset proportional valve controllers and all related registers
     proportional_valve_0_controller.reset();
+    proportional_valve_1_controller.reset();
+    proportional_valve_2_controller.reset();
+
     app_regs.PidUpdateFrequency = proportional_valve_0_controller.get_pid_update_frequency();
+    
+    app_regs.ProportionalValve0Adc = proportional_valve_0_controller.get_flow_adc_index(); 
+    app_regs.ProportionalValve1Adc = proportional_valve_1_controller.get_flow_adc_index(); 
+    app_regs.ProportionalValve2Adc = proportional_valve_2_controller.get_flow_adc_index(); 
+
     app_regs.ProportionalValve0EnablePid = proportional_valve_0_controller.get_pid_enabled();
     app_regs.ProportionalValve0TargetFlowRate = proportional_valve_0_controller.get_target_flow_rate();
     app_regs.ProportionalValve0DutyCycle = proportional_valve_0_controller.get_duty_cycle();
-    proportional_valve_1_controller.reset();
+    
     app_regs.ProportionalValve1EnablePid = proportional_valve_1_controller.get_pid_enabled();
     app_regs.ProportionalValve1TargetFlowRate = proportional_valve_1_controller.get_target_flow_rate();
     app_regs.ProportionalValve1DutyCycle = proportional_valve_1_controller.get_duty_cycle();
-    proportional_valve_2_controller.reset();
+    
     app_regs.ProportionalValve2EnablePid = proportional_valve_2_controller.get_pid_enabled();
     app_regs.ProportionalValve2TargetFlowRate = proportional_valve_2_controller.get_target_flow_rate();
     app_regs.ProportionalValve2DutyCycle = proportional_valve_2_controller.get_duty_cycle();

@@ -1,21 +1,23 @@
 #include <proportional_valve_control.h>
 
-ProportionalValveControl::ProportionalValveControl(ValveDriver& proportional_valve, uint8_t flow_adc_index):
-flow_adc_index_{flow_adc_index}, target_flow_rate_{0.0f}, proportional_valve_{proportional_valve},
+ProportionalValveControl::ProportionalValveControl(ValveDriver& proportional_valve):
+flow_adc_index_{-1}, target_flow_rate_{0.0f}, proportional_valve_{proportional_valve},
 kp_{0.0f}, ki_{0.0f}, kd_{0.0f}, previous_error_{0.0f}, integral_error_{0.0f}, derivative_error_{0.0f},
 duty_cycle_{0.0f}, control_enabled_{false}, update_rate_hz_{DEFAULT_UPDATE_RATE_HZ}, start_time_us_{0},
-prev_meas_{0.0f}, d_filt_{0.0f}
+prev_meas_{0.0f}, d_filt_{0.0f}, u_prev_{0.0f}
 {
     reset();
 }
 
 ProportionalValveControl::~ProportionalValveControl()
 {
+    flow_adc_index_ = -1;
     control_enabled_ = false;
     duty_cycle_ = 0.0f;
     proportional_valve_.set_normalized_hold_output(duty_cycle_);
     proportional_valve_.deenergize();   
 }
+
 
 void ProportionalValveControl::reset()
 {
@@ -23,18 +25,28 @@ void ProportionalValveControl::reset()
     kp_ = 0.0f;
     ki_ = 0.0f;
     kd_ = 0.0f;
+    flow_adc_index_ = -1; //
+
     previous_error_ = 0.0f;
     integral_error_ = 0.0f;
     derivative_error_ = 0.0f;
+
+    prev_meas_ = 0.0f;
+    d_filt_ = 0.0f;
+    u_prev_ = 0.0f;
+
     duty_cycle_ = 0.0f;
     control_enabled_ = false;
+
     start_time_us_ = 0;
     update_rate_hz_ = DEFAULT_UPDATE_RATE_HZ;
+
     proportional_valve_.set_pwm_frequency_hz(DEFAULT_FREQUENCY_HZ);
     proportional_valve_.set_hit_duration_us(DEFAULT_HIT_DURATION_US);
-    proportional_valve_.set_normalized_hold_output(duty_cycle_);
+    proportional_valve_.set_normalized_hold_output(0.0f);
     proportional_valve_.deenergize();
 }
+
 
 void ProportionalValveControl::pid_controller()
 {
@@ -94,15 +106,14 @@ void ProportionalValveControl::pid_controller()
     if (u_cmd > 1.0f) u_cmd = 1.0f;
 
     // --- 6) Slew-rate limiter (controller space) ---
-    static float u_prev = 0.0f;            // or make this a member: u_prev_
     const float du_max_per_s = 0.6f;       // tune 0.3–1.0 full-scale per second
     const float du_step = du_max_per_s * dt;
-    float du = u_cmd - u_prev;
-    if (du >  du_step) u_cmd = u_prev + du_step;
-    if (du < -du_step) u_cmd = u_prev - du_step;
+    float du = u_cmd - u_prev_;
+    if (du >  du_step) u_cmd = u_prev_ + du_step;
+    if (du < -du_step) u_cmd = u_prev_ - du_step;
     if (u_cmd < 0.0f) u_cmd = 0.0f;
     if (u_cmd > 1.0f) u_cmd = 1.0f;
-    u_prev = u_cmd;
+    u_prev_ = u_cmd;
 
     // --- 7) Output (controller space). Map deadband outside if you use D_MIN/D_MAX. ---
     duty_cycle_ = u_cmd;
@@ -113,25 +124,28 @@ void ProportionalValveControl::pid_controller()
     previous_error_ = error; // keep if you still want it for logging
 }
 
-
 void ProportionalValveControl::update(float current_flow_rate)
 {
-    // Check the valve state and energize/deenergize the valve or exit the loop needed before running PID controller
-    if (control_enabled_ && !proportional_valve_.is_energized())
-    {
-        proportional_valve_.energize();
-    }
-    else if (!control_enabled_ && proportional_valve_.is_energized())
-    {
+    if (!control_enabled_) {
+        duty_cycle_ = 0.0f;
+        u_prev_ = 0.0f;
+        integral_error_ = 0.0f;
+        proportional_valve_.set_normalized_hold_output(0.0f);
         proportional_valve_.deenergize();
         return;
     }
-    else if (!control_enabled_) return;
 
-    // Check to see if the alloted time has passed since last update before running PID controller again
-    // This ensures that we are running the PID controller at the specified update rate.
-    if ((time_us_32() - start_time_us_) >= (1000000.0f / update_rate_hz_))  // seconds to microseconds conversion
-    {
+    if (!has_flow_adc()) {
+        proportional_valve_.set_normalized_hold_output(0.0f);
+        proportional_valve_.deenergize();
+        return;
+    }
+
+    if (!proportional_valve_.is_energized()) {
+        proportional_valve_.energize();
+    }
+
+    if ((time_us_32() - start_time_us_) >= (1000000.0f / update_rate_hz_)) {
         current_flow_rate_ = current_flow_rate;
         pid_controller();
         start_time_us_ = time_us_32();
