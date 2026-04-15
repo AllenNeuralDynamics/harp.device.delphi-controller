@@ -19,7 +19,8 @@ def print_poke_counts(
 
 
 # Open serial connection with the first Valve Controller.
-com_port = "COM20"  #'COM3' #None
+# com_port = "COM20"  #'COM3' #None
+com_port = "COM4"
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -68,6 +69,9 @@ print("Min Poke Time")
 reply = device.send(
     HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 10000).frame
 )
+
+print("Odor Dwell Time")
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 0).frame)
 
 print()
 odor_masks = [0x0002, 0x0004, 0x0008, 0x0003, 0x000F]
