@@ -3996,6 +3996,16 @@
 		)
 		(uuid "bf8ae641-0a8e-4465-a2a9-3251236c8b03")
 	)
+	(text "Note: Din and Dout flipped \nfrom original prototype"
+		(exclude_from_sim no)
+		(at 173.228 138.43 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "cb1c1963-2bc2-41f0-af5d-421ea4c21a86")
+	)
 	(text "Extra"
 		(exclude_from_sim no)
 		(at 139.446 80.518 0)
@@ -5317,7 +5327,7 @@
 		(uuid "157fcc65-f210-4dd9-a4e4-6a06695816ce")
 	)
 	(label "SPI_In"
-		(at 149.86 138.43 0)
+		(at 149.86 140.97 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5467,7 +5477,7 @@
 		(uuid "6571c304-9dfe-4a35-a38c-a35dafd61520")
 	)
 	(label "SPI_Out"
-		(at 149.86 140.97 0)
+		(at 149.86 138.43 0)
 		(effects
 			(font
 				(size 1.27 1.27)
