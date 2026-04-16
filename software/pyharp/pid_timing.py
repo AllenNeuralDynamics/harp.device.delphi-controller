@@ -63,13 +63,13 @@ parser.add_argument(
     "--poke-on",
     type=float,
     default=1.0,
-    help="Simulated poke on duration in seconds (default: 5)",
+    help="Simulated poke on duration in seconds (default: 1)",
 )
 parser.add_argument(
     "--poke-off",
     type=float,
     default=1.0,
-    help="Simulated poke off duration in seconds (default: 5)",
+    help="Simulated poke off duration in seconds (default: 1)",
 )
 parser.add_argument(
     "--ch7-threshold",
@@ -103,24 +103,24 @@ device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 50000).fra
 device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 500000).frame)
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame)
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
-
+'''
 # Camera triggers (disabled)
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 0).frame)
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame)
 device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam0FrameRate, 100).frame)
 device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.Cam1FrameRate, 30).frame)
-
+'''
 # Flow meter / ADC
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 1).frame)
 device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve0Adc, 0).frame)
-device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve1Adc, 1).frame)
-device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve2Adc, 2).frame)
-device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 3).frame)
+#device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve1Adc, 1).frame)
+#device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve2Adc, 2).frame)
+#device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ManualFlowMeter, 3).frame)
 
 # PID
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 1).frame)
-device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 1).frame)
-device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve2EnablePid, 1).frame)
+#device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 1).frame)
+#device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve2EnablePid, 1).frame)
 
 pid_gain_array = pack_pid_config(2.0, 0.75, 0.18)
 msg = WriteHarpMessage(
@@ -133,8 +133,8 @@ device.send(msg.frame)
 
 device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).frame)
 device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 75.0).frame)
-device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, 75.0).frame)
-device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve2TargetFlowRate, 75.0).frame)
+#device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, 75.0).frame)
+#device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve2TargetFlowRate, 75.0).frame)
 
 """CSV setup"""
 
@@ -144,7 +144,8 @@ timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
 csv_filename = os.path.join("data", f"analog_values_{timestamp_str}.csv")
 csvfile = open(csv_filename, "w", newline="")
 writer = csv.writer(csvfile)
-writer.writerow(["harp_timestamp", "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7"])
+#writer.writerow(["harp_timestamp", "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7"])
+writer.writerow(["harp_timestamp", "In_Prop", "In", "Exhaust", "BottleOut", "BottleIn", "Alt", "NC", "miniPID"])
 
 poke_csv_filename = os.path.join("data", f"poke_{timestamp_str}.csv")
 poke_csvfile = open(poke_csv_filename, "w", newline="")
@@ -180,6 +181,8 @@ active_poke_harp_ts = None  # Harp timestamp of the most recent poke-on (any odo
 active_poke_odor = None     # "odor1" or "odor2" for the poke being watched
 waiting_for_ch7 = False     # True while watching ch7 for a rise after poke-on
 
+flow_scale = 49.944*3.3/4096
+flow_offset = 24.864 #To subtract from flow
 try:
     while True:
         now = time.perf_counter()
@@ -217,7 +220,8 @@ try:
             )
             raw = read_uint16_struct_from_u8(reply.payload, bytes_expected=16)
             harp_ts = reply.timestamp
-            writer.writerow([harp_ts, *raw])
+            #writer.writerow([harp_ts, *raw])
+            writer.writerow([harp_ts, *[v * flow_scale - flow_offset for v in raw[:6]], *raw[6:]]) # Attempt to write flows
             last_sample = now
             samples_since_print += 1
             last_raw = raw
@@ -241,12 +245,12 @@ try:
 except KeyboardInterrupt:
     print("Disabling FSM.")
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam0Trigger, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableCam1Trigger, 0).frame)
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve2EnablePid, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve2EnablePid, 0).frame)
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
     csvfile.close()
     poke_csvfile.close()
