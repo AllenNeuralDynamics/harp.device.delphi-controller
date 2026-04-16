@@ -2,6 +2,9 @@
 build/
 exports/ # or exporting Kicad files.
 
+# exclude data from tests
+pyharp/data/
+
 # Kicad-generated
 *-backups/
 *.kicad_prl
