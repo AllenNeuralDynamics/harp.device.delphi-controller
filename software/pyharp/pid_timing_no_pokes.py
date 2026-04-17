@@ -9,7 +9,7 @@ from typing import Iterable, Tuple
 
 from pyharp.device import Device
 from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
-from app_registers_refactor import DelphiOnlyAppRegs, AppRegs
+from app_registers_refactor import DelphiOnlyAppRegs
 
 import logging
 
@@ -56,8 +56,8 @@ parser.add_argument("com_port", help="Serial port, e.g. COM4")
 parser.add_argument(
     "--rate",
     type=float,
-    default=2000.0,
-    help="Poll rate in Hz (default: 800)",
+    default=1020.0,
+    help="Poll rate in Hz (default: 1020)",
 )
 parser.add_argument(
     "--poke-on",
@@ -82,6 +82,12 @@ parser.add_argument(
     type=float,
     default=0.5,
     help="Seconds after odor1 poke-on to stop watching ch7 (default: 0.5)",
+)
+parser.add_argument(
+    "--pre-arm-advance",
+    type=float,
+    default=2.0,
+    help="Seconds before end valve activation to turn on the next odor (default: 2.0)",
 )
 args = parser.parse_args()
 
@@ -128,6 +134,15 @@ device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).
 device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 75.0).frame)
 
 
+"""Valve bitmasks"""
+
+VALVE_END   = 0x08  # valve 3 — end valve
+VALVE_ODOR1 = 0x10  # valve 4 — odor A
+VALVE_ODOR2 = 0x20  # valve 5 — odor B
+
+def odor_mask(odor: int) -> int:
+    return VALVE_ODOR1 if odor == 1 else VALVE_ODOR2
+
 """CSV setup"""
 
 os.makedirs("data", exist_ok=True)
@@ -150,14 +165,17 @@ print("Press Ctrl-C to stop.")
 
 """Poke state — odor 1 on at start"""
 
-odor1_state = 1
-odor2_state = 0
+current_odor = 1   # which odor valve is currently active (1 or 2)
 poke_active = False
-poke_count = 0  # increments each time poke turns on; even -> odor1, odd -> odor2
+pre_armed = False  # True once next odor is turned on ahead of the end valve
+poke_count = 0     # increments each time the end valve opens
 
-# Set initial odor and log the starting state
-#reply = device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
-#poke_writer.writerow([reply.timestamp, odor1_state, odor2_state, 0])
+# Turn on initial odor
+reply = device.send(HarpMessage.WriteU16(33, odor_mask(current_odor)).frame)
+poke_writer.writerow([reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+
+# How far in advance (clamped so it never exceeds poke_off)
+pre_arm_advance = min(args.pre_arm_advance, args.poke_off)
 
 """Polling loop"""
 
@@ -186,41 +204,40 @@ try:
         device.send(HarpMessage.WriteU16(33, 0x28).frame)
         time.sleep(1)
         print('end basic test') #'''
-        # Simulated poke — evaluated before ADC so poke state is settled this iteration
-        if not poke_active and now - last_poke_change >= args.poke_off:
-            # Poke turns on — alternate odor
-            if poke_count % 2 == 0:
-                odor1_state, odor2_state = 1, 0
-                #device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
-                #device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0008).frame)
-                poke_reply = device.send(HarpMessage.WriteU16(33, 0x18).frame) #set endvalve on
-                device.send(HarpMessage.WriteU16(34,0x20).frame) #Turn off other odor
+        # Poke state machine — evaluated before ADC so valve state is settled this iteration
+        elapsed = now - last_poke_change
 
-            else:
-                odor1_state, odor2_state = 0, 1
-                #device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0002).frame)
-                poke_reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x28).frame)
-                device.send(HarpMessage.WriteU16(34,0x10).frame) #Turn off other odor
-            #poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame)
-            #device.send(HarpMessage.WriteU16(33, 0x06).frame) #set endvalve on
+        if not poke_active:
+            # Stage 1: pre-arm — swap to the next odor (off current, on next) atomically
+            if not pre_armed and elapsed >= args.poke_off - pre_arm_advance:
+                next_odor = 2 if current_odor == 1 else 1
+                device.send(HarpMessage.WriteU16(34, odor_mask(current_odor)).frame)  # off current
+                pre_arm_reply = device.send(HarpMessage.WriteU16(33, odor_mask(next_odor)).frame)  # on next
+                current_odor = next_odor
+                pre_armed = True
+                poke_writer.writerow([pre_arm_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+                print(f"  [pre-arm] switched to odor{current_odor} ({pre_arm_advance:.1f}s before end valve)")
 
-            poke_writer.writerow([poke_reply.timestamp, odor1_state, odor2_state, 1])
-            poke_active = True
-            poke_count += 1
-            last_poke_change = now
-            active_poke_harp_ts = poke_reply.timestamp
-            active_poke_odor = "odor1" if odor1_state == 1 else "odor2"
-            waiting_for_ch7 = True
-            print(f"  [poke {poke_count}] {active_poke_odor} on — armed ch7 detection")
+            # Stage 2: open end valve
+            if elapsed >= args.poke_off:
+                poke_reply = device.send(HarpMessage.WriteU16(33, VALVE_END).frame)
+                poke_active = True
+                poke_count += 1
+                last_poke_change = now
+                active_poke_harp_ts = poke_reply.timestamp
+                active_poke_odor = f"odor{current_odor}"
+                waiting_for_ch7 = True
+                poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 1])
+                print(f"  [poke {poke_count}] end valve open — {active_poke_odor} active, armed ch7 detection")
 
-        elif poke_active and now - last_poke_change >= args.poke_on:
-            # Poke turns off — odors stay as-is
-            #poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 0).frame)
-            
-            poke_reply = device.send(HarpMessage.WriteU8(34, 0x8).frame) #Turn off end valve
-            poke_writer.writerow([poke_reply.timestamp, odor1_state, odor2_state, 0])
+        elif poke_active and elapsed >= args.poke_on:
+            # Stage 3: close end valve only — odor already switched at pre-arm
+            poke_reply = device.send(HarpMessage.WriteU16(34, VALVE_END).frame)
+            pre_armed = False
             poke_active = False
             last_poke_change = now
+            poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+            print(f"  [poke {poke_count}] end valve closed — odor{current_odor} continues")
 
         # ADC sampling — runs after poke state is settled for this iteration
         if now - last_sample >= interval:
