@@ -62,13 +62,13 @@ parser.add_argument(
 parser.add_argument(
     "--poke-on",
     type=float,
-    default=1.0,
+    default=0.5,
     help="Simulated poke on duration in seconds (default: 1)",
 )
 parser.add_argument(
     "--poke-off",
     type=float,
-    default=1.0,
+    default=3,
     help="Simulated poke off duration in seconds (default: 1)",
 )
 parser.add_argument(
@@ -95,20 +95,18 @@ device.info()
 """Set Registers"""
 
 # Poke pin parameters
-device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
-device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePinInverted, 1).frame)
-device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 50000).frame)
+#device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePin, 22).frame)
+#device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.PokePinInverted, 1).frame)
+#device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinimumPokeTimeUS, 50000).frame)
 
 # Valve parameters
-device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 500000).frame)
-device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame)
+#device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 500000).frame)
+#device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame)
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 
 # Set up simulated pokes
-valve_on_duration = 300000 # microseconds 
-reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinOdorDeliveryTimeUS, valve_on_duration
-    ).frame
-)
+#valve_on_duration = 300000 # microseconds 
+#reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinOdorDeliveryTimeUS, valve_on_duration).frame)
 
 # Flow meter / ADC
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 1).frame)
@@ -158,8 +156,8 @@ poke_active = False
 poke_count = 0  # increments each time poke turns on; even -> odor1, odd -> odor2
 
 # Set initial odor and log the starting state
-reply = device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
-poke_writer.writerow([reply.timestamp, odor1_state, odor2_state, 0])
+#reply = device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
+#poke_writer.writerow([reply.timestamp, odor1_state, odor2_state, 0])
 
 """Polling loop"""
 
@@ -181,25 +179,31 @@ try:
     while True:
         now = time.perf_counter()
         '''print('basic test')
-        device.send(HarpMessage.WriteU16(34, 0x12).frame)
-        device.send(HarpMessage.WriteU16(33, 0x10).frame)
+        device.send(HarpMessage.WriteU16(34, 0x28).frame) #clear
+        device.send(HarpMessage.WriteU16(33, 0x10).frame) #set
         time.sleep(1)
         device.send(HarpMessage.WriteU16(34, 0x10).frame)
-        device.send(HarpMessage.WriteU16(33, 0x12).frame)
+        device.send(HarpMessage.WriteU16(33, 0x28).frame)
         time.sleep(1)
-        print('end basic test')'''
+        print('end basic test') #'''
         # Simulated poke — evaluated before ADC so poke state is settled this iteration
         if not poke_active and now - last_poke_change >= args.poke_off:
             # Poke turns on — alternate odor
             if poke_count % 2 == 0:
                 odor1_state, odor2_state = 1, 0
-                device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
+                #device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame)
                 #device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0008).frame)
+                poke_reply = device.send(HarpMessage.WriteU16(33, 0x18).frame) #set endvalve on
+                device.send(HarpMessage.WriteU16(34,0x20).frame) #Turn off other odor
+
             else:
                 odor1_state, odor2_state = 0, 1
-                device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0002).frame)
-                #device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0010).frame)
-            poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame)
+                #device.send(HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0002).frame)
+                poke_reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x28).frame)
+                device.send(HarpMessage.WriteU16(34,0x10).frame) #Turn off other odor
+            #poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 1).frame)
+            #device.send(HarpMessage.WriteU16(33, 0x06).frame) #set endvalve on
+
             poke_writer.writerow([poke_reply.timestamp, odor1_state, odor2_state, 1])
             poke_active = True
             poke_count += 1
@@ -211,7 +215,9 @@ try:
 
         elif poke_active and now - last_poke_change >= args.poke_on:
             # Poke turns off — odors stay as-is
-            poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 0).frame)
+            #poke_reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ForceFSM, 0).frame)
+            
+            poke_reply = device.send(HarpMessage.WriteU8(34, 0x8).frame) #Turn off end valve
             poke_writer.writerow([poke_reply.timestamp, odor1_state, odor2_state, 0])
             poke_active = False
             last_poke_change = now
@@ -247,7 +253,7 @@ try:
 
 except KeyboardInterrupt:
     print("Disabling FSM.")
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
+    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
     #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame)
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
