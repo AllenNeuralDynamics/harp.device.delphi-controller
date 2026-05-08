@@ -60,7 +60,7 @@ public:
  * \brief constructor.
  * \param pwm_pio_pin the pwm output pin to the controller enable pin.
  */
-    CameraDriver(uint8_t pwm_pio_pin);
+    CameraDriver(uint8_t pwm_pio_pin, PIO pio, uint sm);
 
 /**
  * \brief destructor.
@@ -84,17 +84,6 @@ public:
  */
     void pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t enable_state);
 
-/**
- * \brief Initialize edge detection
- */
-    void edge_detection_init(PIO pio, uint sm_edge, uint8_t pin, uint8_t enable_state);
-
-/**
- * \brief Edge detection
- */
-    void process_edges(PIO pio, uint sm_edge);
-
-
 // FOR POOLING EVENTS
 /**
  * \brief Set PWM frequency
@@ -106,14 +95,13 @@ public:
  */
     inline void set_pio_pwm_pin(uint8_t pwm_pio_pin)
     {
-        gpio_deinit(DEFAULT_PIO_PWM_PIN);
-        // Init new gpio pin.
+        // gpio_deinit(DEFAULT_PIO_PWM_PIN);
+        // Init gpio pin.
         pwm_pio_pin_ = pwm_pio_pin;
         gpio_init(pwm_pio_pin_);
         gpio_set_dir(pwm_pio_pin_, 1);
-        sm_ = DEFAULT_PIO_SM;
-        uint offset = pio_add_program(pio0, &pwm_program); //FIXME pio0 is hard coded
-        pwm_init(pio0, sm_, offset, pwm_pio_pin_, false); 
+        uint offset = pio_add_program(pio_, &pwm_program);
+        pwm_init(pio_, sm_, offset, pwm_pio_pin_, false); 
     }
 
 /**
@@ -185,11 +173,4 @@ private:
     // Declare Constants
     static inline constexpr float DEFAULT_DUTY_CYCLE = 0.5f;
     static inline constexpr uint32_t DEFAULT_FREQ = 60;
-    static inline constexpr uint8_t DEFAULT_PIO_PWM_PIN = CAM_TRIGGER_PIN;
-    static inline constexpr uint DEFAULT_PIO_SM = 0;
 };
-
-
-
-
-

@@ -5,7 +5,8 @@
 #define NUM_ODOR_VALVES (14)
 #define FINAL_VALVE_INDEX (0)
 #define VACCUM_VALVE_INDEX (1)
-#define CAM_TRIGGER_PIN (26)
+#define CAM0_TRIGGER_PIN (26)
+#define CAM1_TRIGGER_PIN (27)
 #define LED_ENABLE_PIN (4)
 
 #define UART_TX_PIN (0)

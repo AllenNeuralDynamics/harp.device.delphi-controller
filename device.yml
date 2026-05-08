@@ -217,33 +217,48 @@ registers:
         type: U32
         access: Write
         description: "Time (in microseconds) that the odor is allowed to dwell before transitioning, contingent on additional pokes."
-    CamPin:
+    Cam0PinState:
         address: 75
-        type: U8
-        access: Write
-        description: "The GPIO output pin used for camera triggering. Default pin is 26."
-    CamPinState:
-        address: 76
         type: U8
         access: Event
         description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
-    FrameRate:
-        address: 77
+    Cam0FrameRate:
+        address: 76
         type: U32
         access: Write
         description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
-    DutyCycle:
-        address: 78
+    Cam0DutyCycle:
+        address: 77
         type: Float
         access: Write
         description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
-    EnableCamTrigger:
+    EnableCam0Trigger:
+        address: 78
+        type: U8
+        access: Write
+        description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
+    Cam1PinState:
         address: 79
+        type: U8
+        access: Event
+        description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
+    Cam1FrameRate:
+        address: 80
+        type: U32
+        access: Write
+        description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
+    Cam1DutyCycle:
+        address: 81
+        type: Float
+        access: Write
+        description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
+    EnableCam1Trigger:
+        address: 82
         type: U8
         access: Write
         description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
     EnableValveLeds:
-        address: 80
+        address: 83
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."

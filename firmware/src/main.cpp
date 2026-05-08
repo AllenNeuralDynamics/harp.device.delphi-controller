@@ -36,7 +36,11 @@ HarpCApp& app = HarpCApp::init(HARP_DEVICE_ID,
 PokeManager poke_manager(final_valve, vac_valve, odor_valves, NUM_ODOR_VALVES);
 
 // Select Cam pin for the CAM DRIVER constuctor
-CameraDriver cam_driver(CAM_TRIGGER_PIN);
+// Select Cam pin for the CAM0  DRIVER constuctor
+CameraDriver cam0_driver(CAM0_TRIGGER_PIN, pio0, 0);
+
+// Select Cam pin for the CAM1  DRIVER constuctor
+CameraDriver cam1_driver(CAM1_TRIGGER_PIN, pio1, 0);
 
 // Core0 main.
 int main()

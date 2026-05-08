@@ -95,11 +95,18 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.FinalValveEnergizedTimeUS, sizeof(app_regs.FinalValveEnergizedTimeUS), U32},
     {(uint8_t*)&app_regs.MinimumPokeTimeUS, sizeof(app_regs.MinimumPokeTimeUS), U32},
     {(uint8_t*)&app_regs.OdorDwellTimeUS, sizeof(app_regs.OdorDwellTimeUS), U32},
-    {(uint8_t*)&app_regs.CamPin, sizeof(app_regs.CamPin), U8},
-    {(uint8_t*)&app_regs.CamPinState, sizeof(app_regs.CamPinState), U8},
-    {(uint8_t*)&app_regs.FrameRate, sizeof(app_regs.FrameRate), U32},
-    {(uint8_t*)&app_regs.DutyCycle, sizeof(app_regs.DutyCycle), Float},
-    {(uint8_t*)&app_regs.EnableCamTrigger, sizeof(app_regs.EnableCamTrigger), U8},
+    // Camera 0 specs
+    {(uint8_t*)&app_regs.Cam0PinState, sizeof(app_regs.Cam0PinState), U8},
+    {(uint8_t*)&app_regs.Cam0FrameRate, sizeof(app_regs.Cam0FrameRate), U32},
+    {(uint8_t*)&app_regs.Cam0DutyCycle, sizeof(app_regs.Cam0DutyCycle), Float},
+    {(uint8_t*)&app_regs.EnableCam0Trigger, sizeof(app_regs.EnableCam0Trigger), U8},
+
+    // Camera 1 specs
+    {(uint8_t*)&app_regs.Cam1PinState, sizeof(app_regs.Cam1PinState), U8},
+    {(uint8_t*)&app_regs.Cam1FrameRate, sizeof(app_regs.Cam1FrameRate), U32},
+    {(uint8_t*)&app_regs.Cam1DutyCycle, sizeof(app_regs.Cam1DutyCycle), Float},
+    {(uint8_t*)&app_regs.EnableCam1Trigger, sizeof(app_regs.EnableCam1Trigger), U8},
+
     {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8}
 };
 
@@ -153,11 +160,14 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_final_valve_energized_time_us, write_final_valve_energized_time_us},
     {read_minimum_poke_time_us, write_minimum_poke_time_us},
     {read_odor_dwell_time_us, write_odor_dwell_time_us},
-    {read_cam_pin, write_cam_pin}, //Start here
-    {read_cam_pin_state, HarpCore::write_to_read_only_reg_error},
-    {read_frame_rate, write_frame_rate},
-    {read_duty_cycle, write_duty_cycle},
-    {read_enable_cam_trigger, write_enable_cam_trigger},
+    {read_cam0_pin_state, HarpCore::write_to_read_only_reg_error},
+    {read_cam0_frame_rate, write_cam0_frame_rate},
+    {read_cam0_duty_cycle, write_cam0_duty_cycle},
+    {read_enable_cam0_trigger, write_enable_cam0_trigger},
+    {read_cam1_pin_state, HarpCore::write_to_read_only_reg_error},
+    {read_cam1_frame_rate, write_cam1_frame_rate},
+    {read_cam1_duty_cycle, write_cam1_duty_cycle},
+    {read_enable_cam1_trigger, write_enable_cam1_trigger},
     {read_valve_leds, write_valve_leds}
 };
 
@@ -176,70 +186,107 @@ void write_valve_leds(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_enable_cam_trigger(uint8_t reg_address)
+void read_enable_cam0_trigger(uint8_t reg_address)
 {
-    app_regs.EnableCamTrigger = cam_driver.get_enable_state();
+    app_regs.EnableCam0Trigger = cam0_driver.get_enable_state();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_enable_cam_trigger(msg_t& msg)
+void write_enable_cam0_trigger(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    cam_driver.set_enable_state(app_regs.EnableCamTrigger);
+    cam0_driver.set_enable_state(app_regs.EnableCam0Trigger);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_duty_cycle(uint8_t reg_address)
+void read_cam0_duty_cycle(uint8_t reg_address)
 {
-    app_regs.DutyCycle = cam_driver.get_pwm_duty();
+    app_regs.Cam0DutyCycle = cam0_driver.get_pwm_duty();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_duty_cycle(msg_t& msg)
+void write_cam0_duty_cycle(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    cam_driver.set_pwm_duty_cycle(app_regs.DutyCycle);
+    cam0_driver.set_pwm_duty_cycle(app_regs.Cam0DutyCycle);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_frame_rate(uint8_t reg_address)
+void read_cam0_frame_rate(uint8_t reg_address)
 {
-    app_regs.FrameRate = cam_driver.get_pwm_freq();
+    app_regs.Cam0FrameRate = cam0_driver.get_pwm_freq();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_frame_rate(msg_t& msg)
+void write_cam0_frame_rate(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    cam_driver.set_pwm_freq(app_regs.FrameRate);
+    cam0_driver.set_pwm_freq(app_regs.Cam0FrameRate);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_cam_pin(uint8_t reg_address)
+void read_cam0_pin_state(uint8_t reg_address)
 {
-    app_regs.CamPin = cam_driver.get_pio_pwm_pin();
+    app_regs.Cam0PinState = cam0_driver.get_pwm_pin_state(); 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_cam_pin(msg_t& msg)
+void read_enable_cam1_trigger(uint8_t reg_address)
+{
+    app_regs.EnableCam1Trigger = cam1_driver.get_enable_state();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_enable_cam1_trigger(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    cam_driver.set_pio_pwm_pin(app_regs.CamPin); //disable previous camera pin 
-    gpio_set_irq_enabled_with_callback(app_regs.CamPin, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
+    cam1_driver.set_enable_state(app_regs.EnableCam1Trigger);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_cam_pin_state(uint8_t reg_address)
+void read_cam1_duty_cycle(uint8_t reg_address)
 {
-    app_regs.CamPinState = cam_driver.get_pwm_pin_state(); 
+    app_regs.Cam1DutyCycle = cam1_driver.get_pwm_duty();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_cam1_duty_cycle(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam1_driver.set_pwm_duty_cycle(app_regs.Cam1DutyCycle);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+void read_cam1_frame_rate(uint8_t reg_address)
+{
+    app_regs.Cam1FrameRate = cam1_driver.get_pwm_freq();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_cam1_frame_rate(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    cam1_driver.set_pwm_freq(app_regs.Cam1FrameRate);
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
+
+
+void read_cam1_pin_state(uint8_t reg_address)
+{
+    app_regs.Cam1PinState = cam1_driver.get_pwm_pin_state(); 
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
@@ -640,9 +687,23 @@ void raw_poke_fall()
 }
 
 void camera_timestamp_callback(uint gpio, uint32_t events) {
-    // // Toggle LED for testing
-    // gpio_put(25, !gpio_get(25));
-    push_event_from_isr(CAM_PIN_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
+    
+    // Only react to rising edges
+    // if (!(events & GPIO_IRQ_EDGE_RISE)) return;
+
+    uint8_t index;
+    if (gpio == CAM0_TRIGGER_PIN) {
+        index = CAM0_PIN_STATE_INDEX_ADDRESS;
+    } else if (gpio == CAM1_TRIGGER_PIN) {
+        index = CAM1_PIN_STATE_INDEX_ADDRESS;
+    } else {
+        // index = CAM0_PIN_STATE_INDEX_ADDRESS;
+        return; // Not one of our camera pins
+    }
+
+    const uint64_t ts = HarpCore::harp_time_us_64();
+    push_event_from_isr(index, ts);
+
 }
 
 // Delphi specific functions
@@ -695,8 +756,11 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update poke manager FSM
     poke_manager.update();
 
-    // Update Camera Driver FSM 
-    cam_driver.update();
+    // Update Camera 0 Driver FSM 
+    cam0_driver.update();
+
+    // Update Camera 1 Driver FSM 
+    cam1_driver.update();
 
     // Handle harp events
     HarpEvent evt;
@@ -753,13 +817,17 @@ void reset_app()
     app_regs.OdorDwellTimeUS = poke_manager.get_odor_dwell_time_us();
 
     //Reset cam driver and all related registers
-    cam_driver.reset();
-    // cam_driver.set_pwm_rise_callback_fn(rising_edge_detected); //USED FOR POOLING EVENTS
-    // cam_driver.set_pwm_fall_callback_fn(falling_edge_detected); // USED FOR POOLING EVENTS
-    app_regs.CamPinState = cam_driver.get_pwm_pin_state();
-    app_regs.FrameRate = cam_driver.get_pwm_freq();
-    app_regs.DutyCycle = cam_driver.get_pwm_duty();
-    app_regs.EnableCamTrigger = cam_driver.get_enable_state();
+    cam0_driver.reset();
+    app_regs.Cam0PinState = cam0_driver.get_pwm_pin_state();
+    app_regs.Cam0FrameRate = cam0_driver.get_pwm_freq();
+    app_regs.Cam0DutyCycle = cam0_driver.get_pwm_duty();
+    app_regs.EnableCam0Trigger = cam0_driver.get_enable_state();
+
+    cam1_driver.reset();
+    app_regs.Cam1PinState = cam1_driver.get_pwm_pin_state();
+    app_regs.Cam1FrameRate = cam1_driver.get_pwm_freq();
+    app_regs.Cam1DutyCycle = cam1_driver.get_pwm_duty();
+    app_regs.EnableCam1Trigger = cam1_driver.get_enable_state();
 
     // FOR TESTING -- LED blinking
     // gpio_init(LED_ENABLE_PIN);
@@ -796,5 +864,11 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
+
+    // GPIO interrupt for camera timestamping
+    cam0_driver.set_pio_pwm_pin(CAM0_TRIGGER_PIN);
+    cam1_driver.set_pio_pwm_pin(CAM1_TRIGGER_PIN);
+    gpio_set_irq_enabled_with_callback(CAM0_TRIGGER_PIN, GPIO_IRQ_EDGE_RISE, true, &camera_timestamp_callback);
+    gpio_set_irq_enabled(CAM1_TRIGGER_PIN, GPIO_IRQ_EDGE_RISE, true); // Use the same callback for both pins; we'll differentiate inside the callback based on the pin number.
 }
 
