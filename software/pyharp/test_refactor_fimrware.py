@@ -22,7 +22,7 @@ def print_poke_counts(
 
 
 # Open serial connection with the first Valve Controller.
-com_port = "COM20"  #'COM3' #None
+com_port = "COM119"  #'COM3' #None
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -140,10 +140,10 @@ print("Enable Valve LEDS")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 print("Enable ADC Sampling")
 reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 1).frame)
-print("ADC Sampling Rate")
-reply = device.send(
-    HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 1000.0).frame
-)
+#print("ADC Sampling Rate")
+#reply = device.send(
+#    HarpMessage.WriteFloat(DelphiOnlyAppRegs.AdcSamplingRate, 1000.0).frame
+#)
 print("Select Leak ADC Channel")
 reply = device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.LeakAdcChannel, 3).frame)
 
@@ -172,7 +172,7 @@ reply = device.send(
 )
 
 """Set Calibrations"""
-print("Calibrate Slope")
+"""print("Calibrate Slope")
 reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateSlope, 0.02).frame
 )
@@ -181,7 +181,7 @@ print("Calibrate Offset")
 reply = device.send(
     HarpMessage.WriteFloat(DelphiOnlyAppRegs.CalibrateOffset, 0.5).frame
 )
-
+"""
 # print("Energize valve 0 and set hit and hold duty cycle")
 # reply = device.send(HarpMessage.WriteU16(AppRegs.ValvesSet, 0x0001).frame)
 

@@ -3,6 +3,7 @@ import argparse
 import csv
 import os
 import struct
+import threading
 import time
 from datetime import datetime
 from typing import Iterable, Tuple
@@ -16,6 +17,7 @@ import logging
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
+odor_2_extra = 4
 
 """Helper functions"""
 
@@ -89,6 +91,18 @@ parser.add_argument(
     default=2.0,
     help="Seconds before end valve activation to turn on the next odor (default: 2.0)",
 )
+parser.add_argument(
+    "--end-valve-always-open",
+    action="store_true",
+    help="Keep end valve open continuously; only odor valves toggle",
+)
+parser.add_argument(
+    "--fixed-odor",
+    type=int,
+    choices=[1, 2],
+    default=None,
+    help="Keep one odor always on and toggle only the end valve (1 or 2)",
+)
 args = parser.parse_args()
 
 interval = 1.0 / args.rate
@@ -117,9 +131,12 @@ device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 # Flow meter / ADC
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 1).frame)
 device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve0Adc, 0).frame)
+device.send(HarpMessage.WriteS8(DelphiOnlyAppRegs.ProportionalValve1Adc, 1).frame)
 
 # PID
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 1).frame)
+
+device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve1EnablePid, 1).frame)
 
 pid_gain_array = pack_pid_config(2.0, 0.75, 0.18)
 msg = WriteHarpMessage(
@@ -131,7 +148,10 @@ msg = WriteHarpMessage(
 device.send(msg.frame)
 
 device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).frame)
-device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 75.0).frame)
+
+device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 30).frame)
+
+device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, 45).frame)
 
 
 """Valve bitmasks"""
@@ -145,34 +165,67 @@ def odor_mask(odor: int) -> int:
 
 """CSV setup"""
 
-os.makedirs("data", exist_ok=True)
 timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+run_dir = os.path.join("data", timestamp_str)
+os.makedirs(run_dir, exist_ok=True)
 
-csv_filename = os.path.join("data", f"analog_values_{timestamp_str}.csv")
+csv_filename = os.path.join(run_dir, f"analog_values_{timestamp_str}.csv")
 csvfile = open(csv_filename, "w", newline="")
 writer = csv.writer(csvfile)
 #writer.writerow(["harp_timestamp", "ch0", "ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7"])
-writer.writerow(["harp_timestamp", "In_Prop", "In", "Exhaust", "BottleOut", "BottleIn", "Alt", "NC", "miniPID"])
+writer.writerow(["harp_timestamp", "In_Prop", "In_Dil", "Exhaust", "BottleOut", "BottleIn", "Alt", "NC", "miniPID"])
 
-poke_csv_filename = os.path.join("data", f"poke_{timestamp_str}.csv")
+poke_csv_filename = os.path.join(run_dir, f"poke_{timestamp_str}.csv")
 poke_csvfile = open(poke_csv_filename, "w", newline="")
 poke_writer = csv.writer(poke_csvfile)
 poke_writer.writerow(["harp_timestamp", "odor1", "odor2", "poke"])
 
-print(f"Logging ADC to {csv_filename} at {args.rate} Hz.")
+info_filename = os.path.join(run_dir, "info.txt")
+
+print(f"Logging to folder {run_dir}/ at {args.rate} Hz.")
 print(f"Logging poke events to {poke_csv_filename} ({args.poke_on}s on / {args.poke_off}s off).")
 print("Press Ctrl-C to stop.")
 
+"""Experiment notes — collected in background thread"""
+
+notes_lines = []
+notes_saved = False
+
+def _write_notes():
+    with open(info_filename, "w") as f:
+        f.write(f"Timestamp: {timestamp_str}\n\n")
+        f.write("\n".join(notes_lines))
+
+def _collect_notes():
+    global notes_saved
+    print("\nEnter experiment notes (blank line to finish):")
+    while True:
+        try:
+            line = input()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if line == "":
+            break
+        notes_lines.append(line)
+    _write_notes()
+    notes_saved = True
+    print(f"[notes saved to {info_filename}]")
+
+threading.Thread(target=_collect_notes, daemon=True).start()
+
 """Poke state — odor 1 on at start"""
 
-current_odor = 1   # which odor valve is currently active (1 or 2)
+current_odor = args.fixed_odor if args.fixed_odor else 1   # which odor valve is currently active (1 or 2)
 poke_active = False
 pre_armed = False  # True once next odor is turned on ahead of the end valve
 poke_count = 0     # increments each time the end valve opens
 
-# Turn on initial odor
-reply = device.send(HarpMessage.WriteU16(33, odor_mask(current_odor)).frame)
-poke_writer.writerow([reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+# Turn on initial odor (and end valve if always-open mode)
+init_mask = odor_mask(current_odor) | (VALVE_END if args.end_valve_always_open else 0)
+reply = device.send(HarpMessage.WriteU16(33, init_mask).frame)
+poke_writer.writerow([reply.timestamp, int(current_odor == 1), int(current_odor == 2), int(args.end_valve_always_open)])
+if args.end_valve_always_open:
+    print("End valve always-open mode: end valve opened at start.")
 
 # How far in advance (clamped so it never exceeds poke_off)
 pre_arm_advance = min(args.pre_arm_advance, args.poke_off)
@@ -196,48 +249,50 @@ flow_offset = 24.864 #To subtract from flow
 try:
     while True:
         now = time.perf_counter()
-        '''print('basic test')
-        device.send(HarpMessage.WriteU16(34, 0x28).frame) #clear
-        device.send(HarpMessage.WriteU16(33, 0x10).frame) #set
-        time.sleep(1)
-        device.send(HarpMessage.WriteU16(34, 0x10).frame)
-        device.send(HarpMessage.WriteU16(33, 0x28).frame)
-        time.sleep(1)
-        print('end basic test') #'''
         # Poke state machine — evaluated before ADC so valve state is settled this iteration
         elapsed = now - last_poke_change
 
         if not poke_active:
-            # Stage 1: pre-arm — swap to the next odor (off current, on next) atomically
-            if not pre_armed and elapsed >= args.poke_off - pre_arm_advance:
+            # Stage 1: pre-arm — swap odors (skipped in fixed-odor mode)
+            if not args.fixed_odor and not pre_armed and elapsed >= args.poke_off - pre_arm_advance:
                 next_odor = 2 if current_odor == 1 else 1
                 device.send(HarpMessage.WriteU16(34, odor_mask(current_odor)).frame)  # off current
                 pre_arm_reply = device.send(HarpMessage.WriteU16(33, odor_mask(next_odor)).frame)  # on next
                 current_odor = next_odor
                 pre_armed = True
-                poke_writer.writerow([pre_arm_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+                poke_writer.writerow([pre_arm_reply.timestamp, int(current_odor == 1), int(current_odor == 2), int(args.end_valve_always_open)])
                 print(f"  [pre-arm] switched to odor{current_odor} ({pre_arm_advance:.1f}s before end valve)")
+                # Arm ch7 on B→A transition (always-open mode: odor flows immediately)
+                if current_odor == 1:
+                    active_poke_harp_ts = pre_arm_reply.timestamp
+                    active_poke_odor = "odor1"
+                    waiting_for_ch7 = True
+                    print(f"  [ch7] armed at odor2→odor1 switch")
 
             # Stage 2: open end valve
             if elapsed >= args.poke_off:
-                poke_reply = device.send(HarpMessage.WriteU16(33, VALVE_END).frame)
+                if args.fixed_odor or not args.end_valve_always_open:
+                    poke_reply = device.send(HarpMessage.WriteU16(33, VALVE_END).frame)
+                    poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 1])
+                    print(f"  [poke {poke_count + 1}] end valve open — odor{current_odor} active")
+                    # Arm ch7 from end valve open timestamp in fixed-odor mode
+                    if args.fixed_odor:
+                        active_poke_harp_ts = poke_reply.timestamp
+                        waiting_for_ch7 = True
+                        print(f"  [ch7] armed at end valve open")
                 poke_active = True
                 poke_count += 1
                 last_poke_change = now
-                active_poke_harp_ts = poke_reply.timestamp
-                active_poke_odor = f"odor{current_odor}"
-                waiting_for_ch7 = True
-                poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 1])
-                print(f"  [poke {poke_count}] end valve open — {active_poke_odor} active, armed ch7 detection")
 
-        elif poke_active and elapsed >= args.poke_on:
-            # Stage 3: close end valve only — odor already switched at pre-arm
-            poke_reply = device.send(HarpMessage.WriteU16(34, VALVE_END).frame)
+        elif poke_active and elapsed >= (args.poke_on * odor_2_extra if current_odor == 2 else args.poke_on):
+            # Stage 3: close end valve
+            if args.fixed_odor or not args.end_valve_always_open:
+                poke_reply = device.send(HarpMessage.WriteU16(34, VALVE_END).frame)
+                poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
+                print(f"  [poke {poke_count}] end valve closed — odor{current_odor} continues")
             pre_armed = False
             poke_active = False
             last_poke_change = now
-            poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
-            print(f"  [poke {poke_count}] end valve closed — odor{current_odor} continues")
 
         # ADC sampling — runs after poke state is settled for this iteration
         if now - last_sample >= interval:
@@ -252,13 +307,11 @@ try:
             samples_since_print += 1
             last_raw = raw
 
-            # Ch7 onset detection — active within timeout window after any poke-on
+            # Ch7 onset detection — stays armed until signal is seen
             if waiting_for_ch7:
-                elapsed = harp_ts - active_poke_harp_ts
-                if elapsed > args.ch7_timeout:
-                    waiting_for_ch7 = False  # timed out, no signal detected
-                elif raw[7] > args.ch7_threshold:
-                    print(f"Ch7 signal detected: {elapsed*1000:.1f} ms after {active_poke_odor} poke-on (ch7={raw[7]})")
+                elapsed_ch7 = harp_ts - active_poke_harp_ts
+                if raw[7] > args.ch7_threshold:
+                    print(f"Ch7 signal detected: {elapsed_ch7*1000:.1f} ms after odor2→odor1 switch (ch7={raw[7]})")
                     waiting_for_ch7 = False
 
         # Periodic status print
@@ -276,4 +329,7 @@ except KeyboardInterrupt:
     device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
     csvfile.close()
     poke_csvfile.close()
+    if not notes_saved:
+        _write_notes()
+        print(f"[notes saved to {info_filename}]")
     device.disconnect()

@@ -7,3 +7,6 @@
 [submodule "firmware/lib/etl"]
 	path = firmware/lib/etl
 	url = https://github.com/ETLCPP/etl.git
+[submodule "software/alicat"]
+	path = software/alicat
+	url = git@github.com:alexrudd2/alicat.git
