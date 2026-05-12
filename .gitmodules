@@ -10,3 +10,6 @@
 [submodule "software/alicat"]
 	path = software/alicat
 	url = git@github.com:alexrudd2/alicat.git
+[submodule "software/pyharp/pyharp"]
+	path = software/pyharp/pyharp
+	url = git@github.com:AllenNeuralDynamics/pyharp.git

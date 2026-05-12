@@ -132,7 +132,7 @@ async def main() -> None:
                     t0 = time.perf_counter()
 
                     alicat_data = await meter.get()
-                    alicat_flow = alicat_data["mass_flow"] * args.alicat_scale
+                    alicat_flow = alicat_data["volumetric_flow"] * args.alicat_scale # was mass_flow
 
                     adc_reply = device.send(
                         HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestRawAdcSample).frame)
