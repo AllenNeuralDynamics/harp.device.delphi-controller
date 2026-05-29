@@ -51,6 +51,23 @@ def pack_pid_config(kp: float, ki: float, kd: float) -> bytes:
 
 FLOW_SCALE = 49.944 * 3.3 / 4096
 FLOW_OFFSET = 24.864
+DISPLAY_INTERVAL = 10.0
+
+
+def abbrev_col(name: str) -> str:
+    _MAP = {
+        "harp_timestamp": "ts",
+        "Alicat_volumetric_flow_mL_min": "vol",
+        "Alicat_mass_flow_mL_min": "mass",
+        "Alicat_temperature_C": "t",
+        "Alicat_pressure": "p",
+        "valve0_duty_pct": "duty",
+    }
+    if name in _MAP:
+        return _MAP[name]
+    if name.startswith("Analog_flow_ch") and name.endswith("_mL_min"):
+        return name[len("Analog_flow_") : name.index("_mL_min")]
+    return name
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,8 +77,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("delphi_port", help="Delphi board serial port, e.g. COM4")
     p.add_argument("alicat_port", help="Alicat serial port, e.g. COM5")
     p.add_argument(
-        "--adc-channel", type=int, default=0,
-        help="ADC channel (0-7) connected to analog flow meter (default: 0)",
+        "--adc-channels", type=int, nargs="+", default=[0, 1, 2, 3, 5],
+        help="ADC channels to record (default: 0 1 2 3 5)",
     )
     p.add_argument(
         "--rate", type=float, default=10.0,
@@ -69,11 +86,11 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--valve", action="store_true",
-        help="Enable PID control on proportional valve 1 and log duty cycle",
+        help="Enable PID control on proportional valve 0 and log duty cycle",
     )
     p.add_argument(
-        "--valve-target", type=float, default=30.0,
-        help="Target flow rate for valve 1 PID in mL/min (default: 30)",
+        "--valve-target", type=float, default=10.0,
+        help="Target flow rate for valve 0 PID in mL/min (default: 70)",
     )
     p.add_argument(
         "--alicat-unit", default="A",
@@ -97,9 +114,9 @@ async def main() -> None:
 
     if args.valve:
         device.send(HarpMessage.WriteS8(
-            DelphiOnlyAppRegs.ProportionalValve1Adc, args.adc_channel).frame)
+            DelphiOnlyAppRegs.ProportionalValve0Adc, args.adc_channels[0]).frame)
         device.send(HarpMessage.WriteU8(
-            DelphiOnlyAppRegs.ProportionalValve1EnablePid, 1).frame)
+            DelphiOnlyAppRegs.ProportionalValve0EnablePid, 1).frame)
         pid_bytes = pack_pid_config(2.0, 0.75, 0.18)
         device.send(WriteHarpMessage(
             PayloadType.U8, pid_bytes, DelphiOnlyAppRegs.PidGains,
@@ -107,20 +124,34 @@ async def main() -> None:
         device.send(HarpMessage.WriteFloat(
             DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).frame)
         device.send(HarpMessage.WriteFloat(
-            DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, args.valve_target).frame)
+            DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, args.valve_target).frame)
 
     os.makedirs("data", exist_ok=True)
     ts_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     csv_path = os.path.join("data", f"flowtest_{ts_str}.csv")
 
-    header = ["harp_timestamp", "alicat_mL_min", "analog_mL_min"]
+    header = [
+        "harp_timestamp",
+        "Alicat_volumetric_flow_mL_min",
+        "Alicat_mass_flow_mL_min",
+        "Alicat_temperature_C",
+        "Alicat_pressure",
+        *[f"Analog_flow_ch{ch}_mL_min" for ch in args.adc_channels],
+    ]
     if args.valve:
-        header.append("valve1_duty_pct")
+        header.append("valve0_duty_pct")
 
     print(f"Logging to {csv_path} at {args.rate} Hz.")
     if args.valve:
-        print(f"Valve 1 PID enabled, target {args.valve_target} mL/min.")
+        print(f"Valve 0 PID enabled, target {args.valve_target} mL/min.")
     print("Press Ctrl-C to stop.")
+
+    col_w = 10
+    display_cols = [abbrev_col(h) for h in header]
+    title_line = "  ".join(f"{c:>{col_w}}" for c in display_cols)
+    print(title_line)
+    print(" " * len(title_line))
+    last_display = time.perf_counter() - DISPLAY_INTERVAL
 
     with open(csv_path, "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
@@ -132,23 +163,40 @@ async def main() -> None:
                     t0 = time.perf_counter()
 
                     alicat_data = await meter.get()
-                    alicat_flow = alicat_data["volumetric_flow"] * args.alicat_scale # was mass_flow
+                    alicat_vol_flow = alicat_data["volumetric_flow"] * args.alicat_scale
+                    alicat_mass_flow = alicat_data["mass_flow"] * args.alicat_scale
+                    alicat_temp = alicat_data["temperature"]
+                    alicat_pressure = alicat_data["pressure"]
 
                     adc_reply = device.send(
                         HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestRawAdcSample).frame)
                     raw = read_uint16_struct_from_u8(adc_reply.payload, bytes_expected=16)
-                    analog_flow = raw[args.adc_channel] * FLOW_SCALE - FLOW_OFFSET
                     harp_ts = adc_reply.timestamp
 
-                    row = [harp_ts, alicat_flow, round(analog_flow, 3)]
+                    row = [
+                        harp_ts,
+                        alicat_vol_flow,
+                        alicat_mass_flow,
+                        alicat_temp,
+                        alicat_pressure,
+                        *[round(raw[ch] * FLOW_SCALE - FLOW_OFFSET, 3) for ch in args.adc_channels],
+                    ]
 
                     if args.valve:
                         dc_reply = device.send(HarpMessage.ReadFloat(
-                            DelphiOnlyAppRegs.ProportionalValve1DutyCycle).frame)
-                        duty = struct.unpack('<f', bytes(dc_reply.payload[:4]))[0]
+                            DelphiOnlyAppRegs.ProportionalValve0DutyCycle).frame)
+                        duty = dc_reply.payload[0]
                         row.append(round(duty, 3))
 
                     writer.writerow(row)
+
+                    if t0 - last_display >= DISPLAY_INTERVAL:
+                        last_display = t0
+                        data_line = "  ".join(
+                            f"{v:.1f}".rjust(col_w) if isinstance(v, float) else f"{v!s:>{col_w}}"
+                            for v in row
+                        )
+                        print(f"\033[1A\r{data_line}", end="\n", flush=True)
 
                     elapsed = time.perf_counter() - t0
                     await asyncio.sleep(max(0.0, interval - elapsed))
@@ -158,7 +206,7 @@ async def main() -> None:
             finally:
                 if args.valve:
                     device.send(HarpMessage.WriteU8(
-                        DelphiOnlyAppRegs.ProportionalValve1EnablePid, 0).frame)
+                        DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame)
                 device.send(HarpMessage.WriteU8(
                     DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
                 device.disconnect()

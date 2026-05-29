@@ -17,7 +17,7 @@ import logging
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
-odor_2_extra = 4
+odor_2_extra = 1  ###CONTROL EXTRA ODOR 2 TIME
 
 """Helper functions"""
 
@@ -70,7 +70,7 @@ parser.add_argument(
 parser.add_argument(
     "--poke-off",
     type=float,
-    default=3,
+    default=15,
     help="Simulated poke off duration in seconds (default: 1)",
 )
 parser.add_argument(
@@ -88,7 +88,7 @@ parser.add_argument(
 parser.add_argument(
     "--pre-arm-advance",
     type=float,
-    default=2.0,
+    default=10.0,
     help="Seconds before end valve activation to turn on the next odor (default: 2.0)",
 )
 parser.add_argument(
@@ -106,6 +106,8 @@ parser.add_argument(
 args = parser.parse_args()
 
 interval = 1.0 / args.rate
+# Clamped so the pre-arm window never exceeds the inter-trial gap
+pre_arm_advance = min(args.pre_arm_advance, args.poke_off)
 
 """Connect to device"""
 
@@ -149,9 +151,11 @@ device.send(msg.frame)
 
 device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.PidUpdateFrequency, 200.0).frame)
 
-device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, 30).frame)
+prop_valve_0_target = 15
+prop_valve_1_target = 60
+device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve0TargetFlowRate, prop_valve_0_target).frame)
 
-device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, 45).frame)
+device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlowRate, prop_valve_1_target).frame)
 
 
 """Valve bitmasks"""
@@ -192,9 +196,47 @@ notes_lines = []
 notes_saved = False
 
 def _write_notes():
+    if args.fixed_odor:
+        mode = f"fixed-odor (odor{args.fixed_odor})"
+    elif args.end_valve_always_open:
+        mode = "end-valve-always-open (odors pre-swap, end valve held open)"
+    else:
+        mode = "alternating odors with pre-arm swap"
+
+    odor2_on_s = args.poke_on * odor_2_extra
+
     with open(info_filename, "w") as f:
-        f.write(f"Timestamp: {timestamp_str}\n\n")
-        f.write("\n".join(notes_lines))
+        f.write(f"Timestamp: {timestamp_str}\n")
+        f.write(f"Mode: {mode}\n\n")
+
+        f.write("Target flow rates:\n")
+        f.write(f"  Proportional valve 0: {prop_valve_0_target} (units per register)\n")
+        f.write(f"  Proportional valve 1: {prop_valve_1_target} (units per register)\n\n")
+
+        f.write("Odor solenoid / end valve sequence per cycle:\n")
+        if args.fixed_odor:
+            f.write(f"  Phase 1 — odor{args.fixed_odor} on, end valve CLOSED: {args.poke_off:.3f} s\n")
+            f.write(f"  Phase 2 — odor{args.fixed_odor} on, end valve OPEN:   {args.poke_on:.3f} s\n")
+        elif args.end_valve_always_open:
+            f.write(f"  Phase 1 — current odor on, end valve OPEN (hold):              {args.poke_off - pre_arm_advance:.3f} s\n")
+            f.write(f"  Phase 2 — swap to next odor, end valve OPEN (pre-arm window): {pre_arm_advance:.3f} s\n")
+            f.write(f"  Phase 3 — next odor on, end valve OPEN (trial window):\n")
+            f.write(f"             odor 1: {args.poke_on:.3f} s\n")
+            f.write(f"             odor 2: {odor2_on_s:.3f} s (poke_on x odor_2_extra={odor_2_extra})\n")
+        else:
+            f.write(f"  Phase 1 — current odor on, end valve CLOSED (inter-trial): {args.poke_off - pre_arm_advance:.3f} s\n")
+            f.write(f"  Phase 2 — swap to next odor, end valve CLOSED (pre-arm):  {pre_arm_advance:.3f} s\n")
+            f.write(f"  Phase 3 — next odor on, end valve OPEN (trial):\n")
+            f.write(f"             odor 1: {args.poke_on:.3f} s\n")
+            f.write(f"             odor 2: {odor2_on_s:.3f} s (poke_on x odor_2_extra={odor_2_extra})\n")
+        f.write(f"\n  Raw params: poke_off={args.poke_off}s, poke_on={args.poke_on}s, "
+                f"pre_arm_advance={pre_arm_advance}s (requested {args.pre_arm_advance}s), "
+                f"odor_2_extra={odor_2_extra}\n")
+        f.write(f"  ADC poll rate: {args.rate} Hz   ch7 threshold: {args.ch7_threshold}   ch7 timeout: {args.ch7_timeout} s\n\n")
+
+        f.write("Notes: ")
+        f.write(" ".join(notes_lines))
+        f.write("\n")
 
 def _collect_notes():
     global notes_saved
@@ -226,9 +268,6 @@ reply = device.send(HarpMessage.WriteU16(33, init_mask).frame)
 poke_writer.writerow([reply.timestamp, int(current_odor == 1), int(current_odor == 2), int(args.end_valve_always_open)])
 if args.end_valve_always_open:
     print("End valve always-open mode: end valve opened at start.")
-
-# How far in advance (clamped so it never exceeds poke_off)
-pre_arm_advance = min(args.pre_arm_advance, args.poke_off)
 
 """Polling loop"""
 
