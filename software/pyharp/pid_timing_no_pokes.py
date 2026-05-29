@@ -70,7 +70,7 @@ parser.add_argument(
 parser.add_argument(
     "--poke-off",
     type=float,
-    default=15,
+    default=5,
     help="Simulated poke off duration in seconds (default: 1)",
 )
 parser.add_argument(
@@ -88,7 +88,7 @@ parser.add_argument(
 parser.add_argument(
     "--pre-arm-advance",
     type=float,
-    default=10.0,
+    default=2.0,
     help="Seconds before end valve activation to turn on the next odor (default: 2.0)",
 )
 parser.add_argument(
@@ -102,6 +102,18 @@ parser.add_argument(
     choices=[1, 2],
     default=None,
     help="Keep one odor always on and toggle only the end valve (1 or 2)",
+)
+parser.add_argument(
+    "--purge-pulse-ms",
+    type=float,
+    default=0.0,
+    help="If >0, pulse solenoid valve 15 alone for this many ms during odor swaps when the end valve is closed (default: 0 = disabled)",
+)
+parser.add_argument(
+    "--post-purge-dead-ms",
+    type=float,
+    default=10.0,
+    help="After the purge pulse, hold all solenoid valves closed for this many ms before opening the next odor (default: 10)",
 )
 args = parser.parse_args()
 
@@ -160,9 +172,10 @@ device.send(HarpMessage.WriteFloat(DelphiOnlyAppRegs.ProportionalValve1TargetFlo
 
 """Valve bitmasks"""
 
-VALVE_END   = 0x08  # valve 3 — end valve
-VALVE_ODOR1 = 0x10  # valve 4 — odor A
-VALVE_ODOR2 = 0x20  # valve 5 — odor B
+VALVE_END   = 0x08    # valve 3 — end valve
+VALVE_ODOR1 = 0x10    # valve 4 — odor A
+VALVE_ODOR2 = 0x20    # valve 5 — odor B
+VALVE_PURGE = 1 << 15 # valve 15 — purge between odor swaps
 
 def odor_mask(odor: int) -> int:
     return VALVE_ODOR1 if odor == 1 else VALVE_ODOR2
@@ -229,6 +242,11 @@ def _write_notes():
             f.write(f"  Phase 3 — next odor on, end valve OPEN (trial):\n")
             f.write(f"             odor 1: {args.poke_on:.3f} s\n")
             f.write(f"             odor 2: {odor2_on_s:.3f} s (poke_on x odor_2_extra={odor_2_extra})\n")
+        if args.purge_pulse_ms > 0 and not args.fixed_odor and not args.end_valve_always_open:
+            f.write(f"  Purge pulse: valve 15 pulsed alone for {args.purge_pulse_ms:.1f} ms during each odor swap (end valve closed)\n")
+            f.write(f"  Post-purge dead time: all solenoid valves closed for {args.post_purge_dead_ms:.1f} ms after the pulse, before opening the next odor\n")
+        else:
+            f.write(f"  Purge pulse: disabled\n")
         f.write(f"\n  Raw params: poke_off={args.poke_off}s, poke_on={args.poke_on}s, "
                 f"pre_arm_advance={pre_arm_advance}s (requested {args.pre_arm_advance}s), "
                 f"odor_2_extra={odor_2_extra}\n")
@@ -261,6 +279,10 @@ current_odor = args.fixed_odor if args.fixed_odor else 1   # which odor valve is
 poke_active = False
 pre_armed = False  # True once next odor is turned on ahead of the end valve
 poke_count = 0     # increments each time the end valve opens
+purging = False              # True while a purge sequence is in progress (pulse + dead time)
+purge_phase = None           # None | 'pulse' (valve 15 on) | 'dead' (all valves closed)
+purge_phase_started_at = None  # perf_counter when the current purge phase began
+pending_next_odor = None     # odor to turn on after the purge sequence ends
 
 # Turn on initial odor (and end valve if always-open mode)
 init_mask = odor_mask(current_odor) | (VALVE_END if args.end_valve_always_open else 0)
@@ -293,23 +315,62 @@ try:
 
         if not poke_active:
             # Stage 1: pre-arm — swap odors (skipped in fixed-odor mode)
-            if not args.fixed_odor and not pre_armed and elapsed >= args.poke_off - pre_arm_advance:
+            if not args.fixed_odor and not pre_armed and not purging and elapsed >= args.poke_off - pre_arm_advance:
                 next_odor = 2 if current_odor == 1 else 1
                 device.send(HarpMessage.WriteU16(34, odor_mask(current_odor)).frame)  # off current
-                pre_arm_reply = device.send(HarpMessage.WriteU16(33, odor_mask(next_odor)).frame)  # on next
-                current_odor = next_odor
-                pre_armed = True
+                if args.purge_pulse_ms > 0 and not args.end_valve_always_open:
+                    # Begin non-blocking purge pulse — ADC sampling continues during the pulse
+                    purge_on_reply = device.send(HarpMessage.WriteU16(33, VALVE_PURGE).frame)
+                    poke_writer.writerow([purge_on_reply.timestamp, 0, 0, 0])
+                    purging = True
+                    purge_phase = 'pulse'
+                    purge_phase_started_at = now
+                    pending_next_odor = next_odor
+                    pre_armed = True  # block re-entry; the deferred swap below finishes the pre-arm
+                    print(f"  [purge] valve 15 on (odor{current_odor}->odor{next_odor})")
+                else:
+                    pre_arm_reply = device.send(HarpMessage.WriteU16(33, odor_mask(next_odor)).frame)  # on next
+                    current_odor = next_odor
+                    pre_armed = True
+                    poke_writer.writerow([pre_arm_reply.timestamp, int(current_odor == 1), int(current_odor == 2), int(args.end_valve_always_open)])
+                    print(f"  [pre-arm] switched to odor{current_odor} ({pre_arm_advance:.1f}s before end valve)")
+                    # Arm ch7 on B->A transition (always-open mode: odor flows immediately)
+                    if current_odor == 1:
+                        active_poke_harp_ts = pre_arm_reply.timestamp
+                        active_poke_odor = "odor1"
+                        waiting_for_ch7 = True
+                        print(f"  [ch7] armed at odor2->odor1 switch")
+
+            # Purge pulse end — close valve 15, then hold all solenoid valves closed for the dead-time window
+            if purging and purge_phase == 'pulse' and (now - purge_phase_started_at) * 1000.0 >= args.purge_pulse_ms:
+                purge_off_reply = device.send(HarpMessage.WriteU16(34, VALVE_PURGE).frame)
+                poke_writer.writerow([purge_off_reply.timestamp, 0, 0, 0])
+                if args.post_purge_dead_ms > 0:
+                    purge_phase = 'dead'
+                    purge_phase_started_at = now
+                    print(f"  [purge] valve 15 off; all valves closed for {args.post_purge_dead_ms:.1f} ms dead time")
+                else:
+                    purge_phase = 'dead'
+                    purge_phase_started_at = now  # zero-length dead time finishes on the next condition check below
+
+            # Dead-time end — open the pending next odor once all-valves-closed window has elapsed
+            if purging and purge_phase == 'dead' and (now - purge_phase_started_at) * 1000.0 >= args.post_purge_dead_ms:
+                pre_arm_reply = device.send(HarpMessage.WriteU16(33, odor_mask(pending_next_odor)).frame)
+                current_odor = pending_next_odor
+                pending_next_odor = None
+                purging = False
+                purge_phase = None
+                purge_phase_started_at = None
                 poke_writer.writerow([pre_arm_reply.timestamp, int(current_odor == 1), int(current_odor == 2), int(args.end_valve_always_open)])
-                print(f"  [pre-arm] switched to odor{current_odor} ({pre_arm_advance:.1f}s before end valve)")
-                # Arm ch7 on B→A transition (always-open mode: odor flows immediately)
+                print(f"  [pre-arm] switched to odor{current_odor} after {args.purge_pulse_ms:.1f} ms purge + {args.post_purge_dead_ms:.1f} ms dead time")
                 if current_odor == 1:
                     active_poke_harp_ts = pre_arm_reply.timestamp
                     active_poke_odor = "odor1"
                     waiting_for_ch7 = True
-                    print(f"  [ch7] armed at odor2→odor1 switch")
+                    print(f"  [ch7] armed at odor2->odor1 switch")
 
-            # Stage 2: open end valve
-            if elapsed >= args.poke_off:
+            # Stage 2: open end valve — held off while a purge is still in progress
+            if not purging and elapsed >= args.poke_off:
                 if args.fixed_odor or not args.end_valve_always_open:
                     poke_reply = device.send(HarpMessage.WriteU16(33, VALVE_END).frame)
                     poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 1])
