@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "labjack-ljm>=1.23.0",
+#   "pyserial>=3.4",
+#   "pyharp",
+# ]
+#
+# [tool.uv.sources]
+# pyharp = { path = "./pyharp", editable = true }
+# ///
 import argparse
 import csv
+import datetime
 import os
 import struct
+import sys
 import threading
 import time
-from datetime import datetime
+from datetime import datetime as dt
 from typing import Iterable, Tuple
 
+from labjack import ljm
 from pyharp.device import Device
 from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
 from app_registers_refactor import DelphiOnlyAppRegs
@@ -18,6 +32,8 @@ logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
 
 odor_2_extra = 1  ###CONTROL EXTRA ODOR 2 TIME
+NUM_ROUND_TRIPS = 10
+POKES_TO_RUN = NUM_ROUND_TRIPS * 2  # one round trip = odor1->odor2->odor1 = 2 end-valve cycles
 
 """Helper functions"""
 
@@ -53,13 +69,25 @@ def pack_pid_config(kp: float, ki: float, kd: float):
 
 """Parse arguments"""
 
-parser = argparse.ArgumentParser(description="Log raw ADC samples from Delphi controller to CSV.")
+parser = argparse.ArgumentParser(description="Log raw ADC samples from Delphi controller to CSV, with LabJack AIN0 alongside.")
 parser.add_argument("com_port", help="Serial port, e.g. COM4")
 parser.add_argument(
     "--rate",
     type=float,
     default=1020.0,
-    help="Poll rate in Hz (default: 1020)",
+    help="Harp ADC poll rate in Hz (default: 1020)",
+)
+parser.add_argument(
+    "--labjack-rate-ms",
+    type=float,
+    default=4.0,
+    help="LabJack AIN0 sample interval in ms (default: 4 = 250 Hz, matches simple_log.py)",
+)
+parser.add_argument(
+    "--labjack-channel",
+    type=str,
+    default="AIN0",
+    help="LabJack channel name to read (default: AIN0)",
 )
 parser.add_argument(
     "--poke-on",
@@ -118,13 +146,22 @@ parser.add_argument(
 args = parser.parse_args()
 
 interval = 1.0 / args.rate
+labjack_interval = args.labjack_rate_ms / 1000.0
 # Clamped so the pre-arm window never exceeds the inter-trial gap
 pre_arm_advance = min(args.pre_arm_advance, args.poke_off)
 
-"""Connect to device"""
+"""Connect to Harp device"""
 
 device = Device(args.com_port)
 device.info()
+
+"""Connect to LabJack"""
+
+lj_handle = ljm.openS("ANY", "ANY", "ANY")
+lj_info = ljm.getHandleInfo(lj_handle)
+print("\nOpened a LabJack with Device type: %i, Connection type: %i,\n"
+      "Serial number: %i, IP address: %s, Port: %i,\nMax bytes per MB: %i" %
+      (lj_info[0], lj_info[1], lj_info[2], ljm.numberToIP(lj_info[3]), lj_info[4], lj_info[5]))
 
 """Set Registers"""
 
@@ -139,7 +176,7 @@ device.info()
 device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableValveLeds, 1).frame)
 
 # Set up simulated pokes
-#valve_on_duration = 300000 # microseconds 
+#valve_on_duration = 300000 # microseconds
 #reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.MinOdorDeliveryTimeUS, valve_on_duration).frame)
 
 # Flow meter / ADC
@@ -182,7 +219,7 @@ def odor_mask(odor: int) -> int:
 
 """CSV setup"""
 
-timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
+timestamp_str = dt.now().strftime("%Y%m%d_%H%M%S")
 run_dir = os.path.join("data", timestamp_str)
 os.makedirs(run_dir, exist_ok=True)
 
@@ -197,11 +234,18 @@ poke_csvfile = open(poke_csv_filename, "w", newline="")
 poke_writer = csv.writer(poke_csvfile)
 poke_writer.writerow(["harp_timestamp", "odor1", "odor2", "poke"])
 
+labjack_csv_filename = os.path.join(run_dir, f"labjack_{timestamp_str}.csv")
+labjack_file = open(labjack_csv_filename, "w", newline="")
+labjack_writer = csv.writer(labjack_file)
+labjack_writer.writerow(["timestamp", "duration_ms", args.labjack_channel])
+
 info_filename = os.path.join(run_dir, "info.txt")
 
 print(f"Logging to folder {run_dir}/ at {args.rate} Hz.")
 print(f"Logging poke events to {poke_csv_filename} ({args.poke_on}s on / {args.poke_off}s off).")
-print("Press Ctrl-C to stop.")
+print(f"Logging LabJack {args.labjack_channel} to {labjack_csv_filename} every {args.labjack_rate_ms} ms.")
+print(f"Stopping after {NUM_ROUND_TRIPS} odor round trips ({POKES_TO_RUN} end-valve cycles).")
+print("Press Ctrl-C to stop early.")
 
 """Experiment notes — collected in background thread"""
 
@@ -220,7 +264,8 @@ def _write_notes():
 
     with open(info_filename, "w") as f:
         f.write(f"Timestamp: {timestamp_str}\n")
-        f.write(f"Mode: {mode}\n\n")
+        f.write(f"Mode: {mode}\n")
+        f.write(f"Planned duration: {NUM_ROUND_TRIPS} round trips ({POKES_TO_RUN} end-valve cycles)\n\n")
 
         f.write("Target flow rates:\n")
         f.write(f"  Proportional valve 0: {prop_valve_0_target} (units per register)\n")
@@ -250,7 +295,8 @@ def _write_notes():
         f.write(f"\n  Raw params: poke_off={args.poke_off}s, poke_on={args.poke_on}s, "
                 f"pre_arm_advance={pre_arm_advance}s (requested {args.pre_arm_advance}s), "
                 f"odor_2_extra={odor_2_extra}\n")
-        f.write(f"  ADC poll rate: {args.rate} Hz   ch7 threshold: {args.ch7_threshold}   ch7 timeout: {args.ch7_timeout} s\n\n")
+        f.write(f"  ADC poll rate: {args.rate} Hz   ch7 threshold: {args.ch7_threshold}   ch7 timeout: {args.ch7_timeout} s\n")
+        f.write(f"  LabJack: channel {args.labjack_channel}   sample interval {args.labjack_rate_ms} ms\n\n")
 
         f.write("Notes: ")
         f.write(f"  Manual Flow Regulators\n")
@@ -295,12 +341,17 @@ if args.end_valve_always_open:
 """Polling loop"""
 
 PRINT_INTERVAL = 5.0  # seconds
+TIMESTAMP_FORMAT = "%Y-%m-%d %I:%M:%S.%f"
 
 last_sample = time.perf_counter()
 last_print = time.perf_counter()
 last_poke_change = time.perf_counter()
+last_labjack = time.perf_counter()
 samples_since_print = 0
 last_raw = None
+last_lj_tick = ljm.getHostTick()
+lj_app_start_time = datetime.datetime.now()
+lj_start_tick = last_lj_tick
 
 active_poke_harp_ts = None  # Harp timestamp of the most recent poke-on (any odor)
 active_poke_odor = None     # "odor1" or "odor2" for the poke being watched
@@ -308,6 +359,7 @@ waiting_for_ch7 = False     # True while watching ch7 for a rise after poke-on
 
 flow_scale = 49.944*3.3/4096
 flow_offset = 24.864 #To subtract from flow
+stop_reason = "completed"
 try:
     while True:
         now = time.perf_counter()
@@ -375,7 +427,7 @@ try:
                 if args.fixed_odor or not args.end_valve_always_open:
                     poke_reply = device.send(HarpMessage.WriteU16(33, VALVE_END).frame)
                     poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 1])
-                    print(f"  [poke {poke_count + 1}] end valve open — odor{current_odor} active")
+                    print(f"  [poke {poke_count + 1}/{POKES_TO_RUN}] end valve open — odor{current_odor} active")
                     # Arm ch7 from end valve open timestamp in fixed-odor mode
                     if args.fixed_odor:
                         active_poke_harp_ts = poke_reply.timestamp
@@ -390,10 +442,15 @@ try:
             if args.fixed_odor or not args.end_valve_always_open:
                 poke_reply = device.send(HarpMessage.WriteU16(34, VALVE_END).frame)
                 poke_writer.writerow([poke_reply.timestamp, int(current_odor == 1), int(current_odor == 2), 0])
-                print(f"  [poke {poke_count}] end valve closed — odor{current_odor} continues")
+                print(f"  [poke {poke_count}/{POKES_TO_RUN}] end valve closed — odor{current_odor} continues")
             pre_armed = False
             poke_active = False
             last_poke_change = now
+
+            # Stop after the configured number of end-valve cycles complete
+            if poke_count >= POKES_TO_RUN:
+                stop_reason = f"completed {NUM_ROUND_TRIPS} round trips ({poke_count} pokes)"
+                break
 
         # ADC sampling — runs after poke state is settled for this iteration
         if now - last_sample >= interval:
@@ -415,22 +472,49 @@ try:
                     print(f"Ch7 signal detected: {elapsed_ch7*1000:.1f} ms after odor2→odor1 switch (ch7={raw[7]})")
                     waiting_for_ch7 = False
 
+        # LabJack sampling — non-blocking, paced off perf_counter
+        if now - last_labjack >= labjack_interval:
+            try:
+                cur_tick = ljm.getHostTick()
+                duration_ms = (cur_tick - last_lj_tick) / 1000.0
+                cur_time = lj_app_start_time + datetime.timedelta(microseconds=(cur_tick - lj_start_tick))
+                result = ljm.eReadName(lj_handle, args.labjack_channel)
+                labjack_writer.writerow([cur_time.strftime(TIMESTAMP_FORMAT), f"{duration_ms:.3f}", f"{result:.6f}"])
+                last_lj_tick = cur_tick
+            except Exception:
+                print("LabJack read error:", sys.exc_info()[1])
+            last_labjack = now
+
         # Periodic status print
         if now - last_print >= PRINT_INTERVAL:
             achieved_hz = samples_since_print / PRINT_INTERVAL
-            print(f"[{achieved_hz:.1f} Hz] latest_raw: {*[round(v * flow_scale - flow_offset, 2) for v in last_raw[:6]], *raw[6:]} | pokes={poke_count}, waiting_ch7={waiting_for_ch7}") #last_raw
+            print(f"[{achieved_hz:.1f} Hz] latest_raw: {*[round(v * flow_scale - flow_offset, 2) for v in last_raw[:6]], *raw[6:]} | pokes={poke_count}/{POKES_TO_RUN}, waiting_ch7={waiting_for_ch7}") #last_raw
             samples_since_print = 0
             last_print = now
 
 except KeyboardInterrupt:
-    print("Disabling FSM.")
-    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 0).frame)
-    #device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame)
-    device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
+    stop_reason = "interrupted by user"
+finally:
+    print(f"Stopping ({stop_reason}). Disabling PID & ADC.")
+    if not notes_saved:
+        try:
+            _write_notes()
+            print(f"[notes saved to {info_filename}]")
+        except Exception:
+            print("Warning: error writing info.txt:", sys.exc_info()[1])
+    try:
+        device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ProportionalValve0EnablePid, 0).frame)
+        device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame)
+    except Exception:
+        print("Warning: error during Harp shutdown:", sys.exc_info()[1])
     csvfile.close()
     poke_csvfile.close()
-    if not notes_saved:
-        _write_notes()
-        print(f"[notes saved to {info_filename}]")
-    device.disconnect()
+    labjack_file.close()
+    try:
+        ljm.close(lj_handle)
+    except Exception:
+        print("Warning: error closing LabJack:", sys.exc_info()[1])
+    try:
+        device.disconnect()
+    except Exception:
+        pass
