@@ -134,7 +134,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.ProportionalValve2Adc, sizeof(app_regs.ProportionalValve2Adc), S8},
     {(uint8_t*)&app_regs.ProportionalValve2EnablePid, sizeof(app_regs.ProportionalValve2EnablePid), U8},
     {(uint8_t*)&app_regs.ProportionalValve2DutyCycle, sizeof(app_regs.ProportionalValve2DutyCycle), Float},
-    {(uint8_t*)&app_regs.ProportionalValve2TargetFlowRate, sizeof(app_regs.ProportionalValve2TargetFlowRate), Float}
+    {(uint8_t*)&app_regs.ProportionalValve2TargetFlowRate, sizeof(app_regs.ProportionalValve2TargetFlowRate), Float},
+    {(uint8_t*)&app_regs.FreezePidUpdates, sizeof(app_regs.FreezePidUpdates), U8}
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -224,8 +225,24 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_proportional_valve_2_adc, write_proportional_valve_2_adc},
     {read_proportional_valve_2_enable_pid, write_proportional_valve_2_enable_pid},
     {read_proportional_valve_2_duty_cycle, write_proportional_valve_2_duty_cycle},
-    {read_proportional_valve_2_target_flow_rate, write_proportional_valve_2_target_flow_rate}
+    {read_proportional_valve_2_target_flow_rate, write_proportional_valve_2_target_flow_rate},
+    {read_freeze_pid_updates, write_freeze_pid_updates}
 };
+
+void read_freeze_pid_updates(uint8_t reg_address)
+{
+    app_regs.FreezePidUpdates = freeze_pid_updates;
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_freeze_pid_updates(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    freeze_pid_updates = app_regs.FreezePidUpdates;
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_raw_adc(uint8_t reg_address)
 {
@@ -1157,36 +1174,6 @@ void update_app_state() // Called when app.run() is called -- add poke detection
     // Update Flow Detection
     flow_detection.update();
 
-    // Update PID controllers with latest flow meter readings.
-    auto& adc_samples = flow_detection.get_latest_adc_sample();
-    if (app_regs.ProportionalValve0Adc >= 0 ) {
-        int ch0 = proportional_valve_0_controller.get_flow_adc_index();
-        assert(ch0 >= -1 && ch0 < MAX_ADC_CHS);
-        // proportional_valve_0_controller.update(adc_samples.v[ch0]);
-        proportional_valve_0_controller.update(adc_samples.v[0]);
-    }
-    if (app_regs.ProportionalValve1Adc >= 0 ) {
-        int ch1 = proportional_valve_1_controller.get_flow_adc_index();
-        // assert(ch1 >= -1 && ch1 < MAX_ADC_CHS);
-        // proportional_valve_1_controller.update(adc_samples.v[ch1]);
-        proportional_valve_1_controller.update(adc_samples.v[1]);
-    }
-    if (app_regs.ProportionalValve2Adc >= 0 ) {
-        int ch2 = proportional_valve_2_controller.get_flow_adc_index();
-        // assert(ch2 >= -1 && ch2 < MAX_ADC_CHS);
-        // proportional_valve_2_controller.update(adc_samples.v[ch2]);
-        proportional_valve_2_controller.update(adc_samples.v[2]);
-    }
-
-
-    // Handle harp events
-    HarpEvent evt;
-    while (pop_event(evt)) {
-        if (!HarpCore::is_muted()) {
-            HarpCore::send_harp_reply(EVENT, evt.index, evt.timestamp);
-        }
-    }
-
     // Handle valve state changes
     uint16_t current_mask = get_valve_mask();
     if (current_mask != previous_mask) {
@@ -1194,6 +1181,38 @@ void update_app_state() // Called when app.run() is called -- add poke detection
         if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, VALVES_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
         previous_mask = current_mask;
+    }
+
+    // Do not update PID controllers if final valve is open, as flow will be zero and this may cause integrator windup. Instead, wait for the next update cycle after the valve closes to update the controllers with fresh flow readings.
+    if (!(current_mask & (1u << FINAL_VALVE_INDEX)) || !freeze_pid_updates) {
+        // Update PID controllers with latest flow meter readings.
+        auto& adc_samples = flow_detection.get_latest_adc_sample();
+        if (app_regs.ProportionalValve0Adc >= 0 ) {
+            int ch0 = proportional_valve_0_controller.get_flow_adc_index();
+            assert(ch0 >= -1 && ch0 < MAX_ADC_CHS);
+            // proportional_valve_0_controller.update(adc_samples.v[ch0]);
+            proportional_valve_0_controller.update(adc_samples.v[0]);
+        }
+        if (app_regs.ProportionalValve1Adc >= 0 ) {
+            int ch1 = proportional_valve_1_controller.get_flow_adc_index();
+            // assert(ch1 >= -1 && ch1 < MAX_ADC_CHS);
+            // proportional_valve_1_controller.update(adc_samples.v[ch1]);
+            proportional_valve_1_controller.update(adc_samples.v[1]);
+        }
+        if (app_regs.ProportionalValve2Adc >= 0 ) {
+            int ch2 = proportional_valve_2_controller.get_flow_adc_index();
+            // assert(ch2 >= -1 && ch2 < MAX_ADC_CHS);
+            // proportional_valve_2_controller.update(adc_samples.v[ch2]);
+            proportional_valve_2_controller.update(adc_samples.v[2]);
+        }
+    } 
+
+    // Handle harp events
+    HarpEvent evt;
+    while (pop_event(evt)) {
+        if (!HarpCore::is_muted()) {
+            HarpCore::send_harp_reply(EVENT, evt.index, evt.timestamp);
+        }
     }
 
     // Process AuxGPIO input changes.
@@ -1313,6 +1332,7 @@ void reset_app()
     app_regs.ProportionalValve2EnablePid = proportional_valve_2_controller.get_pid_enabled();
     app_regs.ProportionalValve2TargetFlowRate = proportional_valve_2_controller.get_target_flow_rate();
     app_regs.ProportionalValve2DutyCycle = proportional_valve_2_controller.get_duty_cycle();
+    app_regs.FreezePidUpdates = freeze_pid_updates;
 
     // GPIO interrupt for camera timestamping
     cam0_driver.set_pio_pwm_pin(CAM0_TRIGGER_PIN);

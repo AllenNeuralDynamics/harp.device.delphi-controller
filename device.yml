@@ -3,7 +3,7 @@
 # yaml-language-server: $schema=https://harp-tech.org/draft-02/schema/device.json
 device: DelphiController
 whoAmI: 1409
-firmwareVersion: "0.0"
+firmwareVersion: "1.0.0"
 hardwareTargets: "1.0"
 registers:
     ValveState:
@@ -373,6 +373,11 @@ registers:
         type: Float
         access: Write
         description: "Set the target flow rate for proportional valve 2."
+    FreezePidUpdates:
+        address: 106
+        type: U8
+        access: Write
+        description: "Enable to freeze PID updates when the final valve is energized."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"

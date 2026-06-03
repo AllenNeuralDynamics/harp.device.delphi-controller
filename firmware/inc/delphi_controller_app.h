@@ -18,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 74;
+inline constexpr size_t APP_REG_COUNT = 75;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -50,6 +50,9 @@ struct HarpEvent {
 
 //Valves state mask variables
 const uint8_t VALVES_STATE_INDEX_ADDRESS = 32;
+
+// Initialize PID freezing variable
+inline bool freeze_pid_updates = false;
 
 // Valve configuration struct for configuring the Hit-and-hold driver
 #pragma pack(push, 1)
@@ -168,6 +171,9 @@ struct app_regs_t
     uint8_t ProportionalValve2EnablePid;
     float ProportionalValve2DutyCycle;
     float ProportionalValve2TargetFlowRate;
+    
+    // Freeze PID updates when the final valve is energized and open
+    uint8_t FreezePidUpdates;
 };
 #pragma pack(pop)
 
@@ -290,6 +296,7 @@ void read_proportional_valve_2_adc(uint8_t reg_address);
 void read_proportional_valve_2_enable_pid(uint8_t reg_address);
 void read_proportional_valve_2_duty_cycle(uint8_t reg_address);
 void read_proportional_valve_2_target_flow_rate(uint8_t reg_address);
+void read_freeze_pid_updates(uint8_t reg_address);
 
 
 void write_valves_state(msg_t& msg);
@@ -344,6 +351,6 @@ void write_proportional_valve_2_adc(msg_t& msg);
 void write_proportional_valve_2_enable_pid(msg_t& msg);
 void write_proportional_valve_2_duty_cycle(msg_t& msg);
 void write_proportional_valve_2_target_flow_rate(msg_t& msg);
-
+void write_freeze_pid_updates(msg_t& msg);
 
 #endif // DELPHI_CONTROLLER_APP_H

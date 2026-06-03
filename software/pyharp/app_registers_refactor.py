@@ -83,6 +83,7 @@ class DelphiOnlyAppRegs(IntEnum):
     ProportionalValve2EnablePid = 103
     ProportionalValve2DutyCycle = 104
     ProportionalValve2TargetFlowRate = 105
+    FreezePidUpdates = 106
 
 
 DelphiAppRegs = IntEnum(
