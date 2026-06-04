@@ -309,5 +309,6 @@ void reset_app()
     app_regs.AuxGPIOFallingInputs = 0;
 
     old_aux_gpio_inputs = read_aux_gpios() & ~app_regs.AuxGPIODir;
+
 }
 
