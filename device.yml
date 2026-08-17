@@ -3,7 +3,7 @@
 # yaml-language-server: $schema=https://harp-tech.org/draft-02/schema/device.json
 device: DelphiController
 whoAmI: 1409
-firmwareVersion: "1.0.0"
+firmwareVersion: "1.0"
 hardwareTargets: "1.0"
 registers:
     ValveState:
@@ -249,14 +249,66 @@ registers:
         description: "Enable (1) and disable (0) valve LEDs."
     LatestFlowRate:
         address: 81
-        type: U8
+        type: Float
+        length: 8
         access: Read
         description: "Latest flow rate measurement sample from ADC0-8."
+        payloadSpec:
+            ADC0:
+                offset: 0
+                description: "ADC0"
+            ADC1:
+                offset: 1
+                description: "ADC1"
+            ADC2:
+                offset: 2
+                description: "ADC2"
+            ADC3:
+                offset: 3
+                description: "ADC3"
+            ADC4:
+                offset: 4
+                description: "ADC4"
+            ADC5:
+                offset: 5
+                description: "ADC5"
+            ADC6:
+                offset: 6
+                description: "ADC6"
+            ADC7:
+                offset: 7
+                description: "ADC7"
     LatestRawAdcSample:
         address: 82
-        type: U8
+        type: Float
+        length: 8
         access: Read
         description: "Latest raw bit measurement sample from ADC0-8."
+        payloadSpec:
+            ADC0:
+                offset: 0
+                description: "ADC0"
+            ADC1:
+                offset: 1
+                description: "ADC1"
+            ADC2:
+                offset: 2
+                description: "ADC2"
+            ADC3:
+                offset: 3
+                description: "ADC3"
+            ADC4:
+                offset: 4
+                description: "ADC4"
+            ADC5:
+                offset: 5
+                description: "ADC5"
+            ADC6:
+                offset: 6
+                description: "ADC6"
+            ADC7:
+                offset: 7
+                description: "ADC7"
     EnableAdcSampling:
         address: 83
         type: U8
@@ -299,9 +351,29 @@ registers:
         description: "Set the state for manual flow meter calibration."
     FlowMeterCalibrations:
         address: 91
-        type: U8
+        type: Float
+        length: 6
         access: Write
         description: "Calibration for the flow meters."
+        payloadSpec:
+            A0:
+                offset: 0
+                description: "A0"
+            A1:
+                offset: 1
+                description: "A1"
+            A2:
+                offset: 2
+                description: "A2"
+            A3:
+                offset: 3
+                description: "A3"
+            A4:
+                offset: 4
+                description: "A4"
+            A5:
+                offset: 5
+                description: "A5"
     PidUpdateFrequency:
         address: 92
         type: Float
@@ -309,10 +381,20 @@ registers:
         description: "Set the update frequency for the PID controller."
     PidGains:
         address: 93
-        type: U8
-        length: 12
+        type: Float
+        length: 3
         access: Write
         description: "Set the PID Kp, Ki, and Kd gains for the controller."
+        payloadSpec:
+            Kp:
+                offset: 0
+                description: "Proportional gain. Default: 2.0"
+            Ki:
+                offset: 1
+                description: "Integral gain. Default: 0.75"
+            Kd:
+                offset: 2
+                description: "Derivative gain. Default: 0.18"
     ProportionalValve0Adc:
         address: 94
         type: U8
@@ -378,6 +460,7 @@ registers:
         type: U8
         access: Write
         description: "Enable to freeze PID updates when the final valve is energized."
+
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"
