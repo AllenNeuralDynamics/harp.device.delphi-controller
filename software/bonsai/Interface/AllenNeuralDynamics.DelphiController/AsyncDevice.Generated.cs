@@ -58,7 +58,7 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<ValveMask> ReadValveStateAsync(CancellationToken cancellationToken = default)
+        public async Task<ushort> ReadValveStateAsync(CancellationToken cancellationToken = default)
         {
             var reply = await CommandAsync(HarpCommand.ReadUInt16(ValveState.Address), cancellationToken);
             return ValveState.GetPayload(reply);
@@ -74,24 +74,10 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<ValveMask>> ReadTimestampedValveStateAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<ushort>> ReadTimestampedValveStateAsync(CancellationToken cancellationToken = default)
         {
             var reply = await CommandAsync(HarpCommand.ReadUInt16(ValveState.Address), cancellationToken);
             return ValveState.GetTimestampedPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously writes a value to the ValveState register.
-        /// </summary>
-        /// <param name="value">The value to be stored in the register.</param>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteValveStateAsync(ValveMask value, CancellationToken cancellationToken = default)
-        {
-            var request = ValveState.FromPayload(MessageType.Write, value);
-            await CommandAsync(request, cancellationToken);
         }
 
         /// <summary>
@@ -1543,7 +1529,7 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the QueuedOdorIndex register.
+        /// Asynchronously reads the contents of the QueuedOdorMask register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1552,14 +1538,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<sbyte> ReadQueuedOdorIndexAsync(CancellationToken cancellationToken = default)
+        public async Task<ushort> ReadQueuedOdorMaskAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadSByte(QueuedOdorIndex.Address), cancellationToken);
-            return QueuedOdorIndex.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt16(QueuedOdorMask.Address), cancellationToken);
+            return QueuedOdorMask.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the QueuedOdorIndex register.
+        /// Asynchronously reads the timestamped contents of the QueuedOdorMask register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1568,28 +1554,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<sbyte>> ReadTimestampedQueuedOdorIndexAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<ushort>> ReadTimestampedQueuedOdorMaskAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadSByte(QueuedOdorIndex.Address), cancellationToken);
-            return QueuedOdorIndex.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt16(QueuedOdorMask.Address), cancellationToken);
+            return QueuedOdorMask.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the QueuedOdorIndex register.
-        /// </summary>
-        /// <param name="value">The value to be stored in the register.</param>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteQueuedOdorIndexAsync(sbyte value, CancellationToken cancellationToken = default)
-        {
-            var request = QueuedOdorIndex.FromPayload(MessageType.Write, value);
-            await CommandAsync(request, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the contents of the VacuumCloseTimeUS register.
+        /// Asynchronously reads the contents of the OdorSetupTimeUS register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1598,14 +1570,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<uint> ReadVacuumCloseTimeUSAsync(CancellationToken cancellationToken = default)
+        public async Task<uint> ReadOdorSetupTimeUSAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(VacuumCloseTimeUS.Address), cancellationToken);
-            return VacuumCloseTimeUS.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorSetupTimeUS.Address), cancellationToken);
+            return OdorSetupTimeUS.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the VacuumCloseTimeUS register.
+        /// Asynchronously reads the timestamped contents of the OdorSetupTimeUS register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1614,23 +1586,23 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<uint>> ReadTimestampedVacuumCloseTimeUSAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<uint>> ReadTimestampedOdorSetupTimeUSAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(VacuumCloseTimeUS.Address), cancellationToken);
-            return VacuumCloseTimeUS.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorSetupTimeUS.Address), cancellationToken);
+            return OdorSetupTimeUS.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the VacuumCloseTimeUS register.
+        /// Asynchronously writes a value to the OdorSetupTimeUS register.
         /// </summary>
         /// <param name="value">The value to be stored in the register.</param>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
         /// </param>
         /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteVacuumCloseTimeUSAsync(uint value, CancellationToken cancellationToken = default)
+        public async Task WriteOdorSetupTimeUSAsync(uint value, CancellationToken cancellationToken = default)
         {
-            var request = VacuumCloseTimeUS.FromPayload(MessageType.Write, value);
+            var request = OdorSetupTimeUS.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
 
@@ -1727,144 +1699,6 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the OdorTransitionTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the register payload.
-        /// </returns>
-        public async Task<uint> ReadOdorTransitionTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorTransitionTimeUS.Address), cancellationToken);
-            return OdorTransitionTimeUS.GetPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the timestamped contents of the OdorTransitionTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the timestamped register payload.
-        /// </returns>
-        public async Task<Timestamped<uint>> ReadTimestampedOdorTransitionTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorTransitionTimeUS.Address), cancellationToken);
-            return OdorTransitionTimeUS.GetTimestampedPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously writes a value to the OdorTransitionTimeUS register.
-        /// </summary>
-        /// <param name="value">The value to be stored in the register.</param>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteOdorTransitionTimeUSAsync(uint value, CancellationToken cancellationToken = default)
-        {
-            var request = OdorTransitionTimeUS.FromPayload(MessageType.Write, value);
-            await CommandAsync(request, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the contents of the VacuumSetupTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the register payload.
-        /// </returns>
-        public async Task<uint> ReadVacuumSetupTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(VacuumSetupTimeUS.Address), cancellationToken);
-            return VacuumSetupTimeUS.GetPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the timestamped contents of the VacuumSetupTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the timestamped register payload.
-        /// </returns>
-        public async Task<Timestamped<uint>> ReadTimestampedVacuumSetupTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(VacuumSetupTimeUS.Address), cancellationToken);
-            return VacuumSetupTimeUS.GetTimestampedPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously writes a value to the VacuumSetupTimeUS register.
-        /// </summary>
-        /// <param name="value">The value to be stored in the register.</param>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteVacuumSetupTimeUSAsync(uint value, CancellationToken cancellationToken = default)
-        {
-            var request = VacuumSetupTimeUS.FromPayload(MessageType.Write, value);
-            await CommandAsync(request, cancellationToken);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the contents of the FinalValveEnergizedTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the register payload.
-        /// </returns>
-        public async Task<uint> ReadFinalValveEnergizedTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(FinalValveEnergizedTimeUS.Address), cancellationToken);
-            return FinalValveEnergizedTimeUS.GetPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously reads the timestamped contents of the FinalValveEnergizedTimeUS register.
-        /// </summary>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>
-        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
-        /// property contains the timestamped register payload.
-        /// </returns>
-        public async Task<Timestamped<uint>> ReadTimestampedFinalValveEnergizedTimeUSAsync(CancellationToken cancellationToken = default)
-        {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(FinalValveEnergizedTimeUS.Address), cancellationToken);
-            return FinalValveEnergizedTimeUS.GetTimestampedPayload(reply);
-        }
-
-        /// <summary>
-        /// Asynchronously writes a value to the FinalValveEnergizedTimeUS register.
-        /// </summary>
-        /// <param name="value">The value to be stored in the register.</param>
-        /// <param name="cancellationToken">
-        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
-        /// </param>
-        /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteFinalValveEnergizedTimeUSAsync(uint value, CancellationToken cancellationToken = default)
-        {
-            var request = FinalValveEnergizedTimeUS.FromPayload(MessageType.Write, value);
-            await CommandAsync(request, cancellationToken);
-        }
-
-        /// <summary>
         /// Asynchronously reads the contents of the MinimumPokeTimeUS register.
         /// </summary>
         /// <param name="cancellationToken">
@@ -1911,7 +1745,7 @@ namespace AllenNeuralDynamics.DelphiController
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the CamPin register.
+        /// Asynchronously reads the contents of the OdorDwellTimeUS register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1920,14 +1754,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<byte> ReadCamPinAsync(CancellationToken cancellationToken = default)
+        public async Task<uint> ReadOdorDwellTimeUSAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(CamPin.Address), cancellationToken);
-            return CamPin.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorDwellTimeUS.Address), cancellationToken);
+            return OdorDwellTimeUS.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the CamPin register.
+        /// Asynchronously reads the timestamped contents of the OdorDwellTimeUS register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1936,28 +1770,28 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<byte>> ReadTimestampedCamPinAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<uint>> ReadTimestampedOdorDwellTimeUSAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(CamPin.Address), cancellationToken);
-            return CamPin.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(OdorDwellTimeUS.Address), cancellationToken);
+            return OdorDwellTimeUS.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the CamPin register.
+        /// Asynchronously writes a value to the OdorDwellTimeUS register.
         /// </summary>
         /// <param name="value">The value to be stored in the register.</param>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
         /// </param>
         /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteCamPinAsync(byte value, CancellationToken cancellationToken = default)
+        public async Task WriteOdorDwellTimeUSAsync(uint value, CancellationToken cancellationToken = default)
         {
-            var request = CamPin.FromPayload(MessageType.Write, value);
+            var request = OdorDwellTimeUS.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the CamPinState register.
+        /// Asynchronously reads the contents of the Cam0PinState register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1966,14 +1800,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<byte> ReadCamPinStateAsync(CancellationToken cancellationToken = default)
+        public async Task<byte> ReadCam0PinStateAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(CamPinState.Address), cancellationToken);
-            return CamPinState.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadByte(Cam0PinState.Address), cancellationToken);
+            return Cam0PinState.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the CamPinState register.
+        /// Asynchronously reads the timestamped contents of the Cam0PinState register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1982,14 +1816,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<byte>> ReadTimestampedCamPinStateAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<byte>> ReadTimestampedCam0PinStateAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(CamPinState.Address), cancellationToken);
-            return CamPinState.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadByte(Cam0PinState.Address), cancellationToken);
+            return Cam0PinState.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the FrameRate register.
+        /// Asynchronously reads the contents of the Cam0FrameRate register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -1998,14 +1832,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<uint> ReadFrameRateAsync(CancellationToken cancellationToken = default)
+        public async Task<uint> ReadCam0FrameRateAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(FrameRate.Address), cancellationToken);
-            return FrameRate.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(Cam0FrameRate.Address), cancellationToken);
+            return Cam0FrameRate.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the FrameRate register.
+        /// Asynchronously reads the timestamped contents of the Cam0FrameRate register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -2014,28 +1848,28 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<uint>> ReadTimestampedFrameRateAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<uint>> ReadTimestampedCam0FrameRateAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadUInt32(FrameRate.Address), cancellationToken);
-            return FrameRate.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(Cam0FrameRate.Address), cancellationToken);
+            return Cam0FrameRate.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the FrameRate register.
+        /// Asynchronously writes a value to the Cam0FrameRate register.
         /// </summary>
         /// <param name="value">The value to be stored in the register.</param>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
         /// </param>
         /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteFrameRateAsync(uint value, CancellationToken cancellationToken = default)
+        public async Task WriteCam0FrameRateAsync(uint value, CancellationToken cancellationToken = default)
         {
-            var request = FrameRate.FromPayload(MessageType.Write, value);
+            var request = Cam0FrameRate.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the DutyCycle register.
+        /// Asynchronously reads the contents of the Cam0DutyCycle register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -2044,14 +1878,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<float> ReadDutyCycleAsync(CancellationToken cancellationToken = default)
+        public async Task<float> ReadCam0DutyCycleAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadSingle(DutyCycle.Address), cancellationToken);
-            return DutyCycle.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadSingle(Cam0DutyCycle.Address), cancellationToken);
+            return Cam0DutyCycle.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the DutyCycle register.
+        /// Asynchronously reads the timestamped contents of the Cam0DutyCycle register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -2060,28 +1894,28 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<float>> ReadTimestampedDutyCycleAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<float>> ReadTimestampedCam0DutyCycleAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadSingle(DutyCycle.Address), cancellationToken);
-            return DutyCycle.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadSingle(Cam0DutyCycle.Address), cancellationToken);
+            return Cam0DutyCycle.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the DutyCycle register.
+        /// Asynchronously writes a value to the Cam0DutyCycle register.
         /// </summary>
         /// <param name="value">The value to be stored in the register.</param>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
         /// </param>
         /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteDutyCycleAsync(float value, CancellationToken cancellationToken = default)
+        public async Task WriteCam0DutyCycleAsync(float value, CancellationToken cancellationToken = default)
         {
-            var request = DutyCycle.FromPayload(MessageType.Write, value);
+            var request = Cam0DutyCycle.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
 
         /// <summary>
-        /// Asynchronously reads the contents of the EnableCamTrigger register.
+        /// Asynchronously reads the contents of the EnableCam0Trigger register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -2090,14 +1924,14 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the register payload.
         /// </returns>
-        public async Task<byte> ReadEnableCamTriggerAsync(CancellationToken cancellationToken = default)
+        public async Task<byte> ReadEnableCam0TriggerAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCamTrigger.Address), cancellationToken);
-            return EnableCamTrigger.GetPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCam0Trigger.Address), cancellationToken);
+            return EnableCam0Trigger.GetPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously reads the timestamped contents of the EnableCamTrigger register.
+        /// Asynchronously reads the timestamped contents of the EnableCam0Trigger register.
         /// </summary>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
@@ -2106,23 +1940,193 @@ namespace AllenNeuralDynamics.DelphiController
         /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
         /// property contains the timestamped register payload.
         /// </returns>
-        public async Task<Timestamped<byte>> ReadTimestampedEnableCamTriggerAsync(CancellationToken cancellationToken = default)
+        public async Task<Timestamped<byte>> ReadTimestampedEnableCam0TriggerAsync(CancellationToken cancellationToken = default)
         {
-            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCamTrigger.Address), cancellationToken);
-            return EnableCamTrigger.GetTimestampedPayload(reply);
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCam0Trigger.Address), cancellationToken);
+            return EnableCam0Trigger.GetTimestampedPayload(reply);
         }
 
         /// <summary>
-        /// Asynchronously writes a value to the EnableCamTrigger register.
+        /// Asynchronously writes a value to the EnableCam0Trigger register.
         /// </summary>
         /// <param name="value">The value to be stored in the register.</param>
         /// <param name="cancellationToken">
         /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
         /// </param>
         /// <returns>The task object representing the asynchronous write operation.</returns>
-        public async Task WriteEnableCamTriggerAsync(byte value, CancellationToken cancellationToken = default)
+        public async Task WriteEnableCam0TriggerAsync(byte value, CancellationToken cancellationToken = default)
         {
-            var request = EnableCamTrigger.FromPayload(MessageType.Write, value);
+            var request = EnableCam0Trigger.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the Cam1PinState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadCam1PinStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(Cam1PinState.Address), cancellationToken);
+            return Cam1PinState.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the Cam1PinState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedCam1PinStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(Cam1PinState.Address), cancellationToken);
+            return Cam1PinState.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the Cam1FrameRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<uint> ReadCam1FrameRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(Cam1FrameRate.Address), cancellationToken);
+            return Cam1FrameRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the Cam1FrameRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<uint>> ReadTimestampedCam1FrameRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadUInt32(Cam1FrameRate.Address), cancellationToken);
+            return Cam1FrameRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the Cam1FrameRate register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteCam1FrameRateAsync(uint value, CancellationToken cancellationToken = default)
+        {
+            var request = Cam1FrameRate.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the Cam1DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadCam1DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(Cam1DutyCycle.Address), cancellationToken);
+            return Cam1DutyCycle.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the Cam1DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedCam1DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(Cam1DutyCycle.Address), cancellationToken);
+            return Cam1DutyCycle.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the Cam1DutyCycle register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteCam1DutyCycleAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = Cam1DutyCycle.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the EnableCam1Trigger register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadEnableCam1TriggerAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCam1Trigger.Address), cancellationToken);
+            return EnableCam1Trigger.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the EnableCam1Trigger register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedEnableCam1TriggerAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableCam1Trigger.Address), cancellationToken);
+            return EnableCam1Trigger.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the EnableCam1Trigger register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteEnableCam1TriggerAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = EnableCam1Trigger.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
 
@@ -2169,6 +2173,1146 @@ namespace AllenNeuralDynamics.DelphiController
         public async Task WriteEnableValveLedsAsync(byte value, CancellationToken cancellationToken = default)
         {
             var request = EnableValveLeds.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the LatestFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<LatestFlowRatePayload> ReadLatestFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LatestFlowRate.Address), cancellationToken);
+            return LatestFlowRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the LatestFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<LatestFlowRatePayload>> ReadTimestampedLatestFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LatestFlowRate.Address), cancellationToken);
+            return LatestFlowRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the LatestRawAdcSample register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<LatestRawAdcSamplePayload> ReadLatestRawAdcSampleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LatestRawAdcSample.Address), cancellationToken);
+            return LatestRawAdcSample.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the LatestRawAdcSample register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<LatestRawAdcSamplePayload>> ReadTimestampedLatestRawAdcSampleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LatestRawAdcSample.Address), cancellationToken);
+            return LatestRawAdcSample.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the EnableAdcSampling register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadEnableAdcSamplingAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableAdcSampling.Address), cancellationToken);
+            return EnableAdcSampling.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the EnableAdcSampling register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedEnableAdcSamplingAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(EnableAdcSampling.Address), cancellationToken);
+            return EnableAdcSampling.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the EnableAdcSampling register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteEnableAdcSamplingAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = EnableAdcSampling.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the LeakAdcChannel register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<sbyte> ReadLeakAdcChannelAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSByte(LeakAdcChannel.Address), cancellationToken);
+            return LeakAdcChannel.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the LeakAdcChannel register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<sbyte>> ReadTimestampedLeakAdcChannelAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSByte(LeakAdcChannel.Address), cancellationToken);
+            return LeakAdcChannel.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the LeakAdcChannel register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteLeakAdcChannelAsync(sbyte value, CancellationToken cancellationToken = default)
+        {
+            var request = LeakAdcChannel.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the LeakThreshold register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadLeakThresholdAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LeakThreshold.Address), cancellationToken);
+            return LeakThreshold.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the LeakThreshold register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedLeakThresholdAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(LeakThreshold.Address), cancellationToken);
+            return LeakThreshold.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the LeakThreshold register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteLeakThresholdAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = LeakThreshold.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the LeakState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadLeakStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(LeakState.Address), cancellationToken);
+            return LeakState.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the LeakState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedLeakStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(LeakState.Address), cancellationToken);
+            return LeakState.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ManualFlowMeter register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<sbyte> ReadManualFlowMeterAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSByte(ManualFlowMeter.Address), cancellationToken);
+            return ManualFlowMeter.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ManualFlowMeter register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<sbyte>> ReadTimestampedManualFlowMeterAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSByte(ManualFlowMeter.Address), cancellationToken);
+            return ManualFlowMeter.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ManualFlowMeter register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteManualFlowMeterAsync(sbyte value, CancellationToken cancellationToken = default)
+        {
+            var request = ManualFlowMeter.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the NominalFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadNominalFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(NominalFlowRate.Address), cancellationToken);
+            return NominalFlowRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the NominalFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedNominalFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(NominalFlowRate.Address), cancellationToken);
+            return NominalFlowRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the NominalFlowRate register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteNominalFlowRateAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = NominalFlowRate.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the FlowRateTolerance register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadFlowRateToleranceAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(FlowRateTolerance.Address), cancellationToken);
+            return FlowRateTolerance.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the FlowRateTolerance register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedFlowRateToleranceAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(FlowRateTolerance.Address), cancellationToken);
+            return FlowRateTolerance.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the FlowRateTolerance register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteFlowRateToleranceAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = FlowRateTolerance.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ManualFlowMeterState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadManualFlowMeterStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ManualFlowMeterState.Address), cancellationToken);
+            return ManualFlowMeterState.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ManualFlowMeterState register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedManualFlowMeterStateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ManualFlowMeterState.Address), cancellationToken);
+            return ManualFlowMeterState.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the FlowMeterCalibrations register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<FlowMeterCalibrationsPayload> ReadFlowMeterCalibrationsAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(FlowMeterCalibrations.Address), cancellationToken);
+            return FlowMeterCalibrations.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the FlowMeterCalibrations register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<FlowMeterCalibrationsPayload>> ReadTimestampedFlowMeterCalibrationsAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(FlowMeterCalibrations.Address), cancellationToken);
+            return FlowMeterCalibrations.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the FlowMeterCalibrations register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteFlowMeterCalibrationsAsync(FlowMeterCalibrationsPayload value, CancellationToken cancellationToken = default)
+        {
+            var request = FlowMeterCalibrations.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the PidUpdateFrequency register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadPidUpdateFrequencyAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(PidUpdateFrequency.Address), cancellationToken);
+            return PidUpdateFrequency.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the PidUpdateFrequency register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedPidUpdateFrequencyAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(PidUpdateFrequency.Address), cancellationToken);
+            return PidUpdateFrequency.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the PidUpdateFrequency register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WritePidUpdateFrequencyAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = PidUpdateFrequency.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the PidGains register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<PidGainsPayload> ReadPidGainsAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(PidGains.Address), cancellationToken);
+            return PidGains.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the PidGains register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<PidGainsPayload>> ReadTimestampedPidGainsAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(PidGains.Address), cancellationToken);
+            return PidGains.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the PidGains register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WritePidGainsAsync(PidGainsPayload value, CancellationToken cancellationToken = default)
+        {
+            var request = PidGains.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve0Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve0AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve0Adc.Address), cancellationToken);
+            return ProportionalValve0Adc.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve0Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve0AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve0Adc.Address), cancellationToken);
+            return ProportionalValve0Adc.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve0Adc register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve0AdcAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve0Adc.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve0EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve0EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve0EnablePid.Address), cancellationToken);
+            return ProportionalValve0EnablePid.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve0EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve0EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve0EnablePid.Address), cancellationToken);
+            return ProportionalValve0EnablePid.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve0EnablePid register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve0EnablePidAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve0EnablePid.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve0DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve0DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve0DutyCycle.Address), cancellationToken);
+            return ProportionalValve0DutyCycle.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve0DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve0DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve0DutyCycle.Address), cancellationToken);
+            return ProportionalValve0DutyCycle.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve0DutyCycle register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve0DutyCycleAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve0DutyCycle.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve0TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve0TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve0TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve0TargetFlowRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve0TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve0TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve0TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve0TargetFlowRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve0TargetFlowRate register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve0TargetFlowRateAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve0TargetFlowRate.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve1Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve1AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve1Adc.Address), cancellationToken);
+            return ProportionalValve1Adc.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve1Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve1AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve1Adc.Address), cancellationToken);
+            return ProportionalValve1Adc.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve1Adc register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve1AdcAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve1Adc.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve1EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve1EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve1EnablePid.Address), cancellationToken);
+            return ProportionalValve1EnablePid.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve1EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve1EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve1EnablePid.Address), cancellationToken);
+            return ProportionalValve1EnablePid.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve1EnablePid register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve1EnablePidAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve1EnablePid.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve1DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve1DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve1DutyCycle.Address), cancellationToken);
+            return ProportionalValve1DutyCycle.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve1DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve1DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve1DutyCycle.Address), cancellationToken);
+            return ProportionalValve1DutyCycle.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve1DutyCycle register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve1DutyCycleAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve1DutyCycle.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve1TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve1TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve1TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve1TargetFlowRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve1TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve1TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve1TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve1TargetFlowRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve1TargetFlowRate register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve1TargetFlowRateAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve1TargetFlowRate.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve2Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve2AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve2Adc.Address), cancellationToken);
+            return ProportionalValve2Adc.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve2Adc register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve2AdcAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve2Adc.Address), cancellationToken);
+            return ProportionalValve2Adc.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve2Adc register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve2AdcAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve2Adc.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve2EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadProportionalValve2EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve2EnablePid.Address), cancellationToken);
+            return ProportionalValve2EnablePid.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve2EnablePid register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedProportionalValve2EnablePidAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(ProportionalValve2EnablePid.Address), cancellationToken);
+            return ProportionalValve2EnablePid.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve2EnablePid register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve2EnablePidAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve2EnablePid.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve2DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve2DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve2DutyCycle.Address), cancellationToken);
+            return ProportionalValve2DutyCycle.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve2DutyCycle register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve2DutyCycleAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve2DutyCycle.Address), cancellationToken);
+            return ProportionalValve2DutyCycle.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve2DutyCycle register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve2DutyCycleAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve2DutyCycle.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the ProportionalValve2TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<float> ReadProportionalValve2TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve2TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve2TargetFlowRate.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the ProportionalValve2TargetFlowRate register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<float>> ReadTimestampedProportionalValve2TargetFlowRateAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadSingle(ProportionalValve2TargetFlowRate.Address), cancellationToken);
+            return ProportionalValve2TargetFlowRate.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the ProportionalValve2TargetFlowRate register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteProportionalValve2TargetFlowRateAsync(float value, CancellationToken cancellationToken = default)
+        {
+            var request = ProportionalValve2TargetFlowRate.FromPayload(MessageType.Write, value);
+            await CommandAsync(request, cancellationToken);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the contents of the FreezePidUpdates register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the register payload.
+        /// </returns>
+        public async Task<byte> ReadFreezePidUpdatesAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(FreezePidUpdates.Address), cancellationToken);
+            return FreezePidUpdates.GetPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously reads the timestamped contents of the FreezePidUpdates register.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous read operation. The <see cref="Task{TResult}.Result"/>
+        /// property contains the timestamped register payload.
+        /// </returns>
+        public async Task<Timestamped<byte>> ReadTimestampedFreezePidUpdatesAsync(CancellationToken cancellationToken = default)
+        {
+            var reply = await CommandAsync(HarpCommand.ReadByte(FreezePidUpdates.Address), cancellationToken);
+            return FreezePidUpdates.GetTimestampedPayload(reply);
+        }
+
+        /// <summary>
+        /// Asynchronously writes a value to the FreezePidUpdates register.
+        /// </summary>
+        /// <param name="value">The value to be stored in the register.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="CancellationToken"/> which can be used to cancel the operation.
+        /// </param>
+        /// <returns>The task object representing the asynchronous write operation.</returns>
+        public async Task WriteFreezePidUpdatesAsync(byte value, CancellationToken cancellationToken = default)
+        {
+            var request = FreezePidUpdates.FromPayload(MessageType.Write, value);
             await CommandAsync(request, cancellationToken);
         }
     }
