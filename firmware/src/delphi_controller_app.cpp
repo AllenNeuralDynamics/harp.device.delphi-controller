@@ -107,7 +107,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.Cam1DutyCycle, sizeof(app_regs.Cam1DutyCycle), Float},
     {(uint8_t*)&app_regs.EnableCam1Trigger, sizeof(app_regs.EnableCam1Trigger), U8},
 
-    {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8}
+    {(uint8_t*)&app_regs.EnableValveLeds, sizeof(app_regs.EnableValveLeds), U8},
+    {(uint8_t*)&app_regs.FirmwareVersion, sizeof(app_regs.FirmwareVersion), U8},
 };
 
 RegFnPair reg_handler_fns[APP_REG_COUNT]
@@ -168,8 +169,16 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_cam1_frame_rate, write_cam1_frame_rate},
     {read_cam1_duty_cycle, write_cam1_duty_cycle},
     {read_enable_cam1_trigger, write_enable_cam1_trigger},
-    {read_valve_leds, write_valve_leds}
+    {read_valve_leds, write_valve_leds},
+    {read_firmware_version, HarpCore::write_to_read_only_reg_error},
 };
+
+void read_firmware_version(uint8_t reg_address)
+{
+    app_regs.FirmwareVersion = FIRMWARE_VERSION;
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
 
 void read_valve_leds(uint8_t reg_address)
 {
@@ -837,6 +846,9 @@ void reset_app()
     gpio_init(LED_ENABLE_PIN);
     gpio_set_dir(LED_ENABLE_PIN, GPIO_OUT);
     gpio_put(LED_ENABLE_PIN, 0);
+
+    // Initialize firmware version register
+    app_regs.FirmwareVersion = FIRMWARE_VERSION;
 
     // Reset Harp register struct elements.
     app_regs.ValvesState = 0;

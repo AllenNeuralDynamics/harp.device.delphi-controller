@@ -16,7 +16,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 52;
+inline constexpr size_t APP_REG_COUNT = 54;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -34,6 +34,17 @@ extern CameraDriver cam0_driver;
 extern CameraDriver cam1_driver;
 
 extern uint8_t old_aux_gpio_inputs;
+
+// HARDCODE FIRMWARE VERSION
+inline constexpr uint8_t FIRMWARE_MAJOR_VERSION = 1;
+inline constexpr uint8_t FIRMWARE_MINOR_VERSION = 0;
+inline constexpr uint8_t FIRMWARE_PATCH_VERSION = 0;
+struct FirmwareVersionStruct {
+    uint8_t major;
+    uint8_t minor;
+    uint8_t patch;
+};
+inline constexpr FirmwareVersionStruct FIRMWARE_VERSION = {FIRMWARE_MAJOR_VERSION, FIRMWARE_MINOR_VERSION, FIRMWARE_PATCH_VERSION};
 
 // struct for HARP event queueing
 static inline constexpr uint8_t CAM0_PIN_STATE_INDEX_ADDRESS = 75;
@@ -117,6 +128,9 @@ struct app_regs_t
     uint8_t EnableCam1Trigger;
 
     uint8_t EnableValveLeds;
+
+    // Firmware version
+    FirmwareVersionStruct FirmwareVersion;
 };
 #pragma pack(pop)
 
@@ -207,6 +221,7 @@ void read_cam1_duty_cycle(uint8_t reg_address);
 void read_enable_cam1_trigger(uint8_t reg_address);
 
 void read_valve_leds(uint8_t reg_address);
+void read_firmware_version(uint8_t reg_address);
 
 void write_valves_state(msg_t& msg);
 void write_valves_set(msg_t& msg);

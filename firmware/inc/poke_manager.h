@@ -313,7 +313,7 @@ private:
     static inline constexpr uint32_t DEFAULT_ODOR_TRANSITION_TIME_US = 30e3;
     static inline constexpr uint32_t DEFAULT_VACUUM_SETUP_TIME_US = 20e3;
     static inline constexpr uint32_t DEFAULT_FINAL_VALVE_ENERGIZED_TIME_US = 110e3;
-    static inline constexpr uint32_t DEFAULT_ODOR_DWELL_TIME_US = 150e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_DWELL_TIME_US = 0;
     static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
     static inline constexpr uint8_t DEFAULT_POKE_PIN = GPIO_PIN_BASE;
 };
