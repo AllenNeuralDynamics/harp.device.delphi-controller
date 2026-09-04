@@ -1,0 +1,59 @@
+#include <pwm_pio.h>
+
+CameraDriver::CameraDriver(uint8_t pwm_pio_pin, PIO pio, uint sm)
+: pwm_pio_pin_{pwm_pio_pin}, pwm_freq_{DEFAULT_FREQ}, 
+pwm_duty_{DEFAULT_DUTY_CYCLE}, pin_is_initialized_{false},
+sm_{sm}, pio_{pio}, pwm_pin_state_{0}, enable_state_{0}
+{
+    reset(); // set timing constants to defaults.
+}
+
+CameraDriver::~CameraDriver() //destuctor
+{
+  pwm_freq_ = 0;  
+  pwm_pin_state_ = 0;
+  pio_sm_set_enabled(pio_, sm_, false);
+}
+
+// Functions to alter the FSM
+void CameraDriver::reset()
+{
+    uint offset = pio_add_program(pio_, &pwm_program);
+    pwm_init(pio_, sm_, offset, pwm_pio_pin_, enable_state_); 
+    pwm_freq_ = DEFAULT_FREQ;
+    pwm_duty_ = DEFAULT_DUTY_CYCLE; //50% duty cycle
+}
+
+void CameraDriver::set_pwm(PIO pio, uint sm, float duty_cycle, uint32_t freq) 
+{
+    // const uint32_t total_us = 16667;  // 60 Hz period in µs
+    uint32_t sys_clk = clock_get_hz(clk_sys); //125000000;
+    uint32_t period = sys_clk / freq;
+    uint32_t high_us = (uint32_t)(period * duty_cycle);
+    uint32_t low_us = period - high_us;
+    pio_sm_put_blocking(pio, sm, high_us);
+    pio_sm_put_blocking(pio, sm, low_us);
+}
+
+void CameraDriver::pwm_init(PIO pio, uint sm, uint offset, uint8_t pin, uint8_t enable_state)
+ {
+    pio_gpio_init(pio, pin);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+    pio_sm_config c = pwm_program_get_default_config(offset);
+    sm_config_set_clkdiv(&c, 1.0f);  // full speed
+    sm_config_set_set_pins(&c, pin, 1);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_NONE);
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, enable_state);
+}
+
+
+void CameraDriver::update()
+{
+    // set PWM 
+    if (!pio_sm_is_tx_fifo_full(pio_, sm_)) 
+    {
+        set_pwm(pio_, sm_, pwm_duty_, pwm_freq_);
+    }
+}
+
