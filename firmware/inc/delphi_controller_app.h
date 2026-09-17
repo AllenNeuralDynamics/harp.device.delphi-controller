@@ -36,8 +36,8 @@ extern CameraDriver cam1_driver;
 extern uint8_t old_aux_gpio_inputs;
 
 // HARDCODE FIRMWARE VERSION
-inline constexpr uint8_t FIRMWARE_MAJOR_VERSION = 1;
-inline constexpr uint8_t FIRMWARE_MINOR_VERSION = 0;
+inline constexpr uint8_t FIRMWARE_MAJOR_VERSION = 0;
+inline constexpr uint8_t FIRMWARE_MINOR_VERSION = 6;
 inline constexpr uint8_t FIRMWARE_PATCH_VERSION = 0;
 struct FirmwareVersionStruct {
     uint8_t major;

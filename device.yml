@@ -262,7 +262,22 @@ registers:
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."
-
+    FirmwareVersion:
+        address: 84
+        type: Float
+        length: 3
+        access: Read
+        description: "Firmware version of the device."
+        payloadSpec:
+            major:
+                offset: 0
+                description: "Major version."
+            minor:
+                offset: 1
+                description: "Minor version."
+            patch:
+                offset: 2
+                description: "Patch version."
 groupMasks:
     ValveMask:
         description: "Valve that can be configured/enabled/disabled"
