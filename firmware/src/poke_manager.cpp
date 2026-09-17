@@ -48,7 +48,7 @@ void PokeManager::update_poke_status()
         if (raw_poke_state_ == 1)
         {
             //falling edge event
-            beam_broken_ == false;
+            beam_broken_ = false;
             poke_initiated_once_ = false;
             raw_poke_fall();
         }
