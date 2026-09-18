@@ -1,6 +1,7 @@
 """ValveController app registers. Later these will be extracted from the device.yaml"""
-from enum import IntEnum
 
+from enum import IntEnum
+from itertools import chain
 
 
 class AppRegs(IntEnum):
@@ -32,3 +33,36 @@ class AppRegs(IntEnum):
     AuxGPIOInputFallEvent = 56
     AuxGPIOInputRisingInputs = 57
     AuxGPIOFallingInputs = 58
+
+
+class DelphiOnlyAppRegs(IntEnum):
+    PokePin = 59
+    PokePinInverted = 60
+    PokeState = 61
+    RawPokeState = 62
+    PokeDometer = 63
+    FSMEnabledState = 64
+    ForceFSM = 65
+    QueuedOdorMask = 66
+    VacuumCloseTimeUS = 67
+    MinOdorDeliveryTimeUS = 68
+    MaxOdorDeliveryTimeUS = 69
+    OdorTransitionTimeUS = 70
+    VacuumSetupTimeUS = 71
+    FinalValveEnergizedTimeUS = 72
+    MinimumPokeTimeUS = 73
+    OdorDwellTimeUS = 74
+    Cam0PinState = 75
+    Cam0FrameRate = 76
+    Cam0DutyCycle = 77
+    EnableCam0Trigger = 78
+    Cam1PinState = 79
+    Cam1FrameRate = 80
+    Cam1DutyCycle = 81
+    EnableCam1Trigger = 82
+    EnableValveLeds = 83
+
+
+DelphiAppRegs = IntEnum(
+    "DelphiAppRegs", [(i.name, i.value) for i in chain(AppRegs, DelphiOnlyAppRegs)]
+)

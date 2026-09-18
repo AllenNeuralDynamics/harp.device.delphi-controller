@@ -2,18 +2,24 @@
 #define CONFIG_H
 
 #define NUM_VALVES (16)
+#define NUM_ODOR_VALVES (14)
+#define FINAL_VALVE_INDEX (0)
+#define VACCUM_VALVE_INDEX (1)
+#define CAM0_TRIGGER_PIN (26)
+#define CAM1_TRIGGER_PIN (27)
+#define LED_ENABLE_PIN (4)
 
 #define UART_TX_PIN (0)
 #define HARP_SYNC_RX_PIN (5)
 #define HARP_CORE_LED_PIN (2)
 
-#define VALVE_PIN_BASE (6)
-#define GPIO_PIN_BASE (22)
+inline constexpr uint32_t VALVE_PIN_BASE = 6;
+inline constexpr uint32_t GPIO_PIN_BASE = 22;
 
 #define VALVES_MASK (0x0000FFFF)
 #define GPIOS_MASK (0x000000FF)
 
-#define HARP_DEVICE_ID (1406)
+#define HARP_DEVICE_ID (1409)
 #define HW_VERSION_MAJOR (1)
 #define HW_VERSION_MINOR (0)
 #define HW_ASSEMBLY_VERSION (0)

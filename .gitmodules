@@ -4,3 +4,6 @@
 [submodule "firmware/lib/rp2040.pwm"]
 	path = firmware/lib/rp2040.pwm
 	url = git@github.com:AllenNeuralDynamics/rp2040.pwm.git
+[submodule "firmware/lib/etl"]
+	path = firmware/lib/etl
+	url = https://github.com/ETLCPP/etl.git
