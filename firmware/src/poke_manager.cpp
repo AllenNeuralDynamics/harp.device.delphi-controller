@@ -9,7 +9,8 @@ poke_detected_{false}, poke_state_{0}, raw_poke_state_{0},
 beam_broken_{false}, poke_initiated_once_{false},
 request_next_odor_callback_fn_{nullptr}, request_poke_state_callback_fn_{nullptr},
 request_raw_poke_rise_callback_fn_{nullptr}, request_raw_poke_fall_callback_fn_{nullptr},
-poke_pin_is_initialized_{false}, block_poke_detection_{false}, request_initiated_{false}, odor_dwell_time_us_{DEFAULT_ODOR_DWELL_TIME_US} 
+poke_pin_is_initialized_{false}, block_poke_detection_{false}, odor_dwell_time_us_{DEFAULT_ODOR_DWELL_TIME_US},
+odor_buffer_count_{0}, pending_odor_requests_{0}
 {
     reset(); // set timing constants to defaults.
 }
@@ -27,7 +28,44 @@ PokeManager::~PokeManager() //destructor
     beam_broken_ = false;
     poke_initiated_once_ = false;
     block_poke_detection_ = false;
-    request_initiated_ = false;
+}
+
+
+// Clear odor buffer, counts, and stop odor requests
+void PokeManager::clear_odor_buffer()
+{
+    for (uint8_t i = 0; i < ODOR_BUFFER_SIZE; i++) {
+        odor_buffer_.b[i] = 0;
+    }
+    odor_buffer_count_ = 0;
+    pending_odor_requests_ = 0;
+}
+
+// Consume the next odor in the buffer and update the odor valve mask accordingly.
+void PokeManager::consume_odor_in_buffer()
+{
+    if (odor_buffer_count_ > 0) {
+        for (uint8_t i = 0; i < ODOR_BUFFER_SIZE - 1; i++) {
+            odor_buffer_.b[i] = odor_buffer_.b[i + 1];
+        }
+        odor_buffer_.b[ODOR_BUFFER_SIZE - 1] = 0;
+        odor_buffer_count_--;
+        odor_valve_mask_ = odor_buffer_.b[0]; // arm the next odor
+    }
+}
+
+// Check if the odor buffer is not full and request odors until it is full.
+void PokeManager::check_buffer()
+{
+    odor_buffer_count_ = 0;
+    for (uint8_t i = 0; i < ODOR_BUFFER_SIZE; i++)
+        if (odor_buffer_.b[i] != 0) odor_buffer_count_++;
+
+    if ((odor_buffer_count_ + pending_odor_requests_) < ODOR_BUFFER_SIZE)
+    {
+        request_next_odor();
+        pending_odor_requests_++;
+    }
 }
 
 void PokeManager::deenergize_all_valves()
@@ -100,13 +138,13 @@ void PokeManager::reset()
     deenergize_all_valves();
     disable();
     odor_valve_mask_ = 0;
+    clear_odor_buffer();
     poke_count_ = 0;
     poke_state_ = 0;
     poke_detected_ = false;
     beam_broken_ = false;
     block_poke_detection_ = false;
     poke_initiated_once_ = false;
-    request_initiated_ = false;
     clear_poke_pin();
     set_poke_pin(DEFAULT_POKE_PIN); // Clear and then set the poke pin to the default one.
     request_next_odor_callback_fn_ = nullptr;
@@ -137,23 +175,6 @@ void PokeManager::set_enabled_state(bool enabled)
     }
 }
 
-//Check odor selection status
-void PokeManager::check_odor()
-{
-    if (odor_valve_mask_ != 0) return;
-    else if (odor_valve_mask_ == 0  && !request_initiated_ && state_ == ODOR_READY_FOR_POKE) //Only want to send one request for a new odor. 
-    {
-        request_next_odor(); //request
-        request_initiated_ = true; 
-        state_ = RESET; // Transition back to odor setup to wait for the next poke and odor delivery.
-    }   
-    else if (odor_valve_mask_ == 0 && state_ && !request_initiated_ && state_ == ODOR_SETUP) // For rule changes
-    {
-        request_next_odor(); //request
-        request_initiated_ = true; 
-    }        
-}
-
 void PokeManager::update()
 {
     //enabled by default, but if disabled, bail early
@@ -165,16 +186,15 @@ void PokeManager::update()
     // check for poke
     update_poke_status();
 
-    // check for odor flag request
-    check_odor();
+    // check that the odor buffer is full and if not, request additional odors to fill the full buffer.
+    check_buffer();
 
     // Handling next-state logic.
     switch (state_)
     {
         case RESET:
-            //initialize RESET state by turning off all valves
-            deenergize_all_valves();
-            next_state = ODOR_SETUP;
+            if (odor_buffer_count_ == ODOR_BUFFER_SIZE)
+                next_state = ODOR_SETUP;
             break;
         case ODOR_SETUP:
             if (odor_valve_mask_ == 0){
@@ -240,9 +260,11 @@ void PokeManager::update()
         if (next_state == ODOR_SETUP)
         {
             deenergize_all_valves();
-            block_poke_detection_ = true; // Don't allow pokes to be detected until the next odor is primed.
-            odor_valve_mask_ = 0; // Clear the mask so that the next odor can be prepared in the queue.    
-            request_initiated_ = false; // Allow for a new request to be sent for the next odor.  
+            block_poke_detection_ = true;
+            if (state_ == ODOR_DWELL)
+                consume_odor_in_buffer(); // cycle complete: shift buffer, arm next odor
+            else // RESET → ODOR_SETUP: first entry, just arm b[0]
+                odor_valve_mask_ = odor_buffer_.b[0];
         }
     }
     // Update state:

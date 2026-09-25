@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-import time
-import struct
-from pyharp.device import Device
-from pyharp.messages import HarpMessage, WriteHarpMessage, PayloadType
-from app_registers_refactor import DelphiOnlyAppRegs
-from typing import Iterable, Tuple
-
 import logging
+import struct
+import time
+from collections.abc import Iterable
+
+from app_registers_refactor import DelphiOnlyAppRegs
+from pyharp.device import Device
+from pyharp.messages import HarpMessage, PayloadType, WriteHarpMessage
 
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())
@@ -20,12 +20,11 @@ def print_poke_counts(
 ):
     reply = device.send(HarpMessage.ReadU8(DelphiOnlyAppRegs.PokeDometer).frame)
     print(f"Current pokedometer count is: {reply.payload}.")
-    return None
 
 
 # # Open serial connection of Delphi controller
 # com_port = "COM20"
-com_port = "COM119"
+com_port = "COM8"
 device = Device(com_port)
 device.info()  # Display device's info on screen
 
@@ -34,13 +33,13 @@ device.info()  # Display device's info on screen
 def read_float_struct_from_u8(
     u8_array: Iterable[int | bytes | bytearray],
     bytes_expected: int = 32,
-) -> Tuple[float, float, float, float]:
+) -> tuple[float, float, float, float, float, float, float, float]:
     """
-    Decode a U8 array that represents a packed struct of four 32-bit floats.
-    Assumes little-endian encoding (<4f).
+    Decode a U8 array that represents a packed struct of eight 32-bit floats.
+    Assumes little-endian encoding (<8f).
 
     Accepts: list[int], bytes, or bytearray.
-    Returns: (f0, f1, f2, f3)
+    Returns: (f0, f1, f2, f3, f4, f5, f6, f7)
 
     Raises:
         ValueError if the input length is not exactly `bytes_expected` bytes.
@@ -59,16 +58,17 @@ def read_float_struct_from_u8(
     return struct.unpack("<8f", buf)
 
 
-def read_uint16_struct_from_u8(
+# Read from U8 Array
+def read_odor_buffer(
     u8_array: Iterable[int | bytes | bytearray],
-    bytes_expected: int = 16,
-) -> Tuple[int, int, int, int]:
+    bytes_expected: int = 10,
+) -> tuple[int, int, int, int, int]:
     """
-    Decode a U8 array that represents a packed struct of four 16-bit unsigned integers.
-    Assumes little-endian encoding (<4H).
+    Decode a U8 array that represents a packed struct of five 16-bit unsigned integers.
+    Assumes little-endian encoding (<5H).
 
     Accepts: list[int], bytes, or bytearray.
-    Returns: (f0, f1, f2, f3)
+    Returns: (i0, i1, i2, i3, i4)
 
     Raises:
         ValueError if the input length is not exactly `bytes_expected` bytes.
@@ -81,7 +81,35 @@ def read_uint16_struct_from_u8(
 
     if len(buf) != bytes_expected:
         raise ValueError(
-            f"Expected {bytes_expected} bytes for 8 uint16, got {len(buf)}"
+            f"Expected {bytes_expected} bytes for 5 uint16, got {len(buf)}"
+        )
+
+    return struct.unpack("<5H", buf)
+
+
+def read_uint16_struct_from_u8(
+    u8_array: Iterable[int | bytes | bytearray],
+    bytes_expected: int = 16,
+) -> tuple[int, int, int, int, int, int, int, int]:
+    """
+    Decode a U8 array that represents a packed struct of eight 16-bit unsigned integers.
+    Assumes little-endian encoding (<8H).
+
+    Accepts: list[int], bytes, or bytearray.
+    Returns: (i0, i1, i2, i3)
+
+    Raises:
+        ValueError if the input length is not exactly `bytes_expected` bytes.
+    """
+    # Normalize to bytes
+    if isinstance(u8_array, (bytes, bytearray)):
+        buf = bytes(u8_array)
+    else:
+        buf = bytes(bytearray(u8_array))
+
+    if len(buf) != bytes_expected:
+        raise ValueError(
+            f"Expected {bytes_expected} bytes for 4 uint16, got {len(buf)}"
         )
 
     return struct.unpack("<8H", buf)
@@ -108,11 +136,12 @@ reply = device.send(
 )
 # Valve parameters
 reply = device.send(
-    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0001).frame
+    HarpMessage.WriteU16(DelphiOnlyAppRegs.QueuedOdorMask, 0x0000).frame
 )
-reply = device.send(
-    HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 500000).frame
-)
+
+# Clear odor buffer
+reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ClearOdorBuffer, 0).frame)
+reply = device.send(HarpMessage.WriteU32(DelphiOnlyAppRegs.OdorDwellTimeUS, 0).frame)
 reply = device.send(
     HarpMessage.WriteU8(DelphiOnlyAppRegs.FSMEnabledState, 1).frame
 )  # Enable odor state machine
@@ -210,7 +239,7 @@ reply = device.send(
 
 """Run system"""
 # Odor initialization
-odor_masks = [0x0001, 0x0002]  # Odor valve sequence
+odor_masks = [0x0001, 0x0002, 0x0004, 0x0008, 0x0010]  # Odor valve sequence
 odor_i = -1
 
 # Visualization initialization
@@ -232,31 +261,35 @@ try:
         for msg in device.get_events():
             """EVENT BASED ODOR UPDATING"""
             event_address = msg.address
-            if event_address == 66:
-                event_payload = msg.payload[0]
-                if event_payload == 0:  # need new odor
-                    odor_i += 1
-                    if odor_i > len(odor_masks) - 1:
-                        odor_i = 0
-                    print(f"New odor index: {odor_masks[odor_i]}")
-                    reply = device.send(
-                        HarpMessage.WriteU16(
-                            DelphiOnlyAppRegs.QueuedOdorMask, odor_masks[odor_i]
-                        ).frame
-                    )
+            if event_address == 66:  # need new odor
+                odor_i += 1
+                if odor_i > len(odor_masks) - 1:
+                    odor_i = 0
+                print(f"New odor index: {odor_masks[odor_i]}")
+                reply = device.send(
+                    HarpMessage.WriteU16(
+                        DelphiOnlyAppRegs.QueuedOdorMask, odor_masks[odor_i]
+                    ).frame
+                )
 
             """LEAK STATE EVENT"""
-            if event_address == 86:
+            if event_address == 88:
                 event_payload = msg.payload[0]
                 print(f"Leak State: {event_payload}")  # Turn on to see leak states
 
             """MANUAL FLOW METER STATE EVENT"""
-            if event_address == 90:
+            if event_address == 92:
                 event_payload = msg.payload[0]
                 print(f"Manual Flow Meter State: {event_payload}")
 
         now = time.monotonic()
         if now - last_print >= 0.5:  # print and change the valve every 1 second
+            # Read odor buffer
+            reply = device.send(HarpMessage.ReadU16(DelphiOnlyAppRegs.OdorBuffer).frame)
+            odor_buffer = read_odor_buffer(reply.payload, bytes_expected=10)
+
+            print(f"odor_buffer: {odor_buffer}")
+
             # Read flow rate
             reply = device.send(
                 HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestFlowRate).frame
@@ -265,14 +298,14 @@ try:
                 reply.payload, bytes_expected=32
             )
 
-            print(f"latest_flow_rate: {latest_flow_rate}")
+            # print(f"latest_flow_rate: {latest_flow_rate}")
 
             reply = device.send(
                 HarpMessage.ReadFloat(DelphiOnlyAppRegs.LatestRawAdcSample).frame
             )
             latest_raw = read_uint16_struct_from_u8(reply.payload, bytes_expected=16)
 
-            print(f"latest_raw: {latest_raw}")
+            # print(f"latest_raw: {latest_raw}")
             # print(
             #     f"{now:.2f}, Odor flow rate: {latest_flow_rate[0]:.2f} mLpm,\t Exhaust flow rate: {latest_flow_rate[-1]:.2f} mLpm,\t Flow A: {latest_flow_rate[1]:.2f}mLpm,\t Flow B: {latest_flow_rate[2]:.2f}mLpm"
             # )
@@ -314,5 +347,7 @@ except KeyboardInterrupt:
     reply = device.send(
         HarpMessage.WriteU8(DelphiOnlyAppRegs.EnableAdcSampling, 0).frame
     )
+    # Clear odor buffer
+    reply = device.send(HarpMessage.WriteU8(DelphiOnlyAppRegs.ClearOdorBuffer, 0).frame)
 
     device.disconnect()

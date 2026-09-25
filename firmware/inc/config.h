@@ -3,6 +3,7 @@
 
 #define NUM_VALVES (16)
 #define NUM_ODOR_VALVES (12)
+#define ODOR_BUFFER_SIZE (5)
 #define FINAL_VALVE_INDEX (3)
 #define ODOR_VALVE_INDEX_START (4)
 #define PROPORTIONAL_VALVE_0_INDEX (0)

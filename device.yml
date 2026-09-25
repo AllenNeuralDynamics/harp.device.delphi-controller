@@ -177,78 +177,105 @@ registers:
         type: U16
         access: Event
         description: "Queued odors (value: odor valve mask) that will be delivered to the odor port given a register poke. After odors have been dispensed, the register will be set to 0, which indicates that new odors are needed"
-    OdorSetupTimeUS:
+    OdorBuffer:
         address: 67
+        type: U16
+        length: 5
+        access: Read
+        description: "Latest odor buffer state. Each entry represents an odor valve."
+        payloadSpec:
+            Odor0:
+                offset: 0
+                description: "Odor valve(s) 0"
+            Odor1:
+                offset: 1
+                description: "Odor valve(s) 1"
+            Odor2:
+                offset: 2
+                description: "Odor valve(s) 2"
+            Odor3:
+                offset: 3
+                description: "Odor valve(s) 3"
+            Odor4:
+                offset: 4
+                description: "Odor valve(s) 4"
+    ClearOdorBuffer:
+        address: 68
+        type: U8
+        access: Write
+        description: "Clear the odor buffer."
+    OdorSetupTimeUS:
+        address: 69
         type: U32
         access: Write
         description: "Time alotted (in microseconds) for the vacuum valve to close."
     MinOdorDeliveryTimeUS:
-        address: 68
+        address: 70
         type: U32
         access: Write
         description: "Minimum time alotted (in microseconds) for the odor delivery state."
     MaxOdorDeliveryTimeUS:
-        address: 69
+        address: 71
         type: U32
         access: Write
         description: "Maximum time alotted (in microseconds) for the odor delivery state."
     MinimumPokeTimeUS:
-        address: 70
+        address: 72
         type: U32
         access: Write
         description: "Minimum time (in microseconds) necessary for a mouse poke port beam to be broken before being interpretted as a poke."
     OdorDwellTimeUS:
-        address: 71
+        address: 73
         type: U32
         access: Write
         description: "Time (in microseconds) that the odor remains in the delivery state."
     Cam0PinState:
-        address: 72
+        address: 74
         type: U8
         access: Event
         description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
     Cam0FrameRate:
-        address: 73
+        address: 75
         type: U32
         access: Write
         description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
     Cam0DutyCycle:
-        address: 74
+        address: 76
         type: Float
         access: Write
         description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
     EnableCam0Trigger:
-        address: 75
+        address: 77
         type: U8
         access: Write
         description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
     Cam1PinState:
-        address: 76
+        address: 78
         type: U8
         access: Event
         description: "Event is initiated when a rising edge of the camera triggered signal (PWM) is detected. The actual value of the pin doesn't change."
     Cam1FrameRate:
-        address: 77
+        address: 79
         type: U32
         access: Write
         description: "Set the frame rate of the camera trigger/ frequency of the PWM signal."
     Cam1DutyCycle:
-        address: 78
+        address: 80
         type: Float
         access: Write
         description: "Set the duty cycle of the PWM. Default and recommend is 0.5 for producing a square wave."
     EnableCam1Trigger:
-        address: 79
+        address: 81
         type: U8
         access: Write
         description: "Enable (1) and disable (0) camera triggering/ the PWM signal."
     EnableValveLeds:
-        address: 80
+        address: 82
         type: U8
         access: Write
         description: "Enable (1) and disable (0) valve LEDs."
     LatestFlowRate:
-        address: 81
+        address: 83
         type: Float
         length: 8
         access: Read
@@ -279,7 +306,7 @@ registers:
                 offset: 7
                 description: "ADC7"
     LatestRawAdcSample:
-        address: 82
+        address: 84
         type: Float
         length: 8
         access: Read
@@ -310,47 +337,47 @@ registers:
                 offset: 7
                 description: "ADC7"
     EnableAdcSampling:
-        address: 83
+        address: 85
         type: U8
         access: Write
         description: "Enable (1) and disable (0) ADC sampling."
     LeakAdcChannel:
-        address: 84
+        address: 86
         type: S8
         access: Write
         description: "Set the ADC channel for leak detection. Leak detection is off by Default (-1)."
     LeakThreshold:
-        address: 85
+        address: 87
         type: Float
         access: Write
         description: "Set the threshold for leak detection in mL/min."
     LeakState:
-        address: 86
+        address: 88
         type: U8
         access: Event
         description: "Set the state for leak detection."
     ManualFlowMeter:
-        address: 87
+        address: 89
         type: S8
         access: Write
         description: "Set which ADC channel (if any) is being used for manual flow meter calibration. Set to -1 for no manual flow meter calibration."
     NominalFlowRate:
-        address: 88
+        address: 90
         type: Float
         access: Write
         description: "Set the nominal flow rate for manual flow meter calibration in mL/min."
     FlowRateTolerance:
-        address: 89
+        address: 91
         type: Float
         access: Write
         description: "Set the tolerance for flow rate detection (e.g., +-0.1 mL/min)."
     ManualFlowMeterState:
-        address: 90
+        address: 92
         type: U8
         access: Event
         description: "Set the state for manual flow meter calibration."
     FlowMeterCalibrations:
-        address: 91
+        address: 93
         type: Float
         length: 6
         access: Write
@@ -375,12 +402,12 @@ registers:
                 offset: 5
                 description: "A5"
     PidUpdateFrequency:
-        address: 92
+        address: 94
         type: Float
         access: Write
         description: "Set the update frequency for the PID controller."
     PidGains:
-        address: 93
+        address: 95
         type: Float
         length: 3
         access: Write
@@ -396,67 +423,67 @@ registers:
                 offset: 2
                 description: "Derivative gain. Default: 0.18"
     ProportionalValve0Adc:
-        address: 94
+        address: 96
         type: U8
         access: Write
         description: "Set the ADC channel used for the control of proportional valve 0."
     ProportionalValve0EnablePid:
-        address: 95
+        address: 97
         type: U8
         access: Write
         description: "Enable (1) or disable (0) PID control for proportional valve 0."
     ProportionalValve0DutyCycle:
-        address: 96
+        address: 98
         type: Float
         access: Write
         description: "Set the duty cycle for proportional valve 0."
     ProportionalValve0TargetFlowRate:
-        address: 97
+        address: 99
         type: Float
         access: Write
         description: "Set the target flow rate for proportional valve 0."
     ProportionalValve1Adc:
-        address: 98
+        address: 100
         type: U8
         access: Write
         description: "Set the ADC channel used for the control of proportional valve 1."
     ProportionalValve1EnablePid:
-        address: 99
+        address: 101
         type: U8
         access: Write
         description: "Enable (1) or disable (0) PID control for proportional valve 1."
     ProportionalValve1DutyCycle:
-        address: 100
+        address: 102
         type: Float
         access: Write
         description: "Set the duty cycle for proportional valve 1."
     ProportionalValve1TargetFlowRate:
-        address: 101
+        address: 103
         type: Float
         access: Write
         description: "Set the target flow rate for proportional valve 1."
     ProportionalValve2Adc:
-        address: 102
+        address: 104
         type: U8
         access: Write
         description: "Set the ADC channel used for the control of proportional valve 2."
     ProportionalValve2EnablePid:
-        address: 103
+        address: 105
         type: U8
         access: Write
         description: "Enable (1) or disable (0) PID control for proportional valve 2."
     ProportionalValve2DutyCycle:
-        address: 104
+        address: 106
         type: Float
         access: Write
         description: "Set the duty cycle for proportional valve 2."
     ProportionalValve2TargetFlowRate:
-        address: 105
+        address: 107
         type: Float
         access: Write
         description: "Set the target flow rate for proportional valve 2."
     FreezePidUpdates:
-        address: 106
+        address: 108
         type: U8
         access: Write
         description: "Enable to freeze PID updates when the final valve is energized."

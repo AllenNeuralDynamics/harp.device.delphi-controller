@@ -87,6 +87,8 @@ RegSpecs app_reg_specs[APP_REG_COUNT]
     {(uint8_t*)&app_regs.FSMEnabledState, sizeof(app_regs.FSMEnabledState), U8},
     {(uint8_t*)&app_regs.ForceFSM, sizeof(app_regs.ForceFSM), U8},
     {(uint8_t*)&app_regs.QueuedOdorMask, sizeof(app_regs.QueuedOdorMask), U16},
+    {(uint8_t*)&app_regs.OdorBuffer, sizeof(app_regs.OdorBuffer), U8},
+    {(uint8_t*)&app_regs.ClearOdorBuffer, sizeof(app_regs.ClearOdorBuffer), U8},
     {(uint8_t*)&app_regs.OdorSetupTimeUS, sizeof(app_regs.OdorSetupTimeUS), U32},
     {(uint8_t*)&app_regs.MinOdorDeliveryTimeUS, sizeof(app_regs.MinOdorDeliveryTimeUS), U32},
     {(uint8_t*)&app_regs.MaxOdorDeliveryTimeUS, sizeof(app_regs.MaxOdorDeliveryTimeUS), U32},
@@ -179,7 +181,9 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_pokedometer, HarpCore::write_to_read_only_reg_error},
     {read_fsm_enabled_state, write_fsm_enabled_state},
     {read_force_fsm, write_force_fsm},
-    {read_current_odors, write_current_odors},
+    {read_current_odor, write_odor},
+    {read_latest_odor_buffer, HarpCore::write_to_read_only_reg_error},
+    {read_clear_odor_buffer, write_clear_odor_buffer},
     {read_odor_setup_time_us, write_odor_setup_time_us},
     {read_min_odor_delivery_time_us, write_min_odor_delivery_time_us},
     {read_max_odor_delivery_time_us, write_max_odor_delivery_time_us},
@@ -228,6 +232,29 @@ RegFnPair reg_handler_fns[APP_REG_COUNT]
     {read_proportional_valve_2_target_flow_rate, write_proportional_valve_2_target_flow_rate},
     {read_freeze_pid_updates, write_freeze_pid_updates}
 };
+
+void read_latest_odor_buffer(uint8_t reg_address)
+{
+    app_regs.OdorBuffer = poke_manager.get_latest_odor_buffer();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+// Don't need to read from the clear odor buffer -- static value
+void read_clear_odor_buffer(uint8_t reg_address)
+{
+    app_regs.ClearOdorBuffer = 0;
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(READ, reg_address);
+}
+
+void write_clear_odor_buffer(msg_t& msg)
+{
+    HarpCore::copy_msg_payload_to_register(msg);
+    poke_manager.clear_odor_buffer();
+    if (!HarpCore::is_muted())
+        HarpCore::send_harp_reply(WRITE, msg.header.address);
+}
 
 void read_freeze_pid_updates(uint8_t reg_address)
 {
@@ -808,18 +835,18 @@ void write_force_fsm(msg_t& msg)
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
 
-void read_current_odors(uint8_t reg_address)
+void read_current_odor(uint8_t reg_address)
 {
     // Get recent poke count value
-    app_regs.QueuedOdorMask = poke_manager.get_current_odors();
+    app_regs.QueuedOdorMask = poke_manager.get_current_odor();
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(READ, reg_address);
 }
 
-void write_current_odors(msg_t& msg)
+void write_odor(msg_t& msg)
 {
     HarpCore::copy_msg_payload_to_register(msg);
-    poke_manager.set_current_odors(app_regs.QueuedOdorMask);
+    poke_manager.set_odor(app_regs.QueuedOdorMask);
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(WRITE, msg.header.address);
 }
@@ -1049,7 +1076,7 @@ void write_aux_gpio_clear(msg_t& msg)
 
 void leak_state_alert()
 {
-    const uint8_t LEAK_STATE_INDEX_ADDRESS = 86; // FIXME: this is hardcoded.
+    const uint8_t LEAK_STATE_INDEX_ADDRESS = 88; // FIXME: this is hardcoded.
     app_regs.LeakState = flow_detection.get_leak_state(); // Update leak state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, LEAK_STATE_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -1057,7 +1084,7 @@ void leak_state_alert()
 
 void manual_flow_meter_alert()
 {
-    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 90; // FIXME: this is hardcoded.
+    const uint8_t MANUAL_FLOW_METER_INDEX_ADDRESS = 92; // FIXME: this is hardcoded.
     app_regs.ManualFlowMeterState = flow_detection.get_manual_flow_meter_state(); // Update manual flow meter state
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, MANUAL_FLOW_METER_INDEX_ADDRESS, HarpCore::harp_time_us_64());
@@ -1066,7 +1093,6 @@ void manual_flow_meter_alert()
 void request_next_odor()
 {
     const uint8_t NEXT_ODOR_INDEX_ADDRESS = 66; // FIXME: this is hardcoded.
-    app_regs.QueuedOdorMask = 0; // Mark it as "used."
     if (!HarpCore::is_muted())
         HarpCore::send_harp_reply(EVENT, NEXT_ODOR_INDEX_ADDRESS, HarpCore::harp_time_us_64());
 }
@@ -1242,7 +1268,9 @@ void reset_app()
     app_regs.PokeDometer = poke_manager.get_poke_count();
     app_regs.FSMEnabledState = poke_manager.get_enabled_state();
     app_regs.ForceFSM = 0;
-    app_regs.QueuedOdorMask = poke_manager.get_current_odors();
+    app_regs.ClearOdorBuffer = 0;
+    app_regs.OdorBuffer = poke_manager.get_latest_odor_buffer();
+    app_regs.QueuedOdorMask = poke_manager.get_current_odor();
     app_regs.OdorSetupTimeUS = poke_manager.get_odor_setup_time_us();
     app_regs.MinOdorDeliveryTimeUS = poke_manager.get_min_odor_delivery_time_us();
     app_regs.MaxOdorDeliveryTimeUS = poke_manager.get_max_odor_delivery_time_us();

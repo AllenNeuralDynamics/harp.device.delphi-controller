@@ -36,6 +36,8 @@ public:
 
     void reset(); // reset the fsm
 
+    void clear_odor_buffer();
+
     inline void enable()
     {set_enabled_state(true);}
 
@@ -116,8 +118,14 @@ public:
  */
     void set_enabled_state(bool enabled);
 
-    inline void set_current_odors(uint16_t odor_mask)
-    {odor_valve_mask_ = odor_mask;}
+    inline void set_odor(uint16_t odor_mask)
+    {
+        if (odor_buffer_count_ < ODOR_BUFFER_SIZE)
+        {
+            odor_buffer_.b[odor_buffer_count_] = odor_mask;
+            if (pending_odor_requests_ > 0) --pending_odor_requests_;
+        }
+    }
 
     inline void set_odor_setup_time_us(uint32_t odor_setup_time_us)
     {odor_setup_time_us_ = odor_setup_time_us;}
@@ -199,8 +207,6 @@ public:
     inline size_t get_poke_count() const
     {return poke_count_;}
 
-    inline uint16_t get_current_odors() const
-    {return odor_valve_mask_;}
 
     inline uint32_t get_odor_setup_time_us() const
     {return odor_setup_time_us_;}
@@ -217,6 +223,24 @@ public:
     inline uint32_t get_odor_dwell_time_us() const
     {return odor_dwell_time_us_;}
 
+    // Struct for the odor buffer
+    #pragma pack(push, 1)
+    struct OdorBuffer {
+        uint16_t b[ODOR_BUFFER_SIZE];
+    };
+    #pragma pack(pop)
+
+    // Get current odor valve mask.
+    inline uint16_t get_current_odor() const
+    {return odor_valve_mask_;}
+
+    // Get the latest odor buffer.
+    inline const OdorBuffer get_latest_odor_buffer() const
+    {
+        return odor_buffer_;
+    }
+
+
 private:
 
 /**
@@ -231,9 +255,14 @@ private:
     {poke_detected_ = true;}
 
 /**
- * \brief check for odor flag (0) so that a new odor is requested. 
+ * \brief Consume the next odor in the buffer and update the odor valve mask accordingly.
  */
-    void check_odor();
+    void consume_odor_in_buffer();
+
+/**
+ * \brief check if the odor buffer is not full and request odors until it is full. 
+ */
+    void check_buffer();
 
 /**
  * \brief time we've been in the current state.
@@ -249,7 +278,11 @@ private:
     uint8_t poke_pin_;
     gpio_override override_state_; /// Whether or not the poke pin is inverted.
 
+    // Odor valve related data members
     uint16_t odor_valve_mask_;
+    uint8_t odor_buffer_count_;
+    OdorBuffer odor_buffer_;
+    uint8_t pending_odor_requests_; // requested from Bonsai but not yet received
 
     size_t poke_count_;
     uint8_t poke_state_;
@@ -259,7 +292,6 @@ private:
     bool beam_broken_; //keep track of beam state
     bool poke_initiated_once_; //Only trigger the FSM on 1 poke
     bool block_poke_detection_;
-    bool request_initiated_;
     ValveDriver& final_valve_;
     ValveDriver (&odor_valves_)[];
     size_t num_odor_valves_;
@@ -282,7 +314,7 @@ private:
     static inline constexpr uint32_t DEFAULT_MIN_ODOR_DELIVERY_TIME_US = 10e3;
     static inline constexpr uint32_t DEFAULT_MAX_ODOR_DELIVERY_TIME_US = 10e6;
     static inline constexpr uint32_t MIN_POKE_TIME_US = 10e3;
-    static inline constexpr uint32_t DEFAULT_ODOR_DWELL_TIME_US = 150e3;
+    static inline constexpr uint32_t DEFAULT_ODOR_DWELL_TIME_US = 0; // Default odor dwell time should be zero. 
     static inline constexpr uint8_t DEFAULT_POKE_PIN = POKE_PIN;
 };
 

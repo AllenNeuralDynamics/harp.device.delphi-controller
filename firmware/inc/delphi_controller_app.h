@@ -18,7 +18,7 @@
 #endif
 
 // Setup for Harp App
-inline constexpr size_t APP_REG_COUNT = 75;
+inline constexpr size_t APP_REG_COUNT = 77;
 // Numeric addresses for Harp Registers (clunky) -- DO ALL NEW REGISTERS NEED TO BE REFERENCED TO THESE??
 inline constexpr size_t VALVE_START_APP_ADDRESS = APP_REG_START_ADDRESS + 3;
 inline constexpr size_t LAST_VALVE_APP_ADDRESS = VALVE_START_APP_ADDRESS + NUM_VALVES - 1;
@@ -41,8 +41,8 @@ extern ProportionalValveControl proportional_valve_2_controller;
 extern uint8_t old_aux_gpio_inputs;
 
 // struct for HARP event queueing
-static inline constexpr uint8_t CAM0_PIN_STATE_INDEX_ADDRESS = 72;
-static inline constexpr uint8_t CAM1_PIN_STATE_INDEX_ADDRESS = 76;
+static inline constexpr uint8_t CAM0_PIN_STATE_INDEX_ADDRESS = 74;
+static inline constexpr uint8_t CAM1_PIN_STATE_INDEX_ADDRESS = 78;
 struct HarpEvent {
     uint8_t index;
     uint64_t timestamp;
@@ -113,6 +113,8 @@ struct app_regs_t
     uint8_t FSMEnabledState;
     uint8_t ForceFSM;
     int16_t QueuedOdorMask;
+    PokeManager::OdorBuffer OdorBuffer; // Read-only: Latest odor buffer
+    uint8_t ClearOdorBuffer;
     uint32_t OdorSetupTimeUS;
     uint32_t MinOdorDeliveryTimeUS;
     uint32_t MaxOdorDeliveryTimeUS;
@@ -253,7 +255,9 @@ void read_raw_poke_state(uint8_t reg_address);
 void read_pokedometer(uint8_t reg_address);
 void read_fsm_enabled_state(uint8_t reg_address);
 //void read_force_fsm(uint8_t reg_address); // aliased to read_reg_generic
-void read_current_odors(uint8_t reg_address);
+void read_current_odor(uint8_t reg_address);
+void read_latest_odor_buffer(uint8_t reg_address);
+void read_clear_odor_buffer(uint8_t reg_address);
 void read_odor_setup_time_us(uint8_t reg_address);
 void read_min_odor_delivery_time_us(uint8_t reg_address);
 void read_max_odor_delivery_time_us(uint8_t reg_address);
@@ -314,7 +318,8 @@ void write_poke_pin_inverted(msg_t& msg);
 // Cannot write to pokedometer
 void write_fsm_enabled_state(msg_t& msg);
 void write_force_fsm(msg_t& msg);
-void write_current_odors(msg_t& msg);
+void write_odor(msg_t& msg);
+void write_clear_odor_buffer(msg_t& msg);
 void write_odor_setup_time_us(msg_t& msg);
 void write_min_odor_delivery_time_us(msg_t& msg);
 void write_max_odor_delivery_time_us(msg_t& msg);
